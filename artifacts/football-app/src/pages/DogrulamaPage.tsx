@@ -71,6 +71,28 @@ export default function DogrulamaPage() {
 
   const handleRefresh = async () => {
     setRefreshing(true);
+    try {
+      const todayISO = new Date().toISOString().slice(0, 10);
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayISO = yesterday.toISOString().slice(0, 10);
+
+      // Dünün skorlarını güncelle
+      await fetch(`${BASE}/api/today-matches/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: yesterdayISO })
+      });
+
+      // Bugünün skorlarını güncelle
+      await fetch(`${BASE}/api/today-matches/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: todayISO })
+      });
+    } catch (err) {
+      console.error("Scraper refresh failed", err);
+    }
     await fetchPredictions();
     setRefreshing(false);
   };

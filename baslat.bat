@@ -8,10 +8,10 @@ echo   CEVDETBARTU FUTBOL ANALIZ SISTEMI BASLATILIYOR
 echo ====================================================
 
 echo 1. API Sunucusu Baslatiliyor...
-start "API Sunucusu" cmd /k "pnpm --filter @workspace/api-server run dev"
+start "API Sunucusu" cmd /k "%USERPROFILE%\.bun\bin\bun.exe" --cwd artifacts/api-server run dev
 
 echo 2. Arayüz (Frontend) Baslatiliyor...
-start "Arayüz (Frontend)" cmd /k "pnpm --filter @workspace/football-app run dev"
+start "Arayüz (Frontend)" cmd /k "%USERPROFILE%\.bun\bin\bun.exe" --cwd artifacts/football-app run dev"
 
 echo 3. Veri Çekici (Scraper) Baslatiliyor...
 start "Veri Cekici (Scraper)" cmd /k "set PYTHONIOENCODING=utf-8 && .venv\Scripts\python scripts/scraper/run.py"
