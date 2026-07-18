@@ -156,10 +156,6 @@ router.get("/dogrulama/predictions", async (req, res): Promise<void> => {
             msTotalV1++;
             if (awayGoalsV1 > homeGoalsV1) msWonV1++;
           }
-          if (v1DrawPct >= 40) {
-            msTotalV1++;
-            if (homeGoalsV1 === awayGoalsV1) msWonV1++;
-          }
         }
       }
 
@@ -354,31 +350,7 @@ router.get("/dogrulama/predictions", async (req, res): Promise<void> => {
         });
       }
 
-      // MS X tahmini (>= 40%)
-      if (drawPct >= 40) {
-        let status = "PENDING";
-        if (isFinished) {
-          const won = homeGoals === awayGoals;
-          status = won ? "WON" : "LOST";
-          msTotal++;
-          if (won) msWon++;
-        }
-        predictions.push({
-          id: `${row.id}-msx`,
-          tarih: row.tarih,
-          saat: row.saat,
-          lig: row.lig,
-          ev_sahibi: row.ev_sahibi,
-          deplasman: row.deplasman,
-          tahmin: "MS X",
-          olasilik: drawPct,
-          guvenlik: confidence,
-          guvenlik_skoru: confidenceScore,
-          skor: row.mac_skoru || "-:-",
-          durum: status
-        });
       }
-    }
 
     res.json({
       ok: true,

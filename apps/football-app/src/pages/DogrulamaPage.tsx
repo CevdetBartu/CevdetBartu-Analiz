@@ -215,7 +215,7 @@ export default function DogrulamaPage() {
                       </td>
                     </tr>
                     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                      <td style={{ padding: '12px 15px', fontWeight: 600, color: '#fff' }}>🏆 MAÇ SONUCU (1/X/2)</td>
+                      <td style={{ padding: '12px 15px', fontWeight: 600, color: '#fff' }}>🏆 MAÇ SONUCU (1/2)</td>
                       <td style={{ padding: '12px 15px', color: '#ef4444' }}>%{data.statsV1.ms.rate} ({data.statsV1.ms.won}/{data.statsV1.ms.total})</td>
                       <td style={{ padding: '12px 15px', color: '#22c55e', fontWeight: 600 }}>%{data.stats.ms.rate} ({data.stats.ms.won}/{data.stats.ms.total})</td>
                       <td style={{ padding: '12px 15px', color: '#3b82f6', fontWeight: 600 }}>

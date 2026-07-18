@@ -165,7 +165,8 @@ def upsert_match(row: dict, conn=None) -> bool:
             ust_orani_acilis = COALESCE(excluded.ust_orani_acilis, ust_orani_acilis),
             kg_var_acilis = COALESCE(excluded.kg_var_acilis, kg_var_acilis),
             kg_yok_acilis = COALESCE(excluded.kg_yok_acilis, kg_yok_acilis),
-            im_6 = COALESCE(excluded.im_6, im_6)
+            im_6 = COALESCE(excluded.im_6, im_6),
+            olusturma_tarihi = CURRENT_TIMESTAMP
     """
     my_conn = conn if conn else get_conn()
     try:
