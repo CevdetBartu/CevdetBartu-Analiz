@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import AdminPage from './pages/AdminPage';
 import TodayMatchesPage from './pages/TodayMatchesPage';
 import LiveMatchesPage from './pages/LiveMatchesPage';
+import DogrulamaPage from './pages/DogrulamaPage';
 
 const queryClient = new QueryClient();
 
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/bugun" component={TodayMatchesPage} />
       <Route path="/canli" component={LiveMatchesPage} />
       <Route path="/admin" component={AdminPage} />
+      <Route path="/dogrulama" component={DogrulamaPage} />
       <Route path="*">
         <div className="flex items-center justify-center min-h-screen">
           <p className="text-white">Sayfa bulunamadı</p>

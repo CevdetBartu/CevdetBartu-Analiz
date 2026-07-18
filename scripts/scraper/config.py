@@ -170,6 +170,7 @@ SOFASCORE_TOURNAMENTS: dict[str, int] = {
     "Norveç Eliteserien": 20,
     "Norveç 1. Lig": 22,
     "ABD MLS": 242,
+    "Kanada Premier Ligi": 1523,
     "İsveç Allsvenskan": 40,
     "İsveç Superettan": 46,
     "İzlanda Besta deild karla": 188,

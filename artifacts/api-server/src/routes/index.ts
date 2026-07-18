@@ -7,6 +7,7 @@ import todayRouter from "./today";
 import spawnRouter from "./spawn";
 import basketMatchesRouter from "./basketMatches";
 import liveRouter from "./live";
+import dogrulamaRouter from "./dogrulama";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(todayRouter);
 router.use(spawnRouter);
 router.use(basketMatchesRouter);
 router.use(liveRouter);
+router.use(dogrulamaRouter);
 
 export default router;

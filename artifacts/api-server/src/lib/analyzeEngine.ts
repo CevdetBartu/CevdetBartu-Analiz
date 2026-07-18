@@ -28,6 +28,7 @@ export interface AnalyzeRefMatch {
   imResult?: string | null;
   kornerHome?: number | null;
   kornerAway?: number | null;
+  similarityScore?: number | null;
 }
 
 export interface AnalyzeTargetMatch {
@@ -70,6 +71,8 @@ export interface AnalyzeOzet {
   ust_10_korner: StatGroup;
   sik_ms: string | null;
   sik_iy: string | null;
+  guvenlik_skoru?: number | null;
+  guven_seviyesi?: string | null;
 }
 
 export type OddsWinner = 'ev' | 'ber' | 'dep' | null;
@@ -208,18 +211,43 @@ export function analyze(
   const htFreq: Record<string, number> = {};
   const ftFreq: Record<string, number> = {};
 
+  let simSum = 0;
+  let homeWinsWeighted = 0;
+  let drawsWeighted = 0;
+  let awayWinsWeighted = 0;
+  let bttsWeighted = 0;
+  let over25Weighted = 0;
+  const simScores: number[] = [];
+
   for (const m of referenceMatches) {
+    const sim = m.similarityScore ?? 100;
+    simScores.push(sim);
+    simSum += sim;
+
     const ft = parseScore(m.ftScore);
     if (!ft) continue;
 
-    if (ft.home > ft.away) homeWins++;
-    else if (ft.home < ft.away) awayWins++;
-    else draws++;
+    if (ft.home > ft.away) {
+      homeWins++;
+      homeWinsWeighted += sim;
+    } else if (ft.home < ft.away) {
+      awayWins++;
+      awayWinsWeighted += sim;
+    } else {
+      draws++;
+      drawsWeighted += sim;
+    }
 
     const goals = ft.home + ft.away;
     totalGoals += goals;
-    if (ft.home > 0 && ft.away > 0) bttsCount++;
-    if (goals > 2.5) over25Count++;
+    if (ft.home > 0 && ft.away > 0) {
+      bttsCount++;
+      bttsWeighted += sim;
+    }
+    if (goals > 2.5) {
+      over25Count++;
+      over25Weighted += sim;
+    }
 
     // FT score freq
     const ftKey = `${ft.home}:${ft.away}`;
@@ -247,32 +275,52 @@ export function analyze(
     }
   }
 
+  const homePctWeighted = simSum > 0 ? Math.round((homeWinsWeighted / simSum) * 100) : 0;
+  const drawPctWeighted = simSum > 0 ? Math.round((drawsWeighted / simSum) * 100) : 0;
+  const awayPctWeighted = simSum > 0 ? Math.round((awayWinsWeighted / simSum) * 100) : 0;
+  const bttsPctWeighted = simSum > 0 ? Math.round((bttsWeighted / simSum) * 100) : 0;
+  const over25PctWeighted = simSum > 0 ? Math.round((over25Weighted / simSum) * 100) : 0;
+
+  const avgSim = simScores.length > 0 ? Math.round(simScores.reduce((a, b) => a + b, 0) / simScores.length) : null;
+  let guvenSeviyesi: string | null = null;
+  if (avgSim !== null) {
+    if (avgSim >= 80) guvenSeviyesi = "YUKSEK";
+    else if (avgSim >= 72) guvenSeviyesi = "ORTA";
+    else guvenSeviyesi = "DUSUK";
+  }
+
   const analiz_yuzde_str =
     total > 0
-      ? `${Math.round((homeWins / total) * 100)}-${Math.round((draws / total) * 100)}-${Math.round((awayWins / total) * 100)}`
+      ? `${homePctWeighted}-${drawPctWeighted}-${awayPctWeighted}`
       : '0-0-0';
 
-  const bttsPct    = total > 0 ? (bttsCount  / total) * 100 : 0;
+  const bttsPct    = bttsPctWeighted;
   const ortKorner  = kornerCount > 0 ? Math.round((totalKorner / kornerCount) * 10) / 10 : null;
-  const over25Pct  = total > 0 ? (over25Count / total) * 100 : 0;
+  const over25Pct  = over25PctWeighted;
   const avgCards   = total > 0 ? totalCards / total : 0;
 
   const sikMs = mostCommon(ftFreq);
   const sikIy = mostCommon(htFreq);
 
+  const statGroupWeighted = (count: number, total: number, weightedPct: number, label: string) => {
+    return { sayi: count, yuzde: weightedPct, label: `${label} ${count}/${total} (${weightedPct}%)` };
+  };
+
   // ── 2. Analiz özet ────────────────────────────────────────────────────────
   const analiz_ozet: AnalyzeOzet = {
     total_mac: total,
-    ev_sahibi:  statGroup(homeWins,    total, 'Ev'),
-    beraberlik: statGroup(draws,       total, 'X'),
-    deplasman:  statGroup(awayWins,    total, 'Dep'),
-    kg_var:     statGroup(bttsCount,   total, 'KG Var'),
-    ust_25:     statGroup(over25Count, total, '2.5 Üst'),
+    ev_sahibi:  statGroupWeighted(homeWins,    total, homePctWeighted, 'Ev'),
+    beraberlik: statGroupWeighted(draws,       total, drawPctWeighted, 'X'),
+    deplasman:  statGroupWeighted(awayWins,    total, awayPctWeighted, 'Dep'),
+    kg_var:     statGroupWeighted(bttsCount,   total, bttsPctWeighted, 'KG Var'),
+    ust_25:     statGroupWeighted(over25Count, total, over25PctWeighted, '2.5 Üst'),
     ort_kart:      Math.round(avgCards * 10) / 10,
     ort_korner:    ortKorner,
-    ust_10_korner: statGroup(ust10KornerCount, kornerCount > 0 ? kornerCount : 1, '10+ Korner'),
+    ust_10_korner: statGroupWeighted(ust10KornerCount, kornerCount > 0 ? kornerCount : 1, kornerCount > 0 ? Math.round((ust10KornerCount / kornerCount) * 100) : 0, '10+ Korner'),
     sik_ms:        sikMs,
     sik_iy:        sikIy,
+    guvenlik_skoru: avgSim,
+    guven_seviyesi: guvenSeviyesi,
   };
 
   // ── 3. Tahminler ─────────────────────────────────────────────────────────
