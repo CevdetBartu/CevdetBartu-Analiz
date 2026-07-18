@@ -12,9 +12,6 @@
     "typecheck:libs": "tsc --build",
     "typecheck": "bun run typecheck:libs && bun run --filter \"*\" typecheck"
   },
-  "dependencies": {
-    "@replit/connectors-sdk": "^0.4.1"
-  },
   "devDependencies": {
     "prettier": "^3.9.5",
     "typescript": "~5.9.3"
