@@ -1,7 +1,7 @@
 @echo off
 title CevdetBartu Futbol Analiz Sistemi
 chcp 65001 > nul
-cd /d "c:\Users\Okyanus\Downloads\ReplitExport-saraccevdetbart\Match-Data-Hub"
+cd /d "%~dp0"
 
 echo ====================================================
 echo   CEVDETBARTU FUTBOL ANALIZ SISTEMI BASLATILIYOR

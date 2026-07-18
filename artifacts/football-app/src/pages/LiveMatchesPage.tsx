@@ -8,6 +8,8 @@ interface LiveStats {
   shots_target_a: number;
   shots_off_h: number;
   shots_off_a: number;
+  shots_total_h?: number;
+  shots_total_a?: number;
   corners_h: number;
   corners_a: number;
   yellow_h: number;
@@ -107,7 +109,7 @@ export default function LiveMatchesPage() {
         <div className="sport-tabs">
           <Link href="/" className="sport-tab">⚽ Futbol</Link>
           <Link href="/canli" className="sport-tab active">
-            <span className="live-dot" style={{ display: 'inline-block', width: 8, height: 8, backgroundColor: '#ef4444', borderRadius: '50%', marginRight: 6, animate: 'pulse 1.5s infinite' }}></span>
+            <span className="live-dot" style={{ display: 'inline-block', width: 8, height: 8, backgroundColor: '#ef4444', borderRadius: '50%', marginRight: 6, animation: 'pulse 1.5s infinite' }}></span>
             📺 Canlı Analiz
           </Link>
         </div>

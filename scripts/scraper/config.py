@@ -50,57 +50,12 @@ FLASK_PORT: int = 5051
 # SQLite veritabanı yolu (proje köküne göre)
 _BASE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH: str = os.path.join(_BASE, "scripts", "scraper", "gecmis_maclar.db")
-BASKET_DB_PATH: str = os.path.join(_BASE, "scripts", "scraper", "basketbol_maclar.db")
 
 # İstek başına yeniden deneme sayısı
 MAX_RETRIES: int = 3
 
 # football-data.co.uk base URL
 FDUK_BASE: str = "https://www.football-data.co.uk/mmz4281"
-
-# Basketbol SofaScore Unique Tournament IDs
-BASKETBOL_TOURNAMENTS: dict[str, int] = {
-    # Amerika En İyi Ligler
-    "NBA": 132,
-    "WNBA": 486,
-    "NCAA Men Division I": 33651,
-    "NCAA Women Division I": 33655,
-    "Brazil NBB": 1562,
-    "Argentina Liga Nacional": 1680,
-    "Puerto Rico BSN": 17374,
-    "Mexico LNBP": 1472,
-    "Mexico LNBP Women": 20467,
-    "Uruguay LUB": 10587,
-    "Venezuela SuperLiga": 16764,
-    "Canada CEBL": 21995,
-
-    # Avrupa En İyi Ligler (Erkek / Kadın)
-    "EuroLeague": 138,
-    "Eurocup": 141,
-    "Champions League (BCL)": 9357,
-    "Euroleague Women": 1167,
-    "Eurocup Women": 10260,
-    "Turkish Basketball Super League": 519,
-    "Turkey KBSL": 1532,
-    "Liga ACB (Spain)": 264,
-    "Liga Femenina (Spain)": 1538,
-    "Lega Basket Serie A": 23,
-    "Germany BBL": 227,
-    "LNB Elite (France)": 156,
-    "Stoiximan GBL (Greece)": 304,
-    "VTB United League": 1438,
-    "AdmiralBet ABA League": 235,
-    "Betsson-LKL (Lithuania)": 975,
-    "Winner League (Israel)": 1197,
-    "BNXT League": 18558,
-    "Super League Basketball (UK)": 23722,
-    "Croatia Premijer Liga": 579,
-    "Austrian Superliga": 297,
-    "LNP Serie A2 (Italy)": 1520,
-    
-    # Diğer Major Ligler
-    "NBL (Australia)": 1524,
-}
 
 # SofaScore Unique Tournament IDs
 SOFASCORE_TOURNAMENTS: dict[str, int] = {

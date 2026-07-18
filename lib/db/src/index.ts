@@ -1,13 +1,15 @@
 export * from "./schema";
 
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import Database from "better-sqlite3";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import * as schema from "./schema";
 
-const connectionString = process.env.DATABASE_URL;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const defaultDbPath = path.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
+const dbPath = process.env.DATABASE_URL || defaultDbPath;
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL environment variable is required");
-}
-
-export const db = drizzle(connectionString, { schema });
+const sqlite = new Database(dbPath);
+export const db = drizzle(sqlite, { schema });
 export { historicalMatchesTable } from "./schema";
