@@ -33,7 +33,7 @@ const W_CARD = 20;
 
 /** Tolerance windows */
 const MAIN_ODDS_TOL = 0.15;   // ±0.15 for 1/X/2
-const ALT_ODDS_TOL = 0.10;    // ±0.10 for Alt/Üst & Var/Yok
+const ALT_ODDS_TOL = 0.06;    // ±0.06 for Alt/Üst & Var/Yok (Daraltıldı)
 const CARD_TOL = 1.5;          // ±1.5 average cards
 const LIG_DIFF_WINDOW = 3;    // ±3 around target position diff
 
@@ -152,6 +152,7 @@ export function findSimilarMatches(
 ): SimilarMatchResult[] {
   const scored = allMatches
     .map(m => scoreMatch(query, m))
+    .filter(m => m.similarityScore >= 70) // %70 ve üzeri benzerlik barajı
     .sort((a, b) => b.similarityScore - a.similarityScore);
 
   const maxResults = query.maxResults ?? scored.length;

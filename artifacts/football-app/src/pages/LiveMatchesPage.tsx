@@ -112,6 +112,7 @@ export default function LiveMatchesPage() {
             <span className="live-dot" style={{ display: 'inline-block', width: 8, height: 8, backgroundColor: '#ef4444', borderRadius: '50%', marginRight: 6, animation: 'pulse 1.5s infinite' }}></span>
             📺 Canlı Analiz
           </Link>
+          <Link href="/dogrulama" className="sport-tab">📊 Tahmin Doğrulama</Link>
         </div>
         <nav className="app-nav">
           <Link href="/" className="nav-btn" style={{ textDecoration: 'none' }}>← Analiz</Link>

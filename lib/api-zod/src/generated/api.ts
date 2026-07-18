@@ -217,7 +217,8 @@ export const AnalyzeMatchesBody = zod.object({
   "avgOddsMax": zod.number().nullish(),
   "imResult": zod.string().nullish(),
   "kornerHome": zod.number().nullish(),
-  "kornerAway": zod.number().nullish()
+  "kornerAway": zod.number().nullish(),
+  "similarityScore": zod.number().nullish()
 }))
 })
 
@@ -257,7 +258,9 @@ export const AnalyzeMatchesResponse = zod.object({
   "label": zod.string()
 }),
   "sik_ms": zod.string().nullish(),
-  "sik_iy": zod.string().nullish()
+  "sik_iy": zod.string().nullish(),
+  "guvenlik_skoru": zod.number().nullish(),
+  "guven_seviyesi": zod.string().nullish()
 }),
   "tahminler": zod.array(zod.string()),
   "tablo_satirlari": zod.array(zod.object({

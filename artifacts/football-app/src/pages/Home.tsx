@@ -246,6 +246,7 @@ export default function Home() {
               imResult:        m.imResult || undefined,
               kornerHome:      m.kornerHome,
               kornerAway:      m.kornerAway,
+              similarityScore: res.similarityScore,
             };
           });
 
@@ -402,6 +403,7 @@ export default function Home() {
         <div className="sport-tabs">
           <Link href="/" className="sport-tab active">⚽ Futbol</Link>
           <Link href="/canli" className="sport-tab">📺 Canlı Analiz</Link>
+          <Link href="/dogrulama" className="sport-tab">📊 Tahmin Doğrulama</Link>
         </div>
         <nav className="app-nav">
           {view === 'table' && (
