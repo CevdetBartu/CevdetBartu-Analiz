@@ -11,7 +11,7 @@
         "typescript": "~5.9.3",
       },
     },
-    "artifacts/api-server": {
+    "apps/api-server": {
       "name": "@workspace/api-server",
       "version": "0.0.0",
       "dependencies": {
@@ -39,7 +39,7 @@
         "thread-stream": "3.1.0",
       },
     },
-    "artifacts/football-app": {
+    "apps/football-app": {
       "name": "@workspace/football-app",
       "version": "0.0.0",
       "devDependencies": {
@@ -108,7 +108,7 @@
         "zod": "^3.25.76",
       },
     },
-    "artifacts/mockup-sandbox": {
+    "apps/mockup-sandbox": {
       "name": "@workspace/mockup-sandbox",
       "version": "2.0.0",
       "devDependencies": {
@@ -174,7 +174,7 @@
         "zod": "^3.25.76",
       },
     },
-    "lib/api-client-react": {
+    "packages/api-client": {
       "name": "@workspace/api-client-react",
       "version": "0.0.0",
       "dependencies": {
@@ -184,21 +184,21 @@
         "react": ">=18",
       },
     },
-    "lib/api-spec": {
+    "packages/api-spec": {
       "name": "@workspace/api-spec",
       "version": "0.0.0",
       "devDependencies": {
         "orval": "^8.21.0",
       },
     },
-    "lib/api-zod": {
+    "packages/api-zod": {
       "name": "@workspace/api-zod",
       "version": "0.0.0",
       "dependencies": {
         "zod": "^3.25.76",
       },
     },
-    "lib/db": {
+    "packages/db": {
       "name": "@workspace/db",
       "version": "0.0.0",
       "dependencies": {
@@ -213,7 +213,7 @@
         "drizzle-kit": "^0.31.10",
       },
     },
-    "scripts": {
+    "packages/scripts": {
       "name": "@workspace/scripts",
       "version": "0.0.0",
       "devDependencies": {
@@ -675,21 +675,21 @@
 
     "@vitejs/plugin-react": ["@vitejs/plugin-react@5.2.0", "", { "dependencies": { "@babel/core": "^7.29.0", "@babel/plugin-transform-react-jsx-self": "^7.27.1", "@babel/plugin-transform-react-jsx-source": "^7.27.1", "@rolldown/pluginutils": "1.0.0-rc.3", "@types/babel__core": "^7.20.5", "react-refresh": "^0.18.0" }, "peerDependencies": { "vite": "^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0" } }, "sha512-YmKkfhOAi3wsB1PhJq5Scj3GXMn3WvtQ/JC0xoopuHoXSdmtdStOpFrYaT1kie2YgFBcIe64ROzMYRjCrYOdYw=="],
 
-    "@workspace/api-client-react": ["@workspace/api-client-react@workspace:lib/api-client-react"],
+    "@workspace/api-client-react": ["@workspace/api-client-react@workspace:packages/api-client"],
 
-    "@workspace/api-server": ["@workspace/api-server@workspace:artifacts/api-server"],
+    "@workspace/api-server": ["@workspace/api-server@workspace:apps/api-server"],
 
-    "@workspace/api-spec": ["@workspace/api-spec@workspace:lib/api-spec"],
+    "@workspace/api-spec": ["@workspace/api-spec@workspace:packages/api-spec"],
 
-    "@workspace/api-zod": ["@workspace/api-zod@workspace:lib/api-zod"],
+    "@workspace/api-zod": ["@workspace/api-zod@workspace:packages/api-zod"],
 
-    "@workspace/db": ["@workspace/db@workspace:lib/db"],
+    "@workspace/db": ["@workspace/db@workspace:packages/db"],
 
-    "@workspace/football-app": ["@workspace/football-app@workspace:artifacts/football-app"],
+    "@workspace/football-app": ["@workspace/football-app@workspace:apps/football-app"],
 
-    "@workspace/mockup-sandbox": ["@workspace/mockup-sandbox@workspace:artifacts/mockup-sandbox"],
+    "@workspace/mockup-sandbox": ["@workspace/mockup-sandbox@workspace:apps/mockup-sandbox"],
 
-    "@workspace/scripts": ["@workspace/scripts@workspace:scripts"],
+    "@workspace/scripts": ["@workspace/scripts@workspace:packages/scripts"],
 
     "accepts": ["accepts@2.0.0", "", { "dependencies": { "mime-types": "^3.0.0", "negotiator": "^1.0.0" } }, "sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng=="],
 

@@ -3,10 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "workspaces": [
-    "artifacts/*",
-    "lib/*",
-    "lib/integrations/*",
-    "scripts"
+    "apps/*",
+    "packages/*"
   ],
   "private": true,
   "scripts": {

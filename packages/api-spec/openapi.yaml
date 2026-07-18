@@ -1,0 +1,714 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: matches
+    description: Historical match operations
+  - name: analysis
+    description: Match analysis engine
+  - name: today
+    description: Today's scheduled matches
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /matches:
+    get:
+      operationId: listMatches
+      tags: [matches]
+      summary: List all historical matches
+      responses:
+        "200":
+          description: List of matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MatchRecord"
+    post:
+      operationId: createMatch
+      tags: [matches]
+      summary: Add a historical match
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MatchInput"
+      responses:
+        "201":
+          description: Match created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MatchRecord"
+        "400":
+          description: Validation error
+
+  /matches/find-similar:
+    post:
+      operationId: findSimilarMatches
+      tags: [matches]
+      summary: Find similar historical matches
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SimilarityQuery"
+      responses:
+        "200":
+          description: Ranked list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SimilarMatchResult"
+        "400":
+          description: Validation error
+
+  /analyze:
+    post:
+      operationId: analyzeMatches
+      tags: [analysis]
+      summary: Analyze a target match against reference matches
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeRequest"
+      responses:
+        "200":
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyzeResponse"
+        "400":
+          description: Validation error
+
+  /matches/{id}:
+    delete:
+      operationId: deleteMatch
+      tags: [matches]
+      summary: Delete a historical match
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /today-matches:
+    get:
+      operationId: getTodayMatches
+      tags: [today]
+      summary: Get today's scheduled matches with odds
+      parameters:
+        - in: query
+          name: date
+          required: false
+          schema:
+            type: string
+          description: Date in YYYY-MM-DD format (defaults to today)
+      responses:
+        "200":
+          description: Today's matches
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TodayMatchesResponse"
+
+  /today-matches/refresh:
+    post:
+      operationId: refreshTodayMatches
+      tags: [today]
+      summary: Manually refresh today's match data
+      responses:
+        "200":
+          description: Refresh result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshResult"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    MatchInput:
+      type: object
+      required:
+        - league
+        - homeTeam
+        - awayTeam
+        - ftScore
+        - oddsHome
+        - oddsDraw
+        - oddsAway
+      properties:
+        matchDate:
+          type: ["string", "null"]
+        league:
+          type: string
+        homeTeam:
+          type: string
+        awayTeam:
+          type: string
+        htScore:
+          type: ["string", "null"]
+        ftScore:
+          type: string
+        previousScore:
+          type: ["string", "null"]
+        yellowCardsHome:
+          type: ["integer", "null"]
+        yellowCardsAway:
+          type: ["integer", "null"]
+        redCards:
+          type: ["integer", "null"]
+        ligSirasiHome:
+          type: ["integer", "null"]
+        ligSirasiAway:
+          type: ["integer", "null"]
+        ligSirasiTotal:
+          type: ["integer", "null"]
+        oddsHome:
+          type: number
+        oddsDraw:
+          type: number
+        oddsAway:
+          type: number
+        altOdds:
+          type: ["number", "null"]
+        ustOdds:
+          type: ["number", "null"]
+        varOdds:
+          type: ["number", "null"]
+        yokOdds:
+          type: ["number", "null"]
+        avgOddsMin:
+          type: ["number", "null"]
+        avgOddsMax:
+          type: ["number", "null"]
+        imResult:
+          type: ["string", "null"]
+        kornerHome:
+          type: ["integer", "null"]
+        kornerAway:
+          type: ["integer", "null"]
+
+    MatchRecord:
+      type: object
+      required:
+        - id
+        - league
+        - homeTeam
+        - awayTeam
+        - ftScore
+        - oddsHome
+        - oddsDraw
+        - oddsAway
+        - createdAt
+      properties:
+        id:
+          type: integer
+        matchDate:
+          type: ["string", "null"]
+        league:
+          type: string
+        homeTeam:
+          type: string
+        awayTeam:
+          type: string
+        htScore:
+          type: ["string", "null"]
+        ftScore:
+          type: string
+        previousScore:
+          type: ["string", "null"]
+        yellowCardsHome:
+          type: ["integer", "null"]
+        yellowCardsAway:
+          type: ["integer", "null"]
+        redCards:
+          type: ["integer", "null"]
+        ligSirasiHome:
+          type: ["integer", "null"]
+        ligSirasiAway:
+          type: ["integer", "null"]
+        ligSirasiTotal:
+          type: ["integer", "null"]
+        oddsHome:
+          type: number
+        oddsDraw:
+          type: number
+        oddsAway:
+          type: number
+        altOdds:
+          type: ["number", "null"]
+        ustOdds:
+          type: ["number", "null"]
+        varOdds:
+          type: ["number", "null"]
+        yokOdds:
+          type: ["number", "null"]
+        avgOddsMin:
+          type: ["number", "null"]
+        avgOddsMax:
+          type: ["number", "null"]
+        imResult:
+          type: ["string", "null"]
+        kornerHome:
+          type: ["integer", "null"]
+        kornerAway:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+
+    SimilarityQuery:
+      type: object
+      required:
+        - oddsHome
+        - oddsDraw
+        - oddsAway
+      properties:
+        oddsHome:
+          type: number
+        oddsDraw:
+          type: number
+        oddsAway:
+          type: number
+        altOdds:
+          type: ["number", "null"]
+        ustOdds:
+          type: ["number", "null"]
+        varOdds:
+          type: ["number", "null"]
+        yokOdds:
+          type: ["number", "null"]
+        league:
+          type: ["string", "null"]
+        ligSirasiDiff:
+          type: ["integer", "null"]
+        avgCardsTotal:
+          type: ["number", "null"]
+        maxResults:
+          type: ["integer", "null"]
+
+    SimilarMatchResult:
+      type: object
+      required:
+        - match
+        - similarityScore
+        - scoreBreakdown
+      properties:
+        match:
+          $ref: "#/components/schemas/MatchRecord"
+        similarityScore:
+          type: number
+        scoreBreakdown:
+          $ref: "#/components/schemas/ScoreBreakdown"
+
+    ScoreBreakdown:
+      type: object
+      required:
+        - oddsScore
+        - leagueScore
+        - cardScore
+      properties:
+        oddsScore:
+          type: number
+        leagueScore:
+          type: number
+        cardScore:
+          type: number
+
+    AnalyzeRequest:
+      type: object
+      required:
+        - targetMatch
+        - referenceMatches
+      properties:
+        targetMatch:
+          $ref: "#/components/schemas/TargetMatchInput"
+        referenceMatches:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReferenceMatchInput"
+
+    TargetMatchInput:
+      type: object
+      required:
+        - homeTeam
+        - awayTeam
+      properties:
+        date:
+          type: ["string", "null"]
+        time:
+          type: ["string", "null"]
+        league:
+          type: ["string", "null"]
+        homeTeam:
+          type: string
+        awayTeam:
+          type: string
+        ligSirasiHome:
+          type: ["integer", "null"]
+        ligSirasiAway:
+          type: ["integer", "null"]
+        ligSirasiTotal:
+          type: ["integer", "null"]
+        oddsHome:
+          type: ["number", "null"]
+        oddsDraw:
+          type: ["number", "null"]
+        oddsAway:
+          type: ["number", "null"]
+        altOdds:
+          type: ["number", "null"]
+        ustOdds:
+          type: ["number", "null"]
+        varOdds:
+          type: ["number", "null"]
+        yokOdds:
+          type: ["number", "null"]
+        avgOddsMin:
+          type: ["number", "null"]
+        avgOddsMax:
+          type: ["number", "null"]
+
+    ReferenceMatchInput:
+      type: object
+      required:
+        - homeTeam
+        - awayTeam
+        - ftScore
+      properties:
+        id:
+          type: ["string", "null"]
+        homeTeam:
+          type: string
+        awayTeam:
+          type: string
+        htScore:
+          type: ["string", "null"]
+        ftScore:
+          type: string
+        previousScore:
+          type: ["string", "null"]
+        yellowCardsHome:
+          type: ["integer", "null"]
+        yellowCardsAway:
+          type: ["integer", "null"]
+        redCards:
+          type: ["integer", "null"]
+        ligSirasiHome:
+          type: ["integer", "null"]
+        ligSirasiAway:
+          type: ["integer", "null"]
+        ligSirasiTotal:
+          type: ["integer", "null"]
+        oddsHome:
+          type: ["number", "null"]
+        oddsDraw:
+          type: ["number", "null"]
+        oddsAway:
+          type: ["number", "null"]
+        altOdds:
+          type: ["number", "null"]
+        ustOdds:
+          type: ["number", "null"]
+        varOdds:
+          type: ["number", "null"]
+        yokOdds:
+          type: ["number", "null"]
+        avgOddsMin:
+          type: ["number", "null"]
+        avgOddsMax:
+          type: ["number", "null"]
+        imResult:
+          type: ["string", "null"]
+        kornerHome:
+          type: ["integer", "null"]
+        kornerAway:
+          type: ["integer", "null"]
+
+    AnalyzeResponse:
+      type: object
+      required:
+        - analiz_ozet
+        - tahminler
+        - tablo_satirlari
+      properties:
+        analiz_ozet:
+          $ref: "#/components/schemas/AnalizOzet"
+        tahminler:
+          type: array
+          items:
+            type: string
+        tablo_satirlari:
+          type: array
+          items:
+            $ref: "#/components/schemas/TabloSatiri"
+
+    AnalizOzet:
+      type: object
+      required:
+        - total_mac
+        - ev_sahibi
+        - beraberlik
+        - deplasman
+        - kg_var
+        - ust_25
+        - ort_kart
+        - ust_10_korner
+      properties:
+        total_mac:
+          type: integer
+        ev_sahibi:
+          $ref: "#/components/schemas/StatGroup"
+        beraberlik:
+          $ref: "#/components/schemas/StatGroup"
+        deplasman:
+          $ref: "#/components/schemas/StatGroup"
+        kg_var:
+          $ref: "#/components/schemas/StatGroup"
+        ust_25:
+          $ref: "#/components/schemas/StatGroup"
+        ort_kart:
+          type: number
+        ort_korner:
+          type: ["number", "null"]
+        ust_10_korner:
+          $ref: "#/components/schemas/StatGroup"
+        sik_ms:
+          type: ["string", "null"]
+        sik_iy:
+          type: ["string", "null"]
+
+    StatGroup:
+      type: object
+      required:
+        - sayi
+        - yuzde
+        - label
+      properties:
+        sayi:
+          type: integer
+        yuzde:
+          type: number
+        label:
+          type: string
+
+    TabloSatiri:
+      type: object
+      required:
+        - id
+        - is_target
+        - analiz_yuzde
+        - row_renk
+        - takimlar
+        - is_highlight
+        - onceki_skor
+        - kirmizi_kart_var_mi
+        - kart_display
+        - kart_yuksek_mi
+        - lig_sirasi
+        - taraf_oranlari
+        - alt_ust
+        - var_yok
+        - ortalama
+        - korner_display
+        - im_sonuc
+        - im_renk
+      properties:
+        id:
+          type: string
+        is_target:
+          type: boolean
+        analiz_yuzde:
+          type: string
+        iy_skor:
+          type: ["string", "null"]
+        iy_skor_renk:
+          type: ["string", "null"]
+        iy_skor_sik_mi:
+          type: boolean
+        ms_skor:
+          type: ["string", "null"]
+        ms_skor_renk:
+          type: ["string", "null"]
+        ms_skor_sik_mi:
+          type: boolean
+        iy_tahmini:
+          type: ["string", "null"]
+        ms_tahmini:
+          type: ["string", "null"]
+        row_renk:
+          type: string
+        takimlar:
+          type: string
+        is_highlight:
+          type: boolean
+        onceki_skor:
+          type: string
+        kirmizi_kart_var_mi:
+          type: boolean
+        kart_display:
+          type: string
+        kart_yuksek_mi:
+          type: boolean
+        lig_sirasi:
+          type: string
+        taraf_oranlari:
+          $ref: "#/components/schemas/TarafOranlari"
+        alt_ust:
+          $ref: "#/components/schemas/AltUst"
+        var_yok:
+          $ref: "#/components/schemas/VarYok"
+        ortalama:
+          type: string
+        korner_display:
+          type: string
+        im_sonuc:
+          type: string
+        im_renk:
+          type: string
+
+    TarafOranlari:
+      type: object
+      properties:
+        ev:
+          type: ["string", "null"]
+        ber:
+          type: ["string", "null"]
+        dep:
+          type: ["string", "null"]
+        kazanan:
+          type: ["string", "null"]
+
+    AltUst:
+      type: object
+      properties:
+        alt:
+          type: ["string", "null"]
+        ust:
+          type: ["string", "null"]
+        kazanan:
+          type: ["string", "null"]
+
+    VarYok:
+      type: object
+      properties:
+        var:
+          type: ["string", "null"]
+        yok:
+          type: ["string", "null"]
+        kazanan:
+          type: ["string", "null"]
+
+    TodayMatch:
+      type: object
+      required:
+        - id
+        - tarih
+        - saat
+        - lig
+        - ev_sahibi
+        - deplasman
+      properties:
+        id:
+          type: integer
+        tarih:
+          type: string
+        saat:
+          type: string
+        lig:
+          type: string
+        ev_sahibi:
+          type: string
+        deplasman:
+          type: string
+        oran_1:
+          type: ["number", "null"]
+        oran_x:
+          type: ["number", "null"]
+        oran_2:
+          type: ["number", "null"]
+        alt_orani:
+          type: ["number", "null"]
+        ust_orani:
+          type: ["number", "null"]
+        kg_var:
+          type: ["number", "null"]
+        kg_yok:
+          type: ["number", "null"]
+        durum:
+          type: string
+
+    TodayMatchesResponse:
+      type: object
+      required:
+        - date
+        - matches
+        - total
+        - last_updated
+      properties:
+        date:
+          type: string
+        matches:
+          type: array
+          items:
+            $ref: "#/components/schemas/TodayMatch"
+        total:
+          type: integer
+        last_updated:
+          type: ["string", "null"]
+
+    RefreshResult:
+      type: object
+      required:
+        - ok
+        - message
+      properties:
+        ok:
+          type: boolean
+        message:
+          type: string
+        added:
+          type: integer
+        updated:
+          type: integer

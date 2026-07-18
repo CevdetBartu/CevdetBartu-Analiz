@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "CevdetBartu Futbol Analiz"
+version = "1.0.0"
+id = "artifacts/football-app"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23715
+
+[services.development]
+run = "pnpm --filter @workspace/football-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/football-app", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/football-app/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23715"
+BASE_PATH = "/"
