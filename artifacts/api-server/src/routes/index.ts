@@ -5,6 +5,8 @@ import analyzeRouter from "./analyze";
 import adminRouter from "./admin";
 import todayRouter from "./today";
 import spawnRouter from "./spawn";
+import basketMatchesRouter from "./basketMatches";
+import liveRouter from "./live";
 
 const router: IRouter = Router();
 
@@ -14,5 +16,7 @@ router.use(analyzeRouter);
 router.use(adminRouter);
 router.use(todayRouter);
 router.use(spawnRouter);
+router.use(basketMatchesRouter);
+router.use(liveRouter);
 
 export default router;

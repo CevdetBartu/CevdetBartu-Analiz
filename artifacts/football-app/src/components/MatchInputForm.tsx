@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { MatchData, SimilarMatch, createEmptySimilarMatch } from '../lib/analysis';
-import { useFindSimilarMatches } from '@workspace/api-client-react';
 
 interface MatchInputFormProps {
   onAnalyze: (data: MatchData) => void;
@@ -31,10 +30,13 @@ export function MatchInputForm({ onAnalyze, isLoading, initialData }: MatchInput
     ligSirasiDiff: '', avgCardsTotal: '', maxResults: '5'
   });
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [oddsType, setOddsType] = useState<'OPENING' | 'CLOSING'>('CLOSING');
+  
+  // Arama sonuçları için lokal state
+  const [searchResults, setSearchResults] = useState<any[] | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const searchMutation = useFindSimilarMatches();
-
-  const handleSearch = () => {
+  const handleSearch = async () => {
     const oddsHome = parseFloat(searchOdds.oddsHome.replace(',', '.'));
     const oddsDraw = parseFloat(searchOdds.oddsDraw.replace(',', '.'));
     const oddsAway = parseFloat(searchOdds.oddsAway.replace(',', '.'));
@@ -44,27 +46,46 @@ export function MatchInputForm({ onAnalyze, isLoading, initialData }: MatchInput
       return;
     }
 
-    searchMutation.mutate({
-      data: {
-        oddsHome,
-        oddsDraw,
-        oddsAway,
-        altOdds: searchOdds.altOdds ? parseFloat(searchOdds.altOdds.replace(',', '.')) : undefined,
-        ustOdds: searchOdds.ustOdds ? parseFloat(searchOdds.ustOdds.replace(',', '.')) : undefined,
-        varOdds: searchOdds.varOdds ? parseFloat(searchOdds.varOdds.replace(',', '.')) : undefined,
-        yokOdds: searchOdds.yokOdds ? parseFloat(searchOdds.yokOdds.replace(',', '.')) : undefined,
-        league: data.league || undefined,
-        ligSirasiDiff: searchFilters.ligSirasiDiff ? parseInt(searchFilters.ligSirasiDiff) : undefined,
-        avgCardsTotal: searchFilters.avgCardsTotal ? parseFloat(searchFilters.avgCardsTotal) : undefined,
-        maxResults: parseInt(searchFilters.maxResults),
+    setIsSearching(true);
+    setSearchResults(null);
+    try {
+      const BASE_URL = import.meta.env.BASE_URL.replace(/\/$/, '');
+      const r = await fetch(`${BASE_URL}/api/matches/find-similar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          oddsHome,
+          oddsDraw,
+          oddsAway,
+          altOdds: searchOdds.altOdds ? parseFloat(searchOdds.altOdds.replace(',', '.')) : undefined,
+          ustOdds: searchOdds.ustOdds ? parseFloat(searchOdds.ustOdds.replace(',', '.')) : undefined,
+          varOdds: searchOdds.varOdds ? parseFloat(searchOdds.varOdds.replace(',', '.')) : undefined,
+          yokOdds: searchOdds.yokOdds ? parseFloat(searchOdds.yokOdds.replace(',', '.')) : undefined,
+          league: data.league || undefined,
+          ligSirasiDiff: searchFilters.ligSirasiDiff ? parseInt(searchFilters.ligSirasiDiff) : undefined,
+          avgCardsTotal: searchFilters.avgCardsTotal ? parseFloat(searchFilters.avgCardsTotal) : undefined,
+          maxResults: parseInt(searchFilters.maxResults),
+          oddsType,
+        }),
+      });
+
+      if (!r.ok) {
+        alert("Benzer maç arama isteği başarısız oldu.");
+        return;
       }
-    });
+      const resData = await r.json();
+      setSearchResults(resData);
+    } catch (e: any) {
+      alert(`Hata: ${e.message}`);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleFillForm = () => {
-    if (!searchMutation.data) return;
+    if (!searchResults) return;
 
-    const newMatches: SimilarMatch[] = searchMutation.data.map((res: any) => {
+    const newMatches: SimilarMatch[] = searchResults.map((res: any) => {
       const match = res.match;
       return {
         id: match.id.toString(),
@@ -179,6 +200,13 @@ export function MatchInputForm({ onAnalyze, isLoading, initialData }: MatchInput
             <label className={labelCls}>Oran 2</label>
             <input className={inputCls} placeholder="3.43" value={searchOdds.oddsAway} onChange={e => setSearchOdds({...searchOdds, oddsAway: e.target.value})} />
           </div>
+          <div className="form-field">
+            <label className={labelCls}>Oran Analiz Tipi</label>
+            <select className={inputCls} value={oddsType} onChange={e => setOddsType(e.target.value as 'OPENING' | 'CLOSING')}>
+              <option value="CLOSING">Kapanış Oranları</option>
+              <option value="OPENING">Açılış Oranları</option>
+            </select>
+          </div>
         </div>
 
         <div className="form-grid-4 mt-2">
@@ -232,16 +260,16 @@ export function MatchInputForm({ onAnalyze, isLoading, initialData }: MatchInput
         )}
 
         <div className="mt-4">
-          <button type="button" className="btn-search" onClick={handleSearch} disabled={searchMutation.isPending}>
-            {searchMutation.isPending ? '⏳ Aranıyor...' : '🔍 Benzer Maçları Bul'}
+          <button type="button" className="btn-search" onClick={handleSearch} disabled={isSearching}>
+            {isSearching ? '⏳ Aranıyor...' : '🔍 Benzer Maçları Bul'}
           </button>
         </div>
 
-        {searchMutation.data && (
+        {searchResults && (
           <div className="search-results mt-4">
-            <h4 className="results-title">Bulunan Maçlar</h4>
+            <h4 className="results-title">Bulunan Maçlar ({oddsType === 'OPENING' ? 'Açılış Oranları' : 'Kapanış Oranları'})</h4>
             <div className="results-list">
-              {searchMutation.data.map((res: any, idx: number) => {
+              {searchResults.map((res: any, idx: number) => {
                 const match = res.match;
                 let scoreColor = 'score-red';
                 if (res.similarityScore >= 70) scoreColor = 'score-green';

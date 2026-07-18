@@ -421,17 +421,31 @@ export function analyze(
         ber: fmtOdds(m.oddsDraw),
         dep: fmtOdds(m.oddsAway),
         kazanan: oddsWinner,
-      },
+        ev_acilis: fmtOdds((m as any).oran_1_acilis),
+        ber_acilis: fmtOdds((m as any).oran_x_acilis),
+        dep_acilis: fmtOdds((m as any).oran_2_acilis),
+        ev_kapanis: fmtOdds((m as any).oran_1_kapanis),
+        ber_kapanis: fmtOdds((m as any).oran_x_kapanis),
+        dep_kapanis: fmtOdds((m as any).oran_2_kapanis),
+      } as any,
       alt_ust: {
         alt: fmtOdds(m.altOdds),
         ust: fmtOdds(m.ustOdds),
         kazanan: altUstWinner,
-      },
+        alt_acilis: fmtOdds((m as any).alt_orani_acilis),
+        ust_acilis: fmtOdds((m as any).ust_orani_acilis),
+        alt_kapanis: fmtOdds((m as any).alt_orani_kapanis),
+        ust_kapanis: fmtOdds((m as any).ust_orani_kapanis),
+      } as any,
       var_yok: {
         var: fmtOdds(m.varOdds),
         yok: fmtOdds(m.yokOdds),
         kazanan: varYokWinner,
-      },
+        var_acilis: fmtOdds((m as any).kg_var_acilis),
+        yok_acilis: fmtOdds((m as any).kg_yok_acilis),
+        var_kapanis: fmtOdds((m as any).kg_var_kapanis),
+        yok_kapanis: fmtOdds((m as any).kg_yok_kapanis),
+      } as any,
       ortalama:
         m.avgOddsMin != null && m.avgOddsMax != null
           ? `${fmtOdds(m.avgOddsMin)}-${fmtOdds(m.avgOddsMax)}`
@@ -440,8 +454,22 @@ export function analyze(
         m.kornerHome != null || m.kornerAway != null
           ? `${m.kornerHome ?? '-'}-${m.kornerAway ?? '-'} (${(m.kornerHome ?? 0) + (m.kornerAway ?? 0)})`
           : '',
-      im_sonuc: m.imResult ?? '',
-      im_renk: imRenk(m.imResult),
+      im_sonuc: m.imResult || (() => {
+        const ht = parseScore(m.htScore);
+        const ft = parseScore(m.ftScore);
+        if (!ht || !ft) return '';
+        const _ht = ht.home > ht.away ? '1' : (ht.home < ht.away ? '2' : 'X');
+        const _ft = ft.home > ft.away ? '1' : (ft.home < ft.away ? '2' : 'X');
+        return `${_ht}/${_ft}`;
+      })(),
+      im_renk: imRenk(m.imResult || (() => {
+        const ht = parseScore(m.htScore);
+        const ft = parseScore(m.ftScore);
+        if (!ht || !ft) return '';
+        const _ht = ht.home > ht.away ? '1' : (ht.home < ht.away ? '2' : 'X');
+        const _ft = ft.home > ft.away ? '1' : (ft.home < ft.away ? '2' : 'X');
+        return `${_ht}/${_ft}`;
+      })()),
     });
   });
 

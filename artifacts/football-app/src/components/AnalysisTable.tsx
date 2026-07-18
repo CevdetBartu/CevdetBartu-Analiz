@@ -165,37 +165,58 @@ export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeR
                   <td className="td-lig">{satir.lig_sirasi ?? ''}</td>
 
                   {/* Taraf Oranları */}
-                  <td className="td-odds">
+                  <td className="td-odds text-center">
                     {(t?.ev || t?.ber || t?.dep) && (
-                      <span>
-                        <OddsCell value={t.ev}  isWinner={t.kazanan === 'ev'}  isLoser={!!t.kazanan && t.kazanan !== 'ev'}  />
-                        {t.ev && '-'}
-                        <OddsCell value={t.ber} isWinner={t.kazanan === 'ber'} isLoser={!!t.kazanan && t.kazanan !== 'ber'} />
-                        {t.ber && '-'}
-                        <OddsCell value={t.dep} isWinner={t.kazanan === 'dep'} isLoser={!!t.kazanan && t.kazanan !== 'dep'} />
-                      </span>
+                      <div className="odds-stack">
+                        <div className="odds-main-row">
+                          <OddsCell value={t.ev}  isWinner={t.kazanan === 'ev'}  isLoser={!!t.kazanan && t.kazanan !== 'ev'}  />
+                          {t.ev && '-'}
+                          <OddsCell value={t.ber} isWinner={t.kazanan === 'ber'} isLoser={!!t.kazanan && t.kazanan !== 'ber'} />
+                          {t.ber && '-'}
+                          <OddsCell value={t.dep} isWinner={t.kazanan === 'dep'} isLoser={!!t.kazanan && t.kazanan !== 'dep'} />
+                        </div>
+                        {((t as any).ev_acilis || (t as any).ber_acilis || (t as any).dep_acilis) && (
+                          <div className="odds-sub-row" title="Açılış Oranları">
+                            Aç: {(t as any).ev_acilis || '-'}-{(t as any).ber_acilis || '-'}-{(t as any).dep_acilis || '-'}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </td>
 
                   {/* Alt / Üst */}
-                  <td className="td-altust col-highlight">
+                  <td className="td-altust col-highlight text-center">
                     {(au?.alt || au?.ust) && (
-                      <span>
-                        <OddsCell value={au.alt} isWinner={au.kazanan === 'alt'} isLoser={!!au.kazanan && au.kazanan !== 'alt'} />
-                        {au.alt && '-'}
-                        <OddsCell value={au.ust} isWinner={au.kazanan === 'ust'} isLoser={!!au.kazanan && au.kazanan !== 'ust'} />
-                      </span>
+                      <div className="odds-stack">
+                        <div className="odds-main-row">
+                          <OddsCell value={au.alt} isWinner={au.kazanan === 'alt'} isLoser={!!au.kazanan && au.kazanan !== 'alt'} />
+                          {au.alt && '-'}
+                          <OddsCell value={au.ust} isWinner={au.kazanan === 'ust'} isLoser={!!au.kazanan && au.kazanan !== 'ust'} />
+                        </div>
+                        {((au as any).alt_acilis || (au as any).ust_acilis) && (
+                          <div className="odds-sub-row" title="Açılış Oranları">
+                            Aç: {(au as any).alt_acilis || '-'}-{(au as any).ust_acilis || '-'}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </td>
 
                   {/* Var / Yok */}
-                  <td className="td-varyok col-highlight">
+                  <td className="td-varyok col-highlight text-center">
                     {(vy?.var || vy?.yok) && (
-                      <span>
-                        <OddsCell value={vy.var} isWinner={vy.kazanan === 'var'} isLoser={!!vy.kazanan && vy.kazanan !== 'var'} />
-                        {vy.var && '-'}
-                        <OddsCell value={vy.yok} isWinner={vy.kazanan === 'yok'} isLoser={!!vy.kazanan && vy.kazanan !== 'yok'} />
-                      </span>
+                      <div className="odds-stack">
+                        <div className="odds-main-row">
+                          <OddsCell value={vy.var} isWinner={vy.kazanan === 'var'} isLoser={!!vy.kazanan && vy.kazanan !== 'var'} />
+                          {vy.var && '-'}
+                          <OddsCell value={vy.yok} isWinner={vy.kazanan === 'yok'} isLoser={!!vy.kazanan && vy.kazanan !== 'yok'} />
+                        </div>
+                        {((vy as any).var_acilis || (vy as any).yok_acilis) && (
+                          <div className="odds-sub-row" title="Açılış Oranları">
+                            Aç: {(vy as any).var_acilis || '-'}-{(vy as any).yok_acilis || '-'}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </td>
 

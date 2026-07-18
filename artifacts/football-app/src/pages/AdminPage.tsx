@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'wouter';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 const API = `${BASE}/api/admin/scraper`;
@@ -33,6 +34,7 @@ export default function AdminPage() {
   const [msg, setMsg]           = useState<string | null>(null);
   const [seasonsBack, setSeasons] = useState(4);
   const [spawning, setSpawning] = useState(false);
+  const [backupLoading, setBackupLoading] = useState(false);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -71,6 +73,20 @@ export default function AdminPage() {
     }
   }
 
+  async function handleBackup() {
+    setBackupLoading(true);
+    setMsg(null);
+    try {
+      const r = await fetch(`${BASE}/api/admin/db/backup`, { method: 'POST' });
+      const data = await r.json();
+      setMsg(data.message);
+    } catch (e: any) {
+      setMsg(`Yedekleme hatası: ${e.message}`);
+    } finally {
+      setBackupLoading(false);
+    }
+  }
+
   async function doAction(endpoint: string, method = 'POST', body?: object) {
     setLoading(true);
     setMsg(null);
@@ -94,6 +110,13 @@ export default function AdminPage() {
 
   return (
     <div className="admin-page">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <Link href="/" className="nav-btn" style={{ textDecoration: 'none' }}>← Analiz Paneli</Link>
+        <div className="sport-tabs">
+          <Link href="/admin" className="sport-tab active">⚽ Futbol</Link>
+          <Link href="/canli" className="sport-tab">📺 Canlı Analiz</Link>
+        </div>
+      </div>
       <div className="admin-header">
         <h1 className="admin-title">⚙️ Veri Havuzu Yönetimi</h1>
         <p className="admin-sub">SofaScore'dan geçmiş maç verisi çekme ve SQLite veritabanı yönetimi</p>
@@ -167,7 +190,7 @@ export default function AdminPage() {
               onChange={e => setSeasons(Number(e.target.value))}
               disabled={isRunning}
             >
-              {[1, 2, 3, 4, 5, 6, 8].map(m => (
+              {[1, 2, 3, 4, 5, 6, 8, 10].map(m => (
                 <option key={m} value={m}>{m} sezon</option>
               ))}
             </select>
@@ -207,6 +230,14 @@ export default function AdminPage() {
               disabled={loading}
             >
               ⟳ Yenile
+            </button>
+            <button
+              className="admin-btn admin-btn-backup"
+              onClick={handleBackup}
+              disabled={loading || backupLoading}
+              title="Veritabanının tarih damgalı güvenli bir yedeğini alır"
+            >
+              {backupLoading ? '💾 Yedekleniyor…' : '💾 Veritabanını Yedekle'}
             </button>
           </div>
         </div>

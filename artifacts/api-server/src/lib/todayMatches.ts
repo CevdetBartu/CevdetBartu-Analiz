@@ -105,19 +105,19 @@ export function getTodayMatchesFromDb(dateStr: string): {
 /**
  * Bugünün maçlarını yenilemek için Python scraper'ı tetikler.
  */
-export async function refreshTodayMatches(): Promise<{
+export async function refreshTodayMatches(dateStr?: string): Promise<{
   ok: boolean;
   message: string;
   added?: number;
   updated?: number;
 }> {
   try {
-    const today = new Date().toISOString().slice(0, 10);
+    const targetDate = dateStr ?? new Date().toISOString().slice(0, 10);
     const resp = await fetch(`${FLASK_URL}/today`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date: today }),
-      signal: AbortSignal.timeout(30_000),
+      body: JSON.stringify({ date: targetDate }),
+      signal: AbortSignal.timeout(300_000),
     });
 
     if (!resp.ok) {

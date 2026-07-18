@@ -21,6 +21,9 @@ from flask import Flask, jsonify, request
 import db
 import worker as worker_module
 from config import FLASK_PORT, SEASONS_BACK
+from sources.today_matches import run_today_scrape
+import time
+from sources.live_matches import get_live_matches_data
 
 logging.basicConfig(
     level=logging.INFO,
@@ -40,6 +43,8 @@ def healthz():
     return jsonify({"status": "ok"})
 
 
+# ── Futbol Scraper Uçları ────────────────────────────────────────────────────
+
 @app.get("/stats")
 def stats():
     db_stats    = db.get_stats()
@@ -54,7 +59,7 @@ def stats():
 def start():
     body          = request.get_json(silent=True) or {}
     seasons_back  = int(body.get("seasons_back", SEASONS_BACK))
-    seasons_back  = max(1, min(8, seasons_back))  # 1-8 sezon arası sınırla
+    seasons_back  = max(1, min(10, seasons_back))  # 1-10 sezon arası sınırla
 
     if W.is_running():
         return jsonify({"ok": False, "message": "Scraper zaten çalışıyor"}), 409
@@ -74,6 +79,23 @@ def stop():
     return jsonify({"ok": True, "message": "Durdurma sinyali gönderildi"})
 
 
+@app.post("/today")
+def today():
+    body = request.get_json(silent=True) or {}
+    date_str = body.get("date")
+    
+    target_date = None
+    if date_str:
+        try:
+            import datetime
+            target_date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+        except Exception:
+            pass
+            
+    res = run_today_scrape(target_date)
+    return jsonify(res)
+
+
 @app.post("/reset")
 def reset():
     """Son işlenen tarihi sıfırla → scraper baştan tarar."""
@@ -81,6 +103,21 @@ def reset():
         return jsonify({"ok": False, "message": "Önce scraper'ı durdurun"}), 409
     db.set_state("last_processed_date", "")
     return jsonify({"ok": True, "message": "Tarih sıfırlandı — sıradaki başlatmada baştan taranır"})
+
+
+_live_matches_cache = {
+    "data": None,
+    "timestamp": 0
+}
+
+@app.get("/live-matches")
+def live_matches():
+    now = time.time()
+    # Cache for 15 seconds to prevent rate limits
+    if _live_matches_cache["data"] is None or (now - _live_matches_cache["timestamp"] > 15):
+        _live_matches_cache["data"] = get_live_matches_data()
+        _live_matches_cache["timestamp"] = now
+    return jsonify(_live_matches_cache["data"])
 
 
 if __name__ == "__main__":

@@ -9,14 +9,14 @@ interface TodayMatch {
   lig: string;
   ev_sahibi: string;
   deplasman: string;
-  oran_1: number | null;
-  oran_x: number | null;
-  oran_2: number | null;
-  alt_orani: number | null;
-  ust_orani: number | null;
-  kg_var: number | null;
-  kg_yok: number | null;
-  durum: string;
+  oran_1?: number | null;
+  oran_x?: number | null;
+  oran_2?: number | null;
+  alt_orani?: number | null;
+  ust_orani?: number | null;
+  kg_var?: number | null;
+  kg_yok?: number | null;
+  durum?: string;
 }
 
 function formatDate(isoDate: string): string {
@@ -24,7 +24,7 @@ function formatDate(isoDate: string): string {
   return d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', year: 'numeric', weekday: 'long' });
 }
 
-function OddsCell({ value }: { value: number | null }) {
+function OddsCell({ value }: { value?: number | null }) {
   if (value == null) return <span className="text-gray-600">—</span>;
   return <span className="font-bold text-green-400">{value.toFixed(2)}</span>;
 }
@@ -49,7 +49,7 @@ export default function TodayMatchesPage() {
 
   const handleRefresh = async () => {
     setMsg(null);
-    refreshMutation.mutate(undefined, {
+    refreshMutation.mutate({ date: selectedDate }, {
       onSuccess: (result: any) => {
         const isErr = !result.ok || (result.message ?? '').toLowerCase().includes('hata') || (result.message ?? '').toLowerCase().includes('bağlantı');
         setMsgType(isErr ? 'err' : 'ok');
@@ -116,6 +116,10 @@ export default function TodayMatchesPage() {
           <span className="logo-icon">⚽</span>
           <span className="logo-text">CevdetBartu Analiz</span>
         </div>
+        <div className="sport-tabs">
+          <Link href="/" className="sport-tab active">⚽ Futbol</Link>
+          <Link href="/canli" className="sport-tab">📺 Canlı Analiz</Link>
+        </div>
         <nav className="app-nav">
           <Link href="/" className="nav-btn" style={{ textDecoration: 'none' }}>← Analiz</Link>
           <Link href="/admin" className="nav-btn" style={{ textDecoration: 'none' }}>⚙️ Veri Havuzu</Link>
@@ -124,12 +128,12 @@ export default function TodayMatchesPage() {
       </header>
 
       <main className="app-main">
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ maxWidth: 1350, margin: '0 auto' }}>
           {/* Hero */}
           <div className="form-hero">
             <h1 className="form-hero-title">Günlük Maç Programı</h1>
             <p className="form-hero-sub">
-              Takım adı veya lig arayın — oranları direkt forma aktarın
+              Maç bilgileri ve oranlar otomatik olarak forma aktarılır. Her sabah 00:00'de tüm liglerin günlük maç programı ve oranları güncellenir.
             </p>
           </div>
 

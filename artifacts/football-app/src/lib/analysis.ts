@@ -24,6 +24,8 @@ export interface SimilarMatch {
   kornerHome: string;
   kornerAway: string;
   isTargetMatch?: boolean;
+  matchDate?: string;
+  league?: string;
 }
 
 export interface MatchData {

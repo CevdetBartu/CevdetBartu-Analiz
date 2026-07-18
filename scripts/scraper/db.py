@@ -55,12 +55,35 @@ def init_db() -> None:
                 kg_yok           REAL,          -- KG Yok
                 ort_min          REAL,          -- Ortalama minimum oran
                 ort_max          REAL,          -- Ortalama maximum oran
+                oran_1_acilis    REAL,
+                oran_x_acilis    REAL,
+                oran_2_acilis    REAL,
+                alt_orani_acilis REAL,
+                ust_orani_acilis REAL,
+                kg_var_acilis    REAL,
+                kg_yok_acilis    REAL,
                 kaynak           TEXT DEFAULT 'sofascore',
                 kaynak_id        INTEGER,       -- SofaScore event ID
                 olusturma_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(ev_sahibi, deplasman, tarih)
             )
         """)
+
+        # Eski tablolara yeni kolonları ekle (varsaOperationalError fırlatır, yakala)
+        cols = [
+            ("oran_1_acilis", "REAL"),
+            ("oran_x_acilis", "REAL"),
+            ("oran_2_acilis", "REAL"),
+            ("alt_orani_acilis", "REAL"),
+            ("ust_orani_acilis", "REAL"),
+            ("kg_var_acilis", "REAL"),
+            ("kg_yok_acilis", "REAL"),
+        ]
+        for name, dtype in cols:
+            try:
+                conn.execute(f"ALTER TABLE gecmis_maclar ADD COLUMN {name} {dtype}")
+            except sqlite3.OperationalError:
+                pass
 
         # ── Hız indeksleri ───────────────────────────────────────────────
         indices = [
@@ -71,6 +94,9 @@ def init_db() -> None:
             "CREATE INDEX IF NOT EXISTS idx_ust_orani  ON gecmis_maclar(ust_orani)",
             "CREATE INDEX IF NOT EXISTS idx_kg_var     ON gecmis_maclar(kg_var)",
             "CREATE INDEX IF NOT EXISTS idx_kg_yok     ON gecmis_maclar(kg_yok)",
+            "CREATE INDEX IF NOT EXISTS idx_oran_1_acilis ON gecmis_maclar(oran_1_acilis)",
+            "CREATE INDEX IF NOT EXISTS idx_oran_x_acilis ON gecmis_maclar(oran_x_acilis)",
+            "CREATE INDEX IF NOT EXISTS idx_oran_2_acilis ON gecmis_maclar(oran_2_acilis)",
             "CREATE INDEX IF NOT EXISTS idx_lig        ON gecmis_maclar(lig)",
             "CREATE INDEX IF NOT EXISTS idx_tarih      ON gecmis_maclar(tarih)",
             "CREATE INDEX IF NOT EXISTS idx_kaynak_id  ON gecmis_maclar(kaynak_id)",
@@ -92,17 +118,20 @@ def init_db() -> None:
         conn.close()
 
 
-def upsert_match(row: dict) -> bool:
-    """Maç kaydını ekle. Zaten varsa (UNIQUE constraint) atla. True=eklendi."""
+def upsert_match(row: dict, conn=None) -> bool:
+    """Maç kaydını ekle veya varsa güncelle. True=eklendi/güncellendi."""
     sql = """
-        INSERT OR IGNORE INTO gecmis_maclar
+        INSERT INTO gecmis_maclar
             (tarih, saat, lig, ev_sahibi, deplasman,
              devre_skoru, mac_skoru, onceki_skorlar,
              kart_ev, kart_dep, kirmizi_kart, korner_ev, korner_dep,
              lig_sira_ev, lig_sira_dep, toplam_takim, im_6,
              oran_1, oran_x, oran_2,
              alt_orani, ust_orani, kg_var, kg_yok,
-             ort_min, ort_max, kaynak, kaynak_id)
+             ort_min, ort_max,
+             oran_1_acilis, oran_x_acilis, oran_2_acilis,
+             alt_orani_acilis, ust_orani_acilis, kg_var_acilis, kg_yok_acilis,
+             kaynak, kaynak_id)
         VALUES
             (:tarih, :saat, :lig, :ev_sahibi, :deplasman,
              :devre_skoru, :mac_skoru, :onceki_skorlar,
@@ -110,18 +139,46 @@ def upsert_match(row: dict) -> bool:
              :lig_sira_ev, :lig_sira_dep, :toplam_takim, :im_6,
              :oran_1, :oran_x, :oran_2,
              :alt_orani, :ust_orani, :kg_var, :kg_yok,
-             :ort_min, :ort_max, :kaynak, :kaynak_id)
+             :ort_min, :ort_max,
+             :oran_1_acilis, :oran_x_acilis, :oran_2_acilis,
+             :alt_orani_acilis, :ust_orani_acilis, :kg_var_acilis, :kg_yok_acilis,
+             :kaynak, :kaynak_id)
+        ON CONFLICT(ev_sahibi, deplasman, tarih) DO UPDATE SET
+            devre_skoru = COALESCE(excluded.devre_skoru, devre_skoru),
+            mac_skoru = CASE WHEN excluded.mac_skoru != '?:?' THEN excluded.mac_skoru ELSE mac_skoru END,
+            kart_ev = COALESCE(excluded.kart_ev, kart_ev),
+            kart_dep = COALESCE(excluded.kart_dep, kart_dep),
+            kirmizi_kart = COALESCE(excluded.kirmizi_kart, kirmizi_kart),
+            korner_ev = COALESCE(excluded.korner_ev, korner_ev),
+            korner_dep = COALESCE(excluded.korner_dep, korner_dep),
+            oran_1 = COALESCE(excluded.oran_1, oran_1),
+            oran_x = COALESCE(excluded.oran_x, oran_x),
+            oran_2 = COALESCE(excluded.oran_2, oran_2),
+            alt_orani = COALESCE(excluded.alt_orani, alt_orani),
+            ust_orani = COALESCE(excluded.ust_orani, ust_orani),
+            kg_var = COALESCE(excluded.kg_var, kg_var),
+            kg_yok = COALESCE(excluded.kg_yok, kg_yok),
+            oran_1_acilis = COALESCE(excluded.oran_1_acilis, oran_1_acilis),
+            oran_x_acilis = COALESCE(excluded.oran_x_acilis, oran_x_acilis),
+            oran_2_acilis = COALESCE(excluded.oran_2_acilis, oran_2_acilis),
+            alt_orani_acilis = COALESCE(excluded.alt_orani_acilis, alt_orani_acilis),
+            ust_orani_acilis = COALESCE(excluded.ust_orani_acilis, ust_orani_acilis),
+            kg_var_acilis = COALESCE(excluded.kg_var_acilis, kg_var_acilis),
+            kg_yok_acilis = COALESCE(excluded.kg_yok_acilis, kg_yok_acilis),
+            im_6 = COALESCE(excluded.im_6, im_6)
     """
-    conn = get_conn()
+    my_conn = conn if conn else get_conn()
     try:
-        cur = conn.execute(sql, row)
-        conn.commit()
+        cur = my_conn.execute(sql, row)
+        if not conn:
+            my_conn.commit()
         return cur.rowcount > 0
     except Exception as e:
         logger.error(f"upsert_match hatası: {e}")
         return False
     finally:
-        conn.close()
+        if not conn:
+            my_conn.close()
 
 
 def get_stats() -> dict:

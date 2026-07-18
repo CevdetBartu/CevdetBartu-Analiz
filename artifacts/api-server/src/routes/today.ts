@@ -25,7 +25,8 @@ router.get("/today-matches", async (req, res): Promise<void> => {
 
 router.post("/today-matches/refresh", async (req, res): Promise<void> => {
   try {
-    const result = await refreshTodayMatches();
+    const dateParam = typeof req.body.date === "string" ? req.body.date : undefined;
+    const result = await refreshTodayMatches(dateParam);
     res.json(result);
   } catch (e: any) {
     res.status(500).json({ ok: false, message: e.message ?? "Bilinmeyen hata" });

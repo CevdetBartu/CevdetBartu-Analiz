@@ -327,7 +327,7 @@
 /* ──────────────────────────────────────────────
    ANALYSIS TABLE CONTAINER
 ────────────────────────────────────────────── */
-.table-container { max-width: 1100px; margin: 0 auto; }
+.table-container { max-width: 1350px; margin: 0 auto; }
 .table-actions {
   display: flex;
   align-items: center;
@@ -404,8 +404,8 @@
 .analysis-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.78rem;
-  min-width: 900px;
+  font-size: 0.73rem;
+  min-width: 880px;
 }
 
 .analysis-table thead tr {
@@ -413,11 +413,11 @@
 }
 
 .analysis-table th {
-  padding: 6px 8px;
+  padding: 5px 4px;
   text-align: center;
   font-weight: 700;
   color: var(--col-header-text);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   border-bottom: 2px solid #2a3a4a;
@@ -434,7 +434,7 @@
 
 /* Body rows */
 .analysis-table td {
-  padding: 5px 8px;
+  padding: 4px 4px;
   text-align: center;
   color: #ccd;
   border-bottom: 1px solid #1e2a38;
@@ -471,31 +471,34 @@
 
 /* Specific cells */
 .td-analiz {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #a0b8cc;
   font-weight: 600;
-  min-width: 72px;
+  min-width: 60px;
 }
-.td-score { min-width: 38px; font-weight: 700; }
+.td-score { min-width: 32px; font-weight: 700; }
 .td-teams {
   text-align: left !important;
-  min-width: 180px;
+  min-width: 140px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #cce;
 }
 .team-highlight { color: var(--col-team-link); font-weight: 600; }
-.td-prev { min-width: 80px; color: #889; font-size: 0.73rem; }
-.td-flag { min-width: 28px; }
-.td-cards { min-width: 90px; font-size: 0.75rem; }
+.td-prev { min-width: 55px; color: #889; font-size: 0.7rem; }
+.td-flag { min-width: 24px; }
+.td-cards { min-width: 72px; font-size: 0.72rem; }
 .card-yellow { color: var(--col-card-yellow); font-weight: 700; }
 .card-red { color: var(--col-card-red); font-weight: 700; }
-.td-lig { min-width: 70px; color: #8ab; font-size: 0.73rem; }
-.td-odds { min-width: 105px; font-size: 0.74rem; }
+.td-lig { min-width: 55px; color: #8ab; font-size: 0.7rem; }
+.td-odds { min-width: 88px; font-size: 0.71rem; }
 .odds-win { color: #28c828; font-weight: 700; }
 .odds-lose { color: #666; text-decoration: line-through; text-decoration-color: #444; opacity: 0.65; }
-.td-altust { min-width: 72px; font-size: 0.74rem; }
-.td-varyok { min-width: 72px; font-size: 0.74rem; }
-.td-avg { min-width: 72px; color: #8ab; font-size: 0.73rem; }
-.td-im { min-width: 52px; font-size: 0.74rem; }
+.td-altust { min-width: 64px; font-size: 0.71rem; }
+.td-varyok { min-width: 64px; font-size: 0.71rem; }
+.td-avg { min-width: 64px; color: #8ab; font-size: 0.7rem; }
+.td-im { min-width: 44px; font-size: 0.71rem; }
 .im-special { color: #f0c040; font-weight: 700; }
 .im-good { color: #5dc85d; font-weight: 600; }
 
@@ -734,6 +737,12 @@
   color: #6a8a6a;
 }
 .admin-btn-refresh:hover:not(:disabled) { border-color: #4a8a4a; color: #8ab878; }
+.admin-btn-backup {
+  background: transparent;
+  border: 1.5px solid #1a3a5a;
+  color: #7ab8f5;
+}
+.admin-btn-backup:hover:not(:disabled) { border-color: #2a5a8f; color: #a0cfff; }
 
 .admin-stats-grid {
   display: grid;
@@ -1061,4 +1070,60 @@
   border-radius: 6px;
   margin-bottom: 12px;
   font-size: 0.875rem;
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+}
+
+/* ── Sport Selector Tabs ────────────────────────────────────────────────── */
+.sport-tabs {
+  display: flex;
+  gap: 8px;
+  margin-left: 20px;
+}
+.sport-tab {
+  text-decoration: none;
+  background: #0f172a;
+  color: #94a3b8;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 1px solid #1e293b;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.sport-tab:hover {
+  background: #1e293b;
+  color: #f1f5f9;
+}
+.sport-tab.active {
+  background: #1e293b;
+  color: #38bdf8;
+  border-color: #38bdf8;
+}
+
+/* ── Odds opening and closing stack ─────────────────────────────────────── */
+.odds-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.odds-main-row {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.odds-sub-row {
+  font-size: 0.65rem !important;
+  color: #8fa4bd !important;
+  opacity: 0.85;
+  font-weight: 500;
+  white-space: nowrap;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(51, 65, 85, 0.4);
 }

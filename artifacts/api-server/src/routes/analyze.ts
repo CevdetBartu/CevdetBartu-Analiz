@@ -58,6 +58,20 @@ router.post("/analyze", (req, res): void => {
       imResult:        m.imResult        ?? null,
       kornerHome:      m.kornerHome      ?? null,
       kornerAway:      m.kornerAway      ?? null,
+      oran_1_acilis:    (m as any).oran_1_acilis    ?? null,
+      oran_x_acilis:    (m as any).oran_x_acilis    ?? null,
+      oran_2_acilis:    (m as any).oran_2_acilis    ?? null,
+      alt_orani_acilis: (m as any).alt_orani_acilis ?? null,
+      ust_orani_acilis: (m as any).ust_orani_acilis ?? null,
+      kg_var_acilis:    (m as any).kg_var_acilis    ?? null,
+      kg_yok_acilis:    (m as any).kg_yok_acilis    ?? null,
+      oran_1_kapanis:    (m as any).oran_1_kapanis    ?? null,
+      oran_x_kapanis:    (m as any).oran_x_kapanis    ?? null,
+      oran_2_kapanis:    (m as any).oran_2_kapanis    ?? null,
+      alt_orani_kapanis: (m as any).alt_orani_kapanis ?? null,
+      ust_orani_kapanis: (m as any).ust_orani_kapanis ?? null,
+      kg_var_kapanis:    (m as any).kg_var_kapanis    ?? null,
+      kg_yok_kapanis:    (m as any).kg_yok_kapanis    ?? null,
     }))
   );
 

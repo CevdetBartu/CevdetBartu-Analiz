@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Home from './pages/Home';
 import AdminPage from './pages/AdminPage';
 import TodayMatchesPage from './pages/TodayMatchesPage';
+import LiveMatchesPage from './pages/LiveMatchesPage';
 
 const queryClient = new QueryClient();
 
@@ -11,6 +12,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/bugun" component={TodayMatchesPage} />
+      <Route path="/canli" component={LiveMatchesPage} />
       <Route path="/admin" component={AdminPage} />
       <Route path="*">
         <div className="flex items-center justify-center min-h-screen">

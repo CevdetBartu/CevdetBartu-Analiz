@@ -150,12 +150,11 @@ export function findSimilarMatches(
   query: SimilarityQuery,
   allMatches: HistoricalMatch[]
 ): SimilarMatchResult[] {
-  const maxResults = Math.min(Math.max(query.maxResults ?? 5, 3), 5);
-
   const scored = allMatches
     .map(m => scoreMatch(query, m))
     .sort((a, b) => b.similarityScore - a.similarityScore);
 
-  // Return top N, ensuring at least 3 if available
-  return scored.slice(0, maxResults);
+  const maxResults = query.maxResults ?? scored.length;
+
+  return scored.slice(0, Math.max(maxResults, 3));
 }

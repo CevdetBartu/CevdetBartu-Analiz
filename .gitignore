@@ -48,3 +48,19 @@ Thumbs.db
 .cache/
 .local/
 .venv/
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Credentials / Environment
+.env
+.env.*
+
+# Local Logs / Cache
+*.log
+live_goal_monitoring_log.json
+dist/
+build/
+.cache/

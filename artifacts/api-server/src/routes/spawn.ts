@@ -23,7 +23,11 @@ const WORKSPACE = path.resolve(
 // Workspace kökü her zaman artifacts/api-server'ın üst üst dizinidir
 const WORKSPACE_ROOT = path.resolve(process.cwd(), "../..");
 
-const VENV_PYTHON   = path.join(WORKSPACE_ROOT, ".venv/bin/python3");
+const isWin = process.platform === "win32";
+const VENV_PYTHON = isWin
+  ? path.join(WORKSPACE_ROOT, ".venv/Scripts/python.exe")
+  : path.join(WORKSPACE_ROOT, ".venv/bin/python3");
+
 const SCRAPER_SCRIPT = path.join(WORKSPACE_ROOT, "scripts/scraper/run.py");
 const SCRAPER_CWD    = path.join(WORKSPACE_ROOT, "scripts/scraper");
 
@@ -55,7 +59,7 @@ router.post("/admin/scraper/spawn", async (req, res): Promise<void> => {
   }
 
   // Python binary: sanal ortam varsa onu kullan
-  const pythonBin = existsSync(VENV_PYTHON) ? VENV_PYTHON : "python3";
+  const pythonBin = existsSync(VENV_PYTHON) ? VENV_PYTHON : (isWin ? "python" : "python3");
 
   if (!existsSync(SCRAPER_SCRIPT)) {
     res.status(500).json({ ok: false, message: `Scraper dosyası bulunamadı: ${SCRAPER_SCRIPT}` });
