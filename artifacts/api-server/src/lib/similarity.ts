@@ -32,33 +32,34 @@ const W_LEAGUE = 20;
 const W_CARD = 20;
 
 /** Tolerance windows */
-const MAIN_ODDS_TOL = 0.15;   // ±0.15 for 1/X/2
-const ALT_ODDS_TOL = 0.06;    // ±0.06 for Alt/Üst & Var/Yok (Daraltıldı)
-const CARD_TOL = 1.5;          // ±1.5 average cards
-const LIG_DIFF_WINDOW = 3;    // ±3 around target position diff
+const MAIN_PROB_TOL = 0.08;
+const ALT_PROB_TOL = 0.06;
+const CARD_TOL = 1.5;
+const LIG_DIFF_WINDOW = 3;
 
-/** Score for a single odds pair — full points if within tolerance, partial for close misses */
-function oddsScore(target: number, actual: number | string | null | undefined, tolerance: number): number {
-  if (actual == null) return 0;
+function oddsScore(target: number, actual: number | string | null | undefined, probTolerance: number): number {
+  if (actual == null || target <= 1.0) return 0;
   const a = typeof actual === "string" ? parseFloat(actual) : actual;
-  if (isNaN(a)) return 0;
-  const diff = Math.abs(target - a);
-  if (diff <= tolerance) {
-    // Within tolerance: scale from 1.0 (perfect) to 0.5 (at edge)
-    return 0.5 + 0.5 * (1 - diff / tolerance);
+  if (isNaN(a) || a <= 1.0) return 0;
+  
+  const targetProb = 1.0 / target;
+  const actualProb = 1.0 / a;
+  const diff = Math.abs(targetProb - actualProb);
+  
+  if (diff <= probTolerance) {
+    return 0.5 + 0.5 * (1 - diff / probTolerance);
   }
-  // Outside tolerance but within 2× — give partial credit that fades to 0
-  if (diff <= tolerance * 2) {
-    return 0.5 * (1 - (diff - tolerance) / tolerance);
+  if (diff <= probTolerance * 2) {
+    return 0.5 * (1 - (diff - probTolerance) / probTolerance);
   }
   return 0;
 }
 
 export function scoreMatch(query: SimilarityQuery, match: HistoricalMatch): SimilarMatchResult {
   // ─── 1. ORAN BENZERLİĞİ (60%) ─────────────────────────────────────────────
-  const mHome = oddsScore(query.oddsHome, match.oddsHome, MAIN_ODDS_TOL);
-  const mDraw = oddsScore(query.oddsDraw, match.oddsDraw, MAIN_ODDS_TOL);
-  const mAway = oddsScore(query.oddsAway, match.oddsAway, MAIN_ODDS_TOL);
+  const mHome = oddsScore(query.oddsHome, match.oddsHome, MAIN_PROB_TOL);
+  const mDraw = oddsScore(query.oddsDraw, match.oddsDraw, MAIN_PROB_TOL);
+  const mAway = oddsScore(query.oddsAway, match.oddsAway, MAIN_PROB_TOL);
 
   // Main odds contribute 3/5 of oran weight
   let oddsRaw = (mHome + mDraw + mAway) / 3;  // 0–1
@@ -66,10 +67,10 @@ export function scoreMatch(query: SimilarityQuery, match: HistoricalMatch): Simi
   // Alt/Üst & Var/Yok contribute 2/5 of oran weight if provided
   let auxCount = 0;
   let auxSum = 0;
-  if (query.altOdds != null) { auxSum += oddsScore(query.altOdds, match.altOdds, ALT_ODDS_TOL); auxCount++; }
-  if (query.ustOdds != null) { auxSum += oddsScore(query.ustOdds, match.ustOdds, ALT_ODDS_TOL); auxCount++; }
-  if (query.varOdds != null) { auxSum += oddsScore(query.varOdds, match.varOdds, ALT_ODDS_TOL); auxCount++; }
-  if (query.yokOdds != null) { auxSum += oddsScore(query.yokOdds, match.yokOdds, ALT_ODDS_TOL); auxCount++; }
+  if (query.altOdds != null) { auxSum += oddsScore(query.altOdds, match.altOdds, ALT_PROB_TOL); auxCount++; }
+  if (query.ustOdds != null) { auxSum += oddsScore(query.ustOdds, match.ustOdds, ALT_PROB_TOL); auxCount++; }
+  if (query.varOdds != null) { auxSum += oddsScore(query.varOdds, match.varOdds, ALT_PROB_TOL); auxCount++; }
+  if (query.yokOdds != null) { auxSum += oddsScore(query.yokOdds, match.yokOdds, ALT_PROB_TOL); auxCount++; }
 
   if (auxCount > 0) {
     const auxRaw = auxSum / auxCount;
@@ -319,3 +320,5 @@ export function findSimilarMatches(
   const maxResults = query.strict100 ? Math.min(query.maxResults ?? 150, 150) : query.maxResults ?? 150;
   return finalResults.slice(0, maxResults);
 }
+
+
