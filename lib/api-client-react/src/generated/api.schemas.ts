@@ -44,6 +44,18 @@ export interface MatchInput {
   /** @nullable */
   yokOdds?: number | null;
   /** @nullable */
+  altOdds35?: number | null;
+  /** @nullable */
+  ustOdds35?: number | null;
+  /** @nullable */
+  iyAltOdds15?: number | null;
+  /** @nullable */
+  iyUstOdds15?: number | null;
+  /** @nullable */
+  iyAltOdds05?: number | null;
+  /** @nullable */
+  iyUstOdds05?: number | null;
+  /** @nullable */
   avgOddsMin?: number | null;
   /** @nullable */
   avgOddsMax?: number | null;
@@ -91,6 +103,18 @@ export interface MatchRecord {
   /** @nullable */
   yokOdds?: number | null;
   /** @nullable */
+  altOdds35?: number | null;
+  /** @nullable */
+  ustOdds35?: number | null;
+  /** @nullable */
+  iyAltOdds15?: number | null;
+  /** @nullable */
+  iyUstOdds15?: number | null;
+  /** @nullable */
+  iyAltOdds05?: number | null;
+  /** @nullable */
+  iyUstOdds05?: number | null;
+  /** @nullable */
   avgOddsMin?: number | null;
   /** @nullable */
   avgOddsMax?: number | null;
@@ -115,6 +139,18 @@ export interface SimilarityQuery {
   varOdds?: number | null;
   /** @nullable */
   yokOdds?: number | null;
+  /** @nullable */
+  altOdds35?: number | null;
+  /** @nullable */
+  ustOdds35?: number | null;
+  /** @nullable */
+  iyAltOdds15?: number | null;
+  /** @nullable */
+  iyUstOdds15?: number | null;
+  /** @nullable */
+  iyAltOdds05?: number | null;
+  /** @nullable */
+  iyUstOdds05?: number | null;
   /** @nullable */
   league?: string | null;
   /** @nullable */
@@ -167,6 +203,18 @@ export interface TargetMatchInput {
   /** @nullable */
   yokOdds?: number | null;
   /** @nullable */
+  altOdds35?: number | null;
+  /** @nullable */
+  ustOdds35?: number | null;
+  /** @nullable */
+  iyAltOdds15?: number | null;
+  /** @nullable */
+  iyUstOdds15?: number | null;
+  /** @nullable */
+  iyAltOdds05?: number | null;
+  /** @nullable */
+  iyUstOdds05?: number | null;
+  /** @nullable */
   avgOddsMin?: number | null;
   /** @nullable */
   avgOddsMax?: number | null;
@@ -209,6 +257,18 @@ export interface ReferenceMatchInput {
   /** @nullable */
   yokOdds?: number | null;
   /** @nullable */
+  altOdds35?: number | null;
+  /** @nullable */
+  ustOdds35?: number | null;
+  /** @nullable */
+  iyAltOdds15?: number | null;
+  /** @nullable */
+  iyUstOdds15?: number | null;
+  /** @nullable */
+  iyAltOdds05?: number | null;
+  /** @nullable */
+  iyUstOdds05?: number | null;
+  /** @nullable */
   avgOddsMin?: number | null;
   /** @nullable */
   avgOddsMax?: number | null;
@@ -238,6 +298,9 @@ export interface AnalizOzet {
   deplasman: StatGroup;
   kg_var: StatGroup;
   ust_25: StatGroup;
+  ust_35: StatGroup;
+  iy_ust_15: StatGroup;
+  iy_ust_05: StatGroup;
   ort_kart: number;
   /** @nullable */
   ort_korner?: number | null;
@@ -305,6 +368,9 @@ export interface TabloSatiri {
   lig_sirasi: string;
   taraf_oranlari: TarafOranlari;
   alt_ust: AltUst;
+  alt_ust_35: AltUst;
+  iy_alt_ust_15: AltUst;
+  iy_alt_ust_05: AltUst;
   var_yok: VarYok;
   ortalama: string;
   korner_display: string;
@@ -355,6 +421,10 @@ export interface RefreshResult {
   message: string;
   added?: number;
   updated?: number;
+}
+
+export interface RefreshRequest {
+  date?: string | null;
 }
 
 export type GetTodayMatchesParams = {

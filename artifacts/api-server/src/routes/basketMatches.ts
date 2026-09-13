@@ -39,7 +39,7 @@ router.get("/basket/today-matches", async (req, res): Promise<void> => {
 
 router.post("/basket/today-matches/refresh", async (req, res): Promise<void> => {
   try {
-    const dateParam = typeof req.body.date === "string" ? req.body.date : undefined;
+    const dateParam = typeof req.body?.date === "string" ? req.body.date : undefined;
     const targetDate = dateParam ?? new Date().toISOString().slice(0, 10);
 
     const resp = await fetch(`${FLASK_URL}/basket/today`, {

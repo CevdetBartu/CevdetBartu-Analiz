@@ -41,6 +41,12 @@ export const ListMatchesResponseItem = zod.object({
   "ustOdds": zod.number().nullish(),
   "varOdds": zod.number().nullish(),
   "yokOdds": zod.number().nullish(),
+  "altOdds35": zod.number().nullish(),
+  "ustOdds35": zod.number().nullish(),
+  "iyAltOdds15": zod.number().nullish(),
+  "iyUstOdds15": zod.number().nullish(),
+  "iyAltOdds05": zod.number().nullish(),
+  "iyUstOdds05": zod.number().nullish(),
   "avgOddsMin": zod.number().nullish(),
   "avgOddsMax": zod.number().nullish(),
   "imResult": zod.string().nullish(),
@@ -75,6 +81,12 @@ export const CreateMatchBody = zod.object({
   "ustOdds": zod.number().nullish(),
   "varOdds": zod.number().nullish(),
   "yokOdds": zod.number().nullish(),
+  "altOdds35": zod.number().nullish(),
+  "ustOdds35": zod.number().nullish(),
+  "iyAltOdds15": zod.number().nullish(),
+  "iyUstOdds15": zod.number().nullish(),
+  "iyAltOdds05": zod.number().nullish(),
+  "iyUstOdds05": zod.number().nullish(),
   "avgOddsMin": zod.number().nullish(),
   "avgOddsMax": zod.number().nullish(),
   "imResult": zod.string().nullish(),
@@ -104,6 +116,12 @@ export const CreateMatchResponse = zod.object({
   "ustOdds": zod.number().nullish(),
   "varOdds": zod.number().nullish(),
   "yokOdds": zod.number().nullish(),
+  "altOdds35": zod.number().nullish(),
+  "ustOdds35": zod.number().nullish(),
+  "iyAltOdds15": zod.number().nullish(),
+  "iyUstOdds15": zod.number().nullish(),
+  "iyAltOdds05": zod.number().nullish(),
+  "iyUstOdds05": zod.number().nullish(),
   "avgOddsMin": zod.number().nullish(),
   "avgOddsMax": zod.number().nullish(),
   "imResult": zod.string().nullish(),
@@ -124,8 +142,20 @@ export const FindSimilarMatchesBody = zod.object({
   "ustOdds": zod.number().nullish(),
   "varOdds": zod.number().nullish(),
   "yokOdds": zod.number().nullish(),
+  "altOdds35": zod.number().nullish(),
+  "ustOdds35": zod.number().nullish(),
+  "iyAltOdds15": zod.number().nullish(),
+  "iyUstOdds15": zod.number().nullish(),
+  "iyAltOdds05": zod.number().nullish(),
+  "iyUstOdds05": zod.number().nullish(),
   "league": zod.string().nullish(),
   "ligSirasiDiff": zod.number().nullish(),
+  "ligSirasiHome": zod.number().nullish(),
+  "ligSirasiAway": zod.number().nullish(),
+  "ligSirasiTotal": zod.number().nullish(),
+  "oran_1_acilis": zod.number().nullish(),
+  "oran_x_acilis": zod.number().nullish(),
+  "oran_2_acilis": zod.number().nullish(),
   "avgCardsTotal": zod.number().nullish(),
   "maxResults": zod.number().nullish()
 })
@@ -153,6 +183,12 @@ export const FindSimilarMatchesResponseItem = zod.object({
   "ustOdds": zod.number().nullish(),
   "varOdds": zod.number().nullish(),
   "yokOdds": zod.number().nullish(),
+  "altOdds35": zod.number().nullish(),
+  "ustOdds35": zod.number().nullish(),
+  "iyAltOdds15": zod.number().nullish(),
+  "iyUstOdds15": zod.number().nullish(),
+  "iyAltOdds05": zod.number().nullish(),
+  "iyUstOdds05": zod.number().nullish(),
   "avgOddsMin": zod.number().nullish(),
   "avgOddsMax": zod.number().nullish(),
   "imResult": zod.string().nullish(),
@@ -190,11 +226,19 @@ export const AnalyzeMatchesBody = zod.object({
   "ustOdds": zod.number().nullish(),
   "varOdds": zod.number().nullish(),
   "yokOdds": zod.number().nullish(),
+  "altOdds35": zod.number().nullish(),
+  "ustOdds35": zod.number().nullish(),
+  "iyAltOdds15": zod.number().nullish(),
+  "iyUstOdds15": zod.number().nullish(),
+  "iyAltOdds05": zod.number().nullish(),
+  "iyUstOdds05": zod.number().nullish(),
   "avgOddsMin": zod.number().nullish(),
   "avgOddsMax": zod.number().nullish()
 }),
   "referenceMatches": zod.array(zod.object({
   "id": zod.string().nullish(),
+  "league": zod.string().nullish(),
+  "matchDate": zod.string().nullish(),
   "homeTeam": zod.string(),
   "awayTeam": zod.string(),
   "htScore": zod.string().nullish(),
@@ -213,12 +257,17 @@ export const AnalyzeMatchesBody = zod.object({
   "ustOdds": zod.number().nullish(),
   "varOdds": zod.number().nullish(),
   "yokOdds": zod.number().nullish(),
+  "altOdds35": zod.number().nullish(),
+  "ustOdds35": zod.number().nullish(),
+  "iyAltOdds15": zod.number().nullish(),
+  "iyUstOdds15": zod.number().nullish(),
+  "iyAltOdds05": zod.number().nullish(),
+  "iyUstOdds05": zod.number().nullish(),
   "avgOddsMin": zod.number().nullish(),
   "avgOddsMax": zod.number().nullish(),
   "imResult": zod.string().nullish(),
   "kornerHome": zod.number().nullish(),
-  "kornerAway": zod.number().nullish(),
-  "similarityScore": zod.number().nullish()
+  "kornerAway": zod.number().nullish()
 }))
 })
 
@@ -250,6 +299,21 @@ export const AnalyzeMatchesResponse = zod.object({
   "yuzde": zod.number(),
   "label": zod.string()
 }),
+  "ust_35": zod.object({
+  "sayi": zod.number(),
+  "yuzde": zod.number(),
+  "label": zod.string()
+}),
+  "iy_ust_15": zod.object({
+  "sayi": zod.number(),
+  "yuzde": zod.number(),
+  "label": zod.string()
+}),
+  "iy_ust_05": zod.object({
+  "sayi": zod.number(),
+  "yuzde": zod.number(),
+  "label": zod.string()
+}),
   "ort_kart": zod.number(),
   "ort_korner": zod.number().nullish(),
   "ust_10_korner": zod.object({
@@ -258,9 +322,7 @@ export const AnalyzeMatchesResponse = zod.object({
   "label": zod.string()
 }),
   "sik_ms": zod.string().nullish(),
-  "sik_iy": zod.string().nullish(),
-  "guvenlik_skoru": zod.number().nullish(),
-  "guven_seviyesi": zod.string().nullish()
+  "sik_iy": zod.string().nullish()
 }),
   "tahminler": zod.array(zod.string()),
   "tablo_satirlari": zod.array(zod.object({
@@ -290,6 +352,21 @@ export const AnalyzeMatchesResponse = zod.object({
   "kazanan": zod.string().nullish()
 }),
   "alt_ust": zod.object({
+  "alt": zod.string().nullish(),
+  "ust": zod.string().nullish(),
+  "kazanan": zod.string().nullish()
+}),
+  "alt_ust_35": zod.object({
+  "alt": zod.string().nullish(),
+  "ust": zod.string().nullish(),
+  "kazanan": zod.string().nullish()
+}),
+  "iy_alt_ust_15": zod.object({
+  "alt": zod.string().nullish(),
+  "ust": zod.string().nullish(),
+  "kazanan": zod.string().nullish()
+}),
+  "iy_alt_ust_05": zod.object({
   "alt": zod.string().nullish(),
   "ust": zod.string().nullish(),
   "kazanan": zod.string().nullish()
@@ -350,6 +427,10 @@ export const GetTodayMatchesResponse = zod.object({
 /**
  * @summary Manually refresh today's match data
  */
+export const RefreshTodayMatchesBody = zod.object({
+  "date": zod.string().nullish()
+})
+
 export const RefreshTodayMatchesResponse = zod.object({
   "ok": zod.boolean(),
   "message": zod.string(),

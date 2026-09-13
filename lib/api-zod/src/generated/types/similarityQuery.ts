@@ -19,6 +19,18 @@ export interface SimilarityQuery {
   /** @nullable */
   yokOdds?: number | null;
   /** @nullable */
+  altOdds35?: number | null;
+  /** @nullable */
+  ustOdds35?: number | null;
+  /** @nullable */
+  iyAltOdds15?: number | null;
+  /** @nullable */
+  iyUstOdds15?: number | null;
+  /** @nullable */
+  iyAltOdds05?: number | null;
+  /** @nullable */
+  iyUstOdds05?: number | null;
+  /** @nullable */
   league?: string | null;
   /** @nullable */
   ligSirasiDiff?: number | null;

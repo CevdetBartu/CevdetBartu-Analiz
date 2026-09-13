@@ -37,6 +37,9 @@ export interface TabloSatiri {
   lig_sirasi: string;
   taraf_oranlari: TarafOranlari;
   alt_ust: AltUst;
+  alt_ust_35: AltUst;
+  iy_alt_ust_15: AltUst;
+  iy_alt_ust_05: AltUst;
   var_yok: VarYok;
   ortalama: string;
   korner_display: string;

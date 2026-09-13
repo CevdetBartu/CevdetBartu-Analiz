@@ -43,6 +43,12 @@ router.post("/matches", async (req, res): Promise<void> => {
         ustOdds: parsed.data.ustOdds != null ? String(parsed.data.ustOdds) : null,
         varOdds: parsed.data.varOdds != null ? String(parsed.data.varOdds) : null,
         yokOdds: parsed.data.yokOdds != null ? String(parsed.data.yokOdds) : null,
+        altOdds35: parsed.data.altOdds35 != null ? String(parsed.data.altOdds35) : null,
+        ustOdds35: parsed.data.ustOdds35 != null ? String(parsed.data.ustOdds35) : null,
+        iyAltOdds15: parsed.data.iyAltOdds15 != null ? String(parsed.data.iyAltOdds15) : null,
+        iyUstOdds15: parsed.data.iyUstOdds15 != null ? String(parsed.data.iyUstOdds15) : null,
+        iyAltOdds05: parsed.data.iyAltOdds05 != null ? String(parsed.data.iyAltOdds05) : null,
+        iyUstOdds05: parsed.data.iyUstOdds05 != null ? String(parsed.data.iyUstOdds05) : null,
         avgOddsMin: parsed.data.avgOddsMin != null ? String(parsed.data.avgOddsMin) : null,
         avgOddsMax: parsed.data.avgOddsMax != null ? String(parsed.data.avgOddsMax) : null,
       })
@@ -78,13 +84,38 @@ router.post("/matches/find-similar", async (req, res): Promise<void> => {
       parsed.data.oddsHome,
       parsed.data.oddsDraw,
       parsed.data.oddsAway,
-      oddsType
+      oddsType,
+      parsed.data.league
     );
   } catch (e: any) {
-    // SQLite erişilemezse sessizce devam et
+    console.error("queryScraperMatches error:", e);
   }
 
-  const allMatches = [...scraperMatches, ...pgMatches];
+  // Deduplicate matches by ID, keeping the one with more populated odds
+  const uniqueMatchesMap = new Map<string | number, any>();
+  for (const m of [...scraperMatches, ...pgMatches]) {
+    const id = m.id;
+    if (id == null) continue;
+    const existing = uniqueMatchesMap.get(id);
+    if (!existing) {
+      uniqueMatchesMap.set(id, m);
+    } else {
+      const countOdds = (x: any) => {
+        let cnt = 0;
+        if (x.altOdds != null && x.altOdds > 1.0) cnt++;
+        if (x.ustOdds != null && x.ustOdds > 1.0) cnt++;
+        if (x.varOdds != null && x.varOdds > 1.0) cnt++;
+        if (x.yokOdds != null && x.yokOdds > 1.0) cnt++;
+        if (x.altOdds35 != null && x.altOdds35 > 1.0) cnt++;
+        if (x.ustOdds35 != null && x.ustOdds35 > 1.0) cnt++;
+        return cnt;
+      };
+      if (countOdds(m) > countOdds(existing)) {
+        uniqueMatchesMap.set(id, m);
+      }
+    }
+  }
+  const allMatches = Array.from(uniqueMatchesMap.values());
 
   const results = findSimilarMatches(
     {
@@ -95,10 +126,16 @@ router.post("/matches/find-similar", async (req, res): Promise<void> => {
       ustOdds: parsed.data.ustOdds ?? null,
       varOdds: parsed.data.varOdds ?? null,
       yokOdds: parsed.data.yokOdds ?? null,
+      altOdds35: parsed.data.altOdds35 ?? null,
+      ustOdds35: parsed.data.ustOdds35 ?? null,
+      iyAltOdds15: parsed.data.iyAltOdds15 ?? null,
+      iyUstOdds15: parsed.data.iyUstOdds15 ?? null,
+      iyAltOdds05: parsed.data.iyAltOdds05 ?? null,
+      iyUstOdds05: parsed.data.iyUstOdds05 ?? null,
       league: parsed.data.league ?? null,
-      ligSirasiDiff: parsed.data.ligSirasiDiff ?? null,
-      avgCardsTotal: parsed.data.avgCardsTotal ?? null,
       maxResults: parsed.data.maxResults ?? null,
+      homeTeam: (req.body as any)?.homeTeam ?? null,
+      awayTeam: (req.body as any)?.awayTeam ?? null,
     },
     allMatches
   );
@@ -113,6 +150,12 @@ router.post("/matches/find-similar", async (req, res): Promise<void> => {
       ustOdds: r.match.ustOdds != null ? parseFloat(r.match.ustOdds) : null,
       varOdds: r.match.varOdds != null ? parseFloat(r.match.varOdds) : null,
       yokOdds: r.match.yokOdds != null ? parseFloat(r.match.yokOdds) : null,
+      altOdds35: r.match.altOdds35 != null ? parseFloat(r.match.altOdds35) : null,
+      ustOdds35: r.match.ustOdds35 != null ? parseFloat(r.match.ustOdds35) : null,
+      iyAltOdds15: r.match.iyAltOdds15 != null ? parseFloat(r.match.iyAltOdds15) : null,
+      iyUstOdds15: r.match.iyUstOdds15 != null ? parseFloat(r.match.iyUstOdds15) : null,
+      iyAltOdds05: r.match.iyAltOdds05 != null ? parseFloat(r.match.iyAltOdds05) : null,
+      iyUstOdds05: r.match.iyUstOdds05 != null ? parseFloat(r.match.iyUstOdds05) : null,
       avgOddsMin: r.match.avgOddsMin != null ? parseFloat(r.match.avgOddsMin) : null,
       avgOddsMax: r.match.avgOddsMax != null ? parseFloat(r.match.avgOddsMax) : null,
       
@@ -124,6 +167,12 @@ router.post("/matches/find-similar", async (req, res): Promise<void> => {
       ust_orani_acilis: (r.match as any).ust_orani_acilis,
       kg_var_acilis: (r.match as any).kg_var_acilis,
       kg_yok_acilis: (r.match as any).kg_yok_acilis,
+      alt_orani_35_acilis: (r.match as any).alt_orani_35_acilis,
+      ust_orani_35_acilis: (r.match as any).ust_orani_35_acilis,
+      iy_alt_orani_15_acilis: (r.match as any).iy_alt_orani_15_acilis,
+      iy_ust_orani_15_acilis: (r.match as any).iy_ust_orani_15_acilis,
+      iy_alt_orani_05_acilis: (r.match as any).iy_alt_orani_05_acilis,
+      iy_ust_orani_05_acilis: (r.match as any).iy_ust_orani_05_acilis,
       
       oran_1_kapanis: (r.match as any).oran_1_kapanis,
       oran_x_kapanis: (r.match as any).oran_x_kapanis,
@@ -132,12 +181,36 @@ router.post("/matches/find-similar", async (req, res): Promise<void> => {
       ust_orani_kapanis: (r.match as any).ust_orani_kapanis,
       kg_var_kapanis: (r.match as any).kg_var_kapanis,
       kg_yok_kapanis: (r.match as any).kg_yok_kapanis,
+      alt_orani_35_kapanis: (r.match as any).alt_orani_35_kapanis,
+      ust_orani_35_kapanis: (r.match as any).ust_orani_35_kapanis,
+      iy_alt_orani_15_kapanis: (r.match as any).iy_alt_orani_15_kapanis,
+      iy_ust_orani_15_kapanis: (r.match as any).iy_ust_orani_15_kapanis,
+      iy_alt_orani_05_kapanis: (r.match as any).iy_alt_orani_05_kapanis,
+      iy_ust_orani_05_kapanis: (r.match as any).iy_ust_orani_05_kapanis,
     },
     similarityScore: r.similarityScore,
     scoreBreakdown: r.scoreBreakdown,
   }));
 
   res.json(serialized);
+});
+
+// POST /h2h-matches — search direct H2H history from gecmis_maclar.db
+router.post("/h2h-matches", async (req, res): Promise<void> => {
+  const { homeTeam, awayTeam } = req.body;
+  if (!homeTeam || !awayTeam) {
+    res.status(400).json({ error: "homeTeam and awayTeam required" });
+    return;
+  }
+
+  try {
+    const { queryH2HMatches } = await import("../lib/scraperDb");
+    const matches = queryH2HMatches(String(homeTeam), String(awayTeam));
+    res.json({ matches });
+  } catch (e: any) {
+    console.error("h2h-matches endpoint error:", e);
+    res.json({ matches: [] });
+  }
 });
 
 // DELETE /matches/:id

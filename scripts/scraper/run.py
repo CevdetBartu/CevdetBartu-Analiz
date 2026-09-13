@@ -21,5 +21,5 @@ logging.basicConfig(
 
 if __name__ == "__main__":
     db.init_db()
-    print(f"⚽  Sykn1977 Scraper Sunucusu → http://127.0.0.1:{FLASK_PORT}")
+    print(f"Sykn1977 Scraper Sunucusu - http://127.0.0.1:{FLASK_PORT}")
     app.run(host="127.0.0.1", port=FLASK_PORT, debug=False, use_reloader=False, threaded=True)

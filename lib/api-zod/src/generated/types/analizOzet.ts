@@ -14,6 +14,9 @@ export interface AnalizOzet {
   deplasman: StatGroup;
   kg_var: StatGroup;
   ust_25: StatGroup;
+  ust_35: StatGroup;
+  iy_ust_15: StatGroup;
+  iy_ust_05: StatGroup;
   ort_kart: number;
   /** @nullable */
   ort_korner?: number | null;

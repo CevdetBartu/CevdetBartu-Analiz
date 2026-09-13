@@ -71,6 +71,15 @@ router.post("/admin/scraper/reset", async (req, res): Promise<void> => {
   }
 });
 
+router.post("/admin/scraper/set-start-date", async (req, res): Promise<void> => {
+  try {
+    const r = await proxyPost("/set-start-date", req.body);
+    res.status(r.status).json(await r.json());
+  } catch (e: any) {
+    offline(res, e.message);
+  }
+});
+
 router.post("/admin/db/backup", (req, res): void => {
   try {
     if (!existsSync(DB_PATH)) {

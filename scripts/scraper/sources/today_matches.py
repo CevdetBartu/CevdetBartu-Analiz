@@ -1,326 +1,192 @@
-"""
-Bugünün maçlarını SofaScore'dan çeker — sadece oranlar, skorsuz.
-Mevcut gecmis_maclar tablosunu kullanır.
-"""
-from __future__ import annotations
-
 import datetime
-import logging
-from typing import Optional
-
+import sqlite3
+import time
 import requests
-
-from sessions import safe_get
-from db import upsert_match
-from sources.sofascore import get_event_incidents, parse_cards
-from config import SOFASCORE_TOURNAMENTS
+import bs4
+import logging
+from typing import Optional, List, Dict
 
 logger = logging.getLogger(__name__)
 
-_BASE = "https://api.sofascore.com/api/v1"
-
-# ─── Market IDs ───────────────────────────────────────────────────────────────
-MARKET_1X2   = 1
-MARKET_OU    = 18   # Over/Under 2.5
-MARKET_BTTS  = 29   # Both Teams To Score
-
-
-def get_event_corners(event_id: int) -> tuple[Optional[int], Optional[int]]:
-    """Fetch corners from SofaScore event statistics endpoint."""
-    url = f"https://api.sofascore.com/api/v1/event/{event_id}/statistics"
-    data = safe_get(url, is_sub=True)
-    if not data:
-        return None, None
+def fetch_mackolik_events() -> List[Dict]:
+    logger.info(f"Fetching Mackolik Iddaa Programi (All Dates)...")
     
-    stats_list = data.get("statistics", [])
-    for period_stats in stats_list:
-        if period_stats.get("period") == "ALL":
-            groups = period_stats.get("groups", [])
-            for g in groups:
-                items = g.get("statisticsItems", [])
-                for item in items:
-                    if item.get("key") == "cornerKicks" or item.get("name") == "Corner kicks":
-                        try:
-                            home_val = int(item.get("home", 0))
-                            away_val = int(item.get("away", 0))
-                            return home_val, away_val
-                        except Exception:
-                            pass
-    return None, None
-
-
-def _get(path: str) -> Optional[dict]:
-    return safe_get(f"{_BASE}{path}")
-
-
-def _frac_to_dec(frac: str | None) -> Optional[float]:
-    if not frac:
-        return None
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+    }
+    
+    url = "https://arsiv.mackolik.com/Iddaa-Programi"
+    
     try:
-        if "/" in frac:
-            num, den = frac.split("/")
-            return round(int(num) / int(den) + 1, 2)
-        return float(frac)
-    except Exception:
-        return None
-
-
-def get_all_event_odds(event_id: int) -> list[dict]:
-    """Fetch all odds markets for provider 1 (Bet365)."""
-    data = _get(f"/event/{event_id}/odds/1/all")
-    if not data:
+        r = requests.get(url, headers=headers, timeout=15)
+        r.raise_for_status()
+        r.encoding = 'utf-8' # Explicitly force UTF-8
+        html = r.text
+    except Exception as e:
+        logger.error(f"Mackolik HTML indirilemedi: {e}")
         return []
-    return data.get("markets", [])
-
-
-def parse_all_odds(markets: list[dict]) -> tuple[dict, dict, dict, dict, dict, dict]:
-    """Parse 1X2, Over/Under 2.5, and Both Teams to Score (Opening and Closing)."""
-    o1x2_closing = {"oran_1": None, "oran_x": None, "oran_2": None}
-    o1x2_opening = {"oran_1_acilis": None, "oran_x_acilis": None, "oran_2_acilis": None}
-    
-    ou_closing = {"alt_orani": None, "ust_orani": None}
-    ou_opening = {"alt_orani_acilis": None, "ust_orani_acilis": None}
-    
-    btts_closing = {"kg_var": None, "kg_yok": None}
-    btts_opening = {"kg_var_acilis": None, "kg_yok_acilis": None}
-
-    for m in markets:
-        mgroup = m.get("marketGroup")
-        mname = m.get("marketName")
         
-        # 1. 1X2
-        if mgroup == "1X2" and mname == "Full time":
-            choices = m.get("choices", [])
-            for c in choices:
-                val = _frac_to_dec(c.get("fractionalValue")) or c.get("decimalValue")
-                val_init = _frac_to_dec(c.get("initialFractionalValue")) or c.get("initialDecimalValue") or val
-                
-                cname = c.get("name")
-                if cname == "1":
-                    o1x2_closing["oran_1"] = round(float(val), 2) if val else None
-                    o1x2_opening["oran_1_acilis"] = round(float(val_init), 2) if val_init else None
-                elif cname == "X":
-                    o1x2_closing["oran_x"] = round(float(val), 2) if val else None
-                    o1x2_opening["oran_x_acilis"] = round(float(val_init), 2) if val_init else None
-                elif cname == "2":
-                    o1x2_closing["oran_2"] = round(float(val), 2) if val else None
-                    o1x2_opening["oran_2_acilis"] = round(float(val_init), 2) if val_init else None
-
-        # 2. Over/Under 2.5
-        elif mgroup == "Match goals" and m.get("choiceGroup") == "2.5":
-            choices = m.get("choices", [])
-            for c in choices:
-                val = _frac_to_dec(c.get("fractionalValue")) or c.get("decimalValue")
-                val_init = _frac_to_dec(c.get("initialFractionalValue")) or c.get("initialDecimalValue") or val
-                
-                cname = c.get("name")
-                if cname == "Over":
-                    ou_closing["ust_orani"] = round(float(val), 2) if val else None
-                    ou_opening["ust_orani_acilis"] = round(float(val_init), 2) if val_init else None
-                elif cname == "Under":
-                    ou_closing["alt_orani"] = round(float(val), 2) if val else None
-                    ou_opening["alt_orani_acilis"] = round(float(val_init), 2) if val_init else None
-
-        # 3. Both Teams to Score
-        elif mgroup == "Both teams to score":
-            choices = m.get("choices", [])
-            for c in choices:
-                val = _frac_to_dec(c.get("fractionalValue")) or c.get("decimalValue")
-                val_init = _frac_to_dec(c.get("initialFractionalValue")) or c.get("initialDecimalValue") or val
-                
-                cname = c.get("name")
-                if cname == "Yes":
-                    btts_closing["kg_var"] = round(float(val), 2) if val else None
-                    btts_opening["kg_var_acilis"] = round(float(val_init), 2) if val_init else None
-                elif cname == "No":
-                    btts_closing["kg_yok"] = round(float(val), 2) if val else None
-                    btts_opening["kg_yok_acilis"] = round(float(val_init), 2) if val_init else None
-
-    return o1x2_closing, o1x2_opening, ou_closing, ou_opening, btts_closing, btts_opening
-
-
-def _calc_avg_odds(o1, ox, o2) -> tuple[Optional[float], Optional[float]]:
-    vals = [v for v in [o1, ox, o2] if v]
-    if not vals:
-        return None, None
-    return round(min(vals), 2), round(max(vals), 2)
-
-
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-def fetch_today_events(target_date: Optional[datetime.date] = None) -> list[dict]:
-    """
-    Belirtilen tarihin maçlarını SofaScore'dan çeker.
-    target_date: None ise bugün.
-    """
-    if target_date is None:
-        target_date = datetime.date.today()
-
-    date_str = target_date.strftime("%Y-%m-%d")
-    logger.info("today_matches: %s için lig bazlı maçlar çekiliyor", date_str)
-
-    events = []
+    soup = bs4.BeautifulSoup(html, 'html.parser')
+    rows = soup.find_all('tr')
     
-    # 1. Lig bazlı maçları paralel olarak sorgula
-    def fetch_tour_events(item):
-        name, tid = item
-        url = f"/unique-tournament/{tid}/scheduled-events/{date_str}"
-        data = _get(url)
-        if data:
-            tour_events = data.get("events", [])
-            if tour_events:
-                return name, tour_events
-        return name, []
-
-    with ThreadPoolExecutor(max_workers=25) as executor:
-        futures = {executor.submit(fetch_tour_events, (name, tid)): (name, tid) for name, tid in SOFASCORE_TOURNAMENTS.items()}
-        for future in as_completed(futures):
-            try:
-                name, tour_events = future.result()
-                if tour_events:
-                    logger.info("today_matches: %s liginden %d maç bulundu", name, len(tour_events))
-                    events.extend(tour_events)
-            except Exception as e:
-                logger.warning(f"Lig çekme hatası: {e}")
-
-    logger.info("today_matches: Toplam %d etkinlik bulundu", len(events))
-    if not events:
-        return []
-
-    # 2. Etkinlik detaylarını ve oranlarını paralel olarak sorgula
-    rows = []
+    matches = []
+    current_league = "Bilinmeyen Lig"
+    current_date = datetime.date.today().strftime("%Y-%m-%d")
     
-    def process_single_event(event):
-        eid = event.get("id")
-        if not eid:
+    def safe_float(val):
+        try:
+            return float(val.replace(',', '.'))
+        except:
             return None
+            
+    for i, r_tag in enumerate(rows):
+        cls = r_tag.get('class', [])
+        
+        if 'iddaa-oyna-title' in cls:
+            current_league = r_tag.text.strip()
+            
+        elif 'iddaa-oyna-title2' in cls:
+            date_td = r_tag.find('td', {'rateSort': 'tarih_1'})
+            if date_td:
+                d_str = date_td.text.strip() # e.g. 27.08.2026
+                try:
+                    current_date = datetime.datetime.strptime(d_str, "%d.%m.%Y").strftime("%Y-%m-%d")
+                except:
+                    pass
+            
+        elif r_tag.has_attr('id') and r_tag['id'].startswith('Tr'):
+            cols = r_tag.find_all('td')
+            if len(cols) > 20:
+                try:
+                    time_str = cols[0].text.strip()
+                    teams_raw = cols[7].text.strip()
+                    
+                    parts = teams_raw.split(' - ')
+                    home = parts[0]
+                    away = parts[1] if len(parts) > 1 else "Unknown"
+                    
+                    home = home.split(' (')[0].strip()
+                    away = away.split(') ')[-1].strip() if ')' in away else away.strip()
+                    
+                    ms1 = msx = ms2 = au_a = au_u = None
+                    
+                    for a_tag in r_tag.find_all('a', class_='iddaa-rate'):
+                        rate_text = a_tag.text.strip()
+                        c = a_tag.get('class', [])
+                        if 'MS1' in c: ms1 = rate_text
+                        if 'MSX' in c: msx = rate_text
+                        if 'MS2' in c: ms2 = rate_text
+                        if 'AU1' in c: au_a = rate_text
+                        if 'AU2' in c: au_u = rate_text
 
-        league_info = event.get("tournament", {}).get("category", {})
-        league_name = event.get("tournament", {}).get("name", "")
-        country = league_info.get("name", "")
-        full_league = f"{country} - {league_name}" if country else league_name
+                    matches.append({
+                        "tarih": current_date,
+                        "saat": time_str,
+                        "lig": current_league,
+                        "ev_sahibi": home,
+                        "deplasman": away,
+                        "devre_skoru": None,
+                        "mac_skoru": None,
+                        "kart_ev": None,
+                        "kart_dep": None,
+                        "kirmizi_kart": None,
+                        "korner_ev": None,
+                        "korner_dep": None,
+                        "lig_sira_ev": None,
+                        "lig_sira_dep": None,
+                        "toplam_takim": None,
+                        "im_6": None,
+                        "oran_1": safe_float(ms1) if ms1 else None,
+                        "oran_x": safe_float(msx) if msx else None,
+                        "oran_2": safe_float(ms2) if ms2 else None,
+                        "alt_orani": safe_float(au_a) if au_a else None,
+                        "ust_orani": safe_float(au_u) if au_u else None,
+                        "kg_var": None,
+                        "kg_yok": None,
+                        "ort_min": None,
+                        "ort_max": None,
+                        "oran_1_acilis": None,
+                        "oran_x_acilis": None,
+                        "oran_2_acilis": None,
+                        "alt_orani_acilis": None,
+                        "ust_orani_acilis": None,
+                        "kg_var_acilis": None,
+                        "kg_yok_acilis": None,
+                    })
+                except Exception as e:
+                    logger.warning(f"Error parsing Mackolik match row: {e}")
+                    continue
+                    
+    logger.info(f"Mackolik: Fetched {len(matches)} matches total.")
+    return matches
 
-        home = event.get("homeTeam", {}).get("name", "").strip()
-        away = event.get("awayTeam", {}).get("name", "").strip()
-        if not home or not away:
-            return None
+def upsert_match(row: dict, conn=None) -> None:
+    should_close = False
+    if conn is None:
+        import os; conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "gecmis_maclar.db"), check_same_thread=False)
+        should_close = True
 
-        ts = event.get("startTimestamp", 0)
-        dt = datetime.datetime.utcfromtimestamp(ts) + datetime.timedelta(hours=3)
-        tarih = dt.strftime("%d.%m.%Y")
-        saat  = dt.strftime("%H:%M")
-
-        # Oranları çek
-        markets_data = get_all_event_odds(eid)
-        o1x2_closing, o1x2_opening, ou_closing, ou_opening, btts_closing, btts_opening = parse_all_odds(markets_data)
-
-        oran_1 = o1x2_closing.get("oran_1")
-        oran_x = o1x2_closing.get("oran_x")
-        oran_2 = o1x2_closing.get("oran_2")
-        ort_min, ort_max = _calc_avg_odds(oran_1, oran_x, oran_2)
-
-        # Skorlar, kartlar ve kornerler (maç bittiyse çek)
-        status_type = event.get("status", {}).get("type", "")
-        devre_skoru = None
-        mac_skoru = "?:?"
-        kart_ev = None
-        kart_dep = None
-        kirmizi_kart = 0
-        korner_ev = None
-        korner_dep = None
-        im_6 = None
-
-        if status_type == "finished":
-            ft_h = event.get("homeScore", {}).get("current")
-            ft_a = event.get("awayScore", {}).get("current")
-            mac_skoru = f"{ft_h}:{ft_a}" if ft_h is not None and ft_a is not None else "?:?"
-
-            ht_h = event.get("homeScore", {}).get("period1")
-            ht_a = event.get("awayScore", {}).get("period1")
-            devre_skoru = f"{ht_h}:{ht_a}" if ht_h is not None and ht_a is not None else None
-
-            # Kartlar
-            try:
-                incidents = get_event_incidents(eid)
-                card_data = parse_cards(incidents)
-                kart_ev = card_data.get("kart_ev")
-                kart_dep = card_data.get("kart_dep")
-                kirmizi_kart = card_data.get("kirmizi_kart", 0)
-            except Exception as e:
-                logger.warning(f"Kart çekme hatası: {e}")
-
-            # Kornerler
-            try:
-                korner_ev, korner_dep = get_event_corners(eid)
-            except Exception as e:
-                logger.warning(f"Korner çekme hatası: {e}")
-
-            # im_6
-            if ft_h is not None and ft_a is not None:
-                toplam_gol = ft_h + ft_a
-                if toplam_gol > 6:
-                    im_6 = "2/1" if ft_h < ft_a else ("1/1" if ft_h > ft_a else "x/x")
-
-        return {
-            "tarih":            tarih,
-            "saat":             saat,
-            "lig":              full_league,
-            "ev_sahibi":        home,
-            "deplasman":        away,
-            "devre_skoru":      devre_skoru,
-            "mac_skoru":        mac_skoru,
-            "onceki_skorlar":   None,
-            "kart_ev":          kart_ev,
-            "kart_dep":         kart_dep,
-            "kirmizi_kart":     kirmizi_kart,
-            "korner_ev":        korner_ev,
-            "korner_dep":       korner_dep,
-            "lig_sira_ev":      None,
-            "lig_sira_dep":     None,
-            "toplam_takim":     None,
-            "im_6":             im_6,
-            "oran_1":           oran_1,
-            "oran_x":           oran_x,
-            "oran_2":           oran_2,
-            "alt_orani":        ou_closing.get("alt_orani"),
-            "ust_orani":        ou_closing.get("ust_orani"),
-            "kg_var":           btts_closing.get("kg_var"),
-            "kg_yok":           btts_closing.get("kg_yok"),
-            "ort_min":          ort_min,
-            "ort_max":          ort_max,
-            "oran_1_acilis":    o1x2_opening.get("oran_1_acilis"),
-            "oran_x_acilis":    o1x2_opening.get("oran_x_acilis"),
-            "oran_2_acilis":    o1x2_opening.get("oran_2_acilis"),
-            "alt_orani_acilis": ou_opening.get("alt_orani_acilis"),
-            "ust_orani_acilis": ou_opening.get("ust_orani_acilis"),
-            "kg_var_acilis":    btts_opening.get("kg_var_acilis"),
-            "kg_yok_acilis":    btts_opening.get("kg_yok_acilis"),
-            "kaynak":           "sofascore",
-            "kaynak_id":        eid,
-        }
-
-    with ThreadPoolExecutor(max_workers=30) as executor:
-        futures = {executor.submit(process_single_event, event): event for event in events}
-        for future in as_completed(futures):
-            try:
-                res = future.result()
-                if res:
-                    rows.append(res)
-            except Exception as e:
-                logger.warning(f"Maç oran işleme hatası: {e}")
-
-    logger.info("today_matches: %d satır hazır", len(rows))
-    return rows
-
+    try:
+        c = conn.cursor()
+        c.execute("""
+            SELECT id FROM gecmis_maclar 
+            WHERE tarih = ? AND ev_sahibi = ? AND deplasman = ?
+        """, (row["tarih"], row["ev_sahibi"], row["deplasman"]))
+        
+        ex = c.fetchone()
+        if ex:
+            mid = ex[0]
+            c.execute("""
+                UPDATE gecmis_maclar SET 
+                  saat=?, lig=?, 
+                  oran_1=?, oran_x=?, oran_2=?, 
+                  alt_orani=?, ust_orani=?
+                WHERE id=?
+            """, (
+                row.get("saat"), row.get("lig"),
+                row.get("oran_1"), row.get("oran_x"), row.get("oran_2"),
+                row.get("alt_orani"), row.get("ust_orani"),
+                mid
+            ))
+        else:
+            c.execute("""
+                INSERT INTO gecmis_maclar (
+                  tarih, saat, lig, ev_sahibi, deplasman,
+                  oran_1, oran_x, oran_2,
+                  alt_orani, ust_orani
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                row.get("tarih"), row.get("saat"), row.get("lig"),
+                row.get("ev_sahibi"), row.get("deplasman"),
+                row.get("oran_1"), row.get("oran_x"), row.get("oran_2"),
+                row.get("alt_orani"), row.get("ust_orani")
+            ))
+        conn.commit()
+    finally:
+        if should_close:
+            conn.close()
 
 def run_today_scrape(target_date: Optional[datetime.date] = None, conn=None) -> dict:
-    """
-    Bugünün maçlarını çek ve DB'ye kaydet.
-    Returns: {"ok": True, "added": N, "updated": M}
-    """
-    rows = fetch_today_events(target_date)
+    rows = fetch_mackolik_events()
+    
+    if target_date:
+        target_date_str = target_date.strftime("%Y-%m-%d")
+        tomorrow = target_date + datetime.timedelta(days=1)
+        tomorrow_str = tomorrow.strftime("%Y-%m-%d")
+        
+        # We want matches for target_date, plus matches for tomorrow <= 06:00
+        filtered_rows = []
+        for r in rows:
+            if r["tarih"] == target_date_str:
+                filtered_rows.append(r)
+            elif r["tarih"] == tomorrow_str and r.get("saat") and r["saat"] <= "06:00":
+                filtered_rows.append(r)
+        open("scratch/debug.txt", "w").write(str(len(filtered_rows)) + " - " + str([r["tarih"] for r in rows[:5]])); rows = filtered_rows
+
     if not rows:
-        return {"ok": True, "added": 0, "updated": 0, "message": "Maç bulunamadı"}
+        return {"ok": True, "added": 0, "updated": 0, "message": "Maç bulunamadı (Mackolik)"}
 
     added = 0
     for row in rows:
@@ -328,6 +194,6 @@ def run_today_scrape(target_date: Optional[datetime.date] = None, conn=None) -> 
             upsert_match(row, conn=conn)
             added += 1
         except Exception as e:
-            logger.warning("today upsert hata: %s | %s", row.get("ev_sahibi"), e)
+            open("scratch/error.txt", "w").write(str(e))
 
-    return {"ok": True, "added": added, "updated": 0, "message": f"{added} maç güncellendi"}
+    return {"ok": True, "added": added, "updated": 0, "message": f"{added} maç güncellendi (Mackolik)"}

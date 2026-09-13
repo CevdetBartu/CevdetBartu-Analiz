@@ -26,6 +26,7 @@ import type {
   HealthStatus,
   MatchInput,
   MatchRecord,
+  RefreshRequest,
   RefreshResult,
   SimilarMatchResult,
   SimilarityQuery,
@@ -592,20 +593,24 @@ export const getRefreshTodayMatchesUrl = () => {
 /**
  * @summary Manually refresh today's match data
  */
-export const refreshTodayMatches = async (params?: { date?: string }, options?: RequestInit): Promise<RefreshResult> => {
+export const refreshTodayMatches = async (refreshRequest?: RefreshRequest, options?: RequestInit): Promise<RefreshResult> => {
+
   return customFetch<RefreshResult>(getRefreshTodayMatchesUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: params?.date ? JSON.stringify({ date: params.date }) : undefined
+    body: JSON.stringify(refreshRequest)
   }
 );}
 
 
+
+
+
 export const getRefreshTodayMatchesMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshTodayMatches>>, TError,{ date?: string } | undefined, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof refreshTodayMatches>>, TError,{ date?: string } | undefined, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshTodayMatches>>, TError,{data?: BodyType<RefreshRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof refreshTodayMatches>>, TError,{data?: BodyType<RefreshRequest>}, TContext> => {
 
 const mutationKey = ['refreshTodayMatches'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -614,25 +619,35 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       : {...options, mutation: {...options.mutation, mutationKey}}
       : {mutation: { mutationKey, }, request: undefined};
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshTodayMatches>>, { date?: string } | undefined> = (variables) => {
-          return  refreshTodayMatches(variables, requestOptions)
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshTodayMatches>>, {data?: BodyType<RefreshRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  refreshTodayMatches(data,requestOptions)
         }
+
+
+
+
+
 
   return  { mutationFn, ...mutationOptions }}
 
     export type RefreshTodayMatchesMutationResult = NonNullable<Awaited<ReturnType<typeof refreshTodayMatches>>>
-
+    export type RefreshTodayMatchesMutationBody = BodyType<RefreshRequest> | undefined
     export type RefreshTodayMatchesMutationError = ErrorType<unknown>
 
     /**
  * @summary Manually refresh today's match data
  */
 export const useRefreshTodayMatches = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshTodayMatches>>, TError,{ date?: string } | undefined, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshTodayMatches>>, TError,{data?: BodyType<RefreshRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof refreshTodayMatches>>,
         TError,
-        { date?: string } | undefined,
+        {data?: BodyType<RefreshRequest>},
         TContext
       > => {
       return useMutation(getRefreshTodayMatchesMutationOptions(options));

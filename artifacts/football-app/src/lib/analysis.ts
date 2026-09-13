@@ -18,6 +18,12 @@ export interface SimilarMatch {
   ustOdds: string;
   varOdds: string;
   yokOdds: string;
+  altOdds35?: string;
+  ustOdds35?: string;
+  iyAltOdds15?: string;
+  iyUstOdds15?: string;
+  iyAltOdds05?: string;
+  iyUstOdds05?: string;
   avgOddsMin: string;
   avgOddsMax: string;
   imResult: string;
@@ -26,6 +32,7 @@ export interface SimilarMatch {
   isTargetMatch?: boolean;
   matchDate?: string;
   league?: string;
+  similarityScore?: number | string;
 }
 
 export interface MatchData {
@@ -58,6 +65,12 @@ export function createEmptySimilarMatch(id: string): SimilarMatch {
     ustOdds: '',
     varOdds: '',
     yokOdds: '',
+    altOdds35: '',
+    ustOdds35: '',
+    iyAltOdds15: '',
+    iyUstOdds15: '',
+    iyAltOdds05: '',
+    iyUstOdds05: '',
     avgOddsMin: '',
     avgOddsMax: '',
     imResult: '',

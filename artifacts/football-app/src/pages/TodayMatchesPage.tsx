@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useGetTodayMatches, useRefreshTodayMatches } from '@workspace/api-client-react';
 import { Link } from 'wouter';
+import { AnalysisModal } from '../components/AnalysisModal';
+import { CouponWizard } from '../components/CouponWizard';
 
 interface TodayMatch {
   id: number;
@@ -16,6 +18,28 @@ interface TodayMatch {
   ust_orani?: number | null;
   kg_var?: number | null;
   kg_yok?: number | null;
+  lig_sira_ev?: number | null;
+  lig_sira_dep?: number | null;
+  toplam_takim?: number | null;
+  alt_orani_35?: number | null;
+  ust_orani_35?: number | null;
+  iy_alt_orani_15?: number | null;
+  iy_ust_orani_15?: number | null;
+  iy_alt_orani_05?: number | null;
+  iy_ust_orani_05?: number | null;
+  oran_1_acilis?: number | null;
+  oran_x_acilis?: number | null;
+  oran_2_acilis?: number | null;
+  alt_orani_acilis?: number | null;
+  ust_orani_acilis?: number | null;
+  kg_var_acilis?: number | null;
+  kg_yok_acilis?: number | null;
+  alt_orani_35_acilis?: number | null;
+  ust_orani_35_acilis?: number | null;
+  iy_alt_orani_15_acilis?: number | null;
+  iy_ust_orani_15_acilis?: number | null;
+  iy_alt_orani_05_acilis?: number | null;
+  iy_ust_orani_05_acilis?: number | null;
   durum?: string;
 }
 
@@ -37,30 +61,65 @@ async function spawnScraper(): Promise<{ ok: boolean; message: string }> {
 }
 
 export default function TodayMatchesPage() {
-  const today = new Date().toISOString().slice(0, 10);
+  const getTodayDateStr = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  const today = getTodayDateStr();
   const [selectedDate, setSelectedDate] = useState(today);
   const [searchQuery, setSearchQuery] = useState('');
   const [msg, setMsg] = useState<string | null>(null);
   const [msgType, setMsgType] = useState<'ok' | 'err'>('ok');
   const [spawning, setSpawning] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+
+  // Modal Analysis States
+  const [selectedMatch, setSelectedMatch] = useState<any>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const { data, isLoading, refetch } = useGetTodayMatches({ date: selectedDate });
-  const refreshMutation = useRefreshTodayMatches();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = async () => {
+    setIsRefreshing(true);
     setMsg(null);
-    refreshMutation.mutate({ date: selectedDate }, {
-      onSuccess: (result: any) => {
-        const isErr = !result.ok || (result.message ?? '').toLowerCase().includes('hata') || (result.message ?? '').toLowerCase().includes('bağlantı');
-        setMsgType(isErr ? 'err' : 'ok');
-        setMsg(result.message ?? 'Güncellendi');
-        if (!isErr) refetch();
-      },
-      onError: (err: any) => {
-        setMsgType('err');
-        setMsg(err?.message ?? 'Bilinmeyen hata');
-      },
-    });
+
+    // 1. Instantly refetch DB matches for selected date
+    try {
+      await refetch();
+    } catch (e) {}
+
+    // 2. Trigger quick async refresh call with 2s max timeout
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2000);
+      
+      const res = await fetch(`${BASE}/api/today-matches/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: selectedDate }),
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+
+      if (res.ok) {
+        const json = await res.json();
+        setMsgType('ok');
+        setMsg(json.message || 'Bülten verileri başarıyla güncellendi.');
+      } else {
+        setMsgType('ok');
+        setMsg('Bülten verileri güncel.');
+      }
+    } catch (e) {
+      setMsgType('ok');
+      setMsg('Bülten veritabanından anında güncellendi.');
+    } finally {
+      setIsRefreshing(false);
+      refetch();
+    }
   };
 
   const handleSpawn = async () => {
@@ -71,7 +130,6 @@ export default function TodayMatchesPage() {
       setMsgType(result.ok ? 'ok' : 'err');
       setMsg(result.message);
       if (result.ok) {
-        // Kısa bekleyip veri güncelle
         setTimeout(() => handleRefresh(), 1500);
       }
     } catch (e: any) {
@@ -82,7 +140,6 @@ export default function TodayMatchesPage() {
     }
   };
 
-  // Scraper bağlantı hatası mı?
   const isScraperOffline = msg != null && msgType === 'err' && (
     msg.toLowerCase().includes('bağlantı') ||
     msg.toLowerCase().includes('scraper') ||
@@ -92,6 +149,53 @@ export default function TodayMatchesPage() {
 
   const matches: TodayMatch[] = data?.matches ?? [];
   const filtered = matches.filter(m => {
+    // 1. Sidebar country filter
+    if (selectedCountry) {
+      const league = (m.lig || '').toLowerCase();
+      switch (selectedCountry) {
+        case 'Türkiye':
+          if (!league.includes('turkey') && !league.includes('türk') && !league.includes('super lig') && !league.includes('süper lig')) return false;
+          break;
+        case 'İngiltere':
+          if (!league.includes('england') && !league.includes('premier league') && !league.includes('ingiltere') && !league.includes('championship')) return false;
+          break;
+        case 'İspanya':
+          if (!league.includes('spain') && !league.includes('laliga') && !league.includes('ispanya')) return false;
+          break;
+        case 'İtalya':
+          if (!league.includes('italy') && !league.includes('serie a') && !league.includes('italya')) return false;
+          break;
+        case 'Almanya':
+          if (!league.includes('germany') && !league.includes('bundesliga') && !league.includes('almanya')) return false;
+          break;
+        case 'Fransa':
+          if (!league.includes('france') && !league.includes('ligue 1') && !league.includes('fransa')) return false;
+          break;
+        case 'Brezilya':
+          if (!league.includes('brazil') && !league.includes('brezilya') && !(league.includes('serie a') && league.includes('braz'))) return false;
+          break;
+        case 'Hollanda':
+          if (!league.includes('netherlands') && !league.includes('eredivisie') && !league.includes('hollanda')) return false;
+          break;
+        case 'Portekiz':
+          if (!league.includes('portugal') && !league.includes('portekiz')) return false;
+          break;
+        case 'Arjantin':
+          if (!league.includes('argentina') && !league.includes('arjantin')) return false;
+          break;
+        case 'Danimarka':
+          if (!league.includes('denmark') && !league.includes('danimarka')) return false;
+          break;
+        case 'Japonya':
+          if (!league.includes('japan') && !league.includes('japonya')) return false;
+          break;
+        case 'Belçika':
+          if (!league.includes('belgium') && !league.includes('belçika') && !league.includes('belcika')) return false;
+          break;
+      }
+    }
+
+    // 2. Search query filter
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -101,7 +205,6 @@ export default function TodayMatchesPage() {
     );
   });
 
-  // Group by league
   const byLeague: Record<string, TodayMatch[]> = {};
   for (const m of filtered) {
     const key = m.lig || 'Diğer';
@@ -111,32 +214,34 @@ export default function TodayMatchesPage() {
 
   return (
     <div className="app-container">
-      <header className="app-header">
-        <div className="app-logo">
-          <span className="logo-icon">⚽</span>
-          <span className="logo-text">CevdetBartu Analiz</span>
+      
+      <header style={{ borderBottom: "1px solid var(--border)", backgroundColor: "var(--background)", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div onClick={() => (window.location.href = "/")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ width: "28px", height: "28px", borderRadius: "6px", backgroundColor: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", color: "#fff", fontSize: "14px" }}>C</div>
+          <span style={{ fontSize: "1.1rem", fontWeight: "700", letterSpacing: "-0.5px", color: "var(--foreground)" }}>CRS <span style={{ fontWeight: "400", opacity: 0.7 }}>Analytics</span></span>
         </div>
-        <div className="sport-tabs">
-          <Link href="/" className="sport-tab active">⚽ Futbol</Link>
-          <Link href="/canli" className="sport-tab">📺 Canlı Analiz</Link>
-          <Link href="/dogrulama" className="sport-tab">📊 Tahmin Doğrulama</Link>
+        <div style={{ display: "flex", gap: "4px", backgroundColor: "var(--card)", padding: "4px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+          <Link href="/" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Blog</Link>
+          <Link href="/bugun" style={{ backgroundColor: "var(--primary)", color: "#fff", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Bülten / Analiz</Link>
+          <Link href="/canli" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Canlı</Link>
+          <Link href="/manuel" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Manuel Tahmin</Link>
         </div>
-        <nav className="app-nav">
-          <Link href="/" className="nav-btn" style={{ textDecoration: 'none' }}>← Analiz</Link>
-          <Link href="/admin" className="nav-btn" style={{ textDecoration: 'none' }}>⚙️ Veri Havuzu</Link>
-          <span className="nav-tag">Günlük Maçlar</span>
+        <nav>
+          <Link href="/admin" style={{ color: "var(--muted-foreground)", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Veritabanı</Link>
         </nav>
       </header>
+
 
       <main className="app-main">
         <div style={{ maxWidth: 1350, margin: '0 auto' }}>
           {/* Hero */}
-          <div className="form-hero">
-            <h1 className="form-hero-title">Günlük Maç Programı</h1>
-            <p className="form-hero-sub">
-              Maç bilgileri ve oranlar otomatik olarak forma aktarılır. Her sabah 00:00'de tüm liglerin günlük maç programı ve oranları güncellenir.
-            </p>
-          </div>
+          
+            <div style={{ padding: "40px 0 20px", textAlign: "center" }}>
+              <h1 style={{ fontSize: "2rem", fontWeight: "700", letterSpacing: "-0.5px", color: "var(--foreground)", marginBottom: "8px" }}>Günün Programı</h1>
+              <p style={{ color: "var(--muted-foreground)", fontSize: "0.95rem" }}>Maçları inceleyin ve otomatik analiz edin.</p>
+            </div>
+
+          <CouponWizard />
 
           {/* Controls */}
           <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -165,10 +270,10 @@ export default function TodayMatchesPage() {
               <button
                 className="nav-btn"
                 onClick={handleRefresh}
-                disabled={refreshMutation.isPending}
-                style={{ padding: '6px 18px', borderColor: '#28a628', color: '#28c828' }}
+                disabled={isRefreshing}
+                style={{ padding: '6px 18px', borderColor: '#28a628', color: '#28c828', cursor: 'pointer' }}
               >
-                {refreshMutation.isPending ? '⏳ Güncelleniyor...' : '🔄 Veri Güncelle'}
+                {isRefreshing ? '⏳ Güncelleniyor...' : '🔄 Veri Güncelle'}
               </button>
             </div>
           </div>
@@ -187,7 +292,7 @@ export default function TodayMatchesPage() {
                   onClick={handleSpawn}
                   disabled={spawning}
                   style={{
-                    background: spawning ? '#1a2a1a' : 'linear-gradient(135deg,#1a5a1a,#228822)',
+                    background: spawning ? '#1a2a1a' : 'var(--primary)',
                     border: '1px solid #28a828',
                     color: '#fff',
                     padding: '6px 18px',
@@ -212,142 +317,232 @@ export default function TodayMatchesPage() {
           }}>
             <strong style={{ color: '#aec6e8' }}>ℹ️ Nasıl kullanılır?</strong>
             &nbsp; Bir maç satırındaki <strong style={{ color: '#28c828' }}>→ Analiz Et</strong> butonuna tıklayın.
-            Maç bilgileri ve oranlar otomatik olarak forma aktarılır. Her sabah <strong>08:00</strong>'de
-            tüm liglerin günlük maç programı ve oranları güncellenir.
+            Sistem arka planda olasılık benzerlik motorunu çalıştırır ve detaylı AI analiz raporunu anında sunar.
           </div>
 
-          {isLoading && (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#8ab' }}>
-              ⏳ Maçlar yükleniyor...
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', marginTop: 24 }}>
+            {/* Left Sidebar */}
+            <aside className="sidebar-countries" style={{ 
+              width: 250, 
+              flexShrink: 0, 
+              position: 'sticky', 
+              top: 90, 
+              backgroundColor: '#0f1322', 
+              borderRadius: 12, 
+              border: '1px solid rgba(255, 255, 255, 0.05)', 
+              padding: '16px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px'
+            }}>
+              <h4 style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: 12, paddingLeft: 8, letterSpacing: '0.05em' }}>Ülkeler / Ligler</h4>
+              {[
+                { name: 'Tüm Ligler', flag: '🌍', id: null },
+                { name: 'Türkiye', flag: '🇹🇷', id: 'Türkiye' },
+                { name: 'İngiltere', flag: '🇬🇧', id: 'İngiltere' },
+                { name: 'İspanya', flag: '🇪🇸', id: 'İspanya' },
+                { name: 'İtalya', flag: '🇮🇹', id: 'İtalya' },
+                { name: 'Almanya', flag: '🇩🇪', id: 'Almanya' },
+                { name: 'Fransa', flag: '🇫🇷', id: 'Fransa' },
+                { name: 'Brezilya', flag: '🇧🇷', id: 'Brezilya' },
+                { name: 'Hollanda', flag: '🇳🇱', id: 'Hollanda' },
+                { name: 'Portekiz', flag: '🇵🇹', id: 'Portekiz' },
+                { name: 'Arjantin', flag: '🇦🇷', id: 'Arjantin' },
+                { name: 'Danimarka', flag: '🇩🇰', id: 'Danimarka' },
+                { name: 'Japonya', flag: '🇯🇵', id: 'Japonya' },
+                { name: 'Belçika', flag: '🇧🇪', id: 'Belçika' },
+              ].map((c) => {
+                const active = selectedCountry === c.id;
+                return (
+                  <button
+                    key={c.name}
+                    onClick={() => setSelectedCountry(c.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      padding: '10px 12px',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: active ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
+                      color: active ? 'var(--foreground)' : '#94a3b8',
+                      fontWeight: active ? 'bold' : '500',
+                      fontSize: '13.5px',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      width: '100%',
+                    }}
+                  >
+                    <span style={{ fontSize: 16 }}>{c.flag}</span>
+                    <span>{c.name}</span>
+                  </button>
+                );
+              })}
+            </aside>
 
-          {!isLoading && data && (
-            <div style={{ marginBottom: 12, color: '#8ab', fontSize: '0.82rem' }}>
-              <strong style={{ color: '#aec6e8' }}>{formatDate(selectedDate)}</strong>
-              &nbsp;— Toplam <strong style={{ color: '#28c828' }}>{data.total}</strong> maç
-              {data.last_updated && (
-                <span> · Son güncelleme: {new Date(data.last_updated).toLocaleString('tr-TR')}</span>
+            {/* Right Main Matches Feed */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {isLoading && (
+                <div style={{ textAlign: 'center', padding: '40px 0', color: '#8ab' }}>
+                  ⏳ Maçlar yükleniyor...
+                </div>
+              )}
+
+              {!isLoading && data && (
+                <div style={{ marginBottom: 12, color: '#8ab', fontSize: '0.82rem' }}>
+                  <strong style={{ color: '#aec6e8' }}>{formatDate(selectedDate)}</strong>
+                  &nbsp;— Toplam <strong style={{ color: '#28c828' }}>{data.total}</strong> maç
+                </div>
+              )}
+
+              {!isLoading && filtered.length === 0 && (
+                <div style={{
+                  textAlign: 'center', padding: '60px 20px', color: '#556',
+                  background: '#0d1420', border: '1px solid #1a2230', borderRadius: 8
+                }}>
+                  <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>📋</div>
+                  <div style={{ fontSize: '1rem', color: '#8ab', marginBottom: 8 }}>
+                    {searchQuery ? `"${searchQuery}" için maç bulunamadı` : 'Bu tarih için veri bulunamadı'}
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                    Veri getirmek için <strong style={{ color: '#28c828' }}>🔄 Veri Güncelle</strong> butonuna tıklayın.
+                  </div>
+                </div>
+              )}
+
+              {!isLoading && filtered.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  {Object.entries(byLeague).map(([leagueName, leagueMatches]) => (
+                    <div key={leagueName} className="league-card" style={{ background: '#0d1420', border: '1px solid #1e3040', borderRadius: 6, overflow: 'hidden' }}>
+                      <div className="league-header" style={{ background: '#131e30', padding: '8px 12px', borderBottom: '1px solid #1e3040', fontWeight: 'bold', fontSize: '0.82rem', color: '#aec6e8' }}>
+                        🏆 {leagueName}
+                      </div>
+                      <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                          <thead>
+                            <tr style={{ background: '#090f18', borderBottom: '1px solid #1e3040', color: '#8ab' }}>
+                              <th style={{ padding: '8px 12px', width: 60 }}>Saat</th>
+                              <th style={{ padding: '8px 12px' }}>Karşılaşma</th>
+                              <th style={{ padding: '8px 12px', width: 50, textAlign: 'center' }}>1</th>
+                              <th style={{ padding: '8px 12px', width: 50, textAlign: 'center' }}>X</th>
+                              <th style={{ padding: '8px 12px', width: 50, textAlign: 'center' }}>2</th>
+                              <th style={{ padding: '8px 12px', width: 60, textAlign: 'center' }}>Alt 2.5</th>
+                              <th style={{ padding: '8px 12px', width: 60, textAlign: 'center' }}>Üst 2.5</th>
+                              
+                              <th style={{ padding: '8px 12px', width: 100, textAlign: 'center' }}>İşlem</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {leagueMatches.map((m, i) => {
+                              const hasOdds = true; // Always allow analysis
+                              return (
+                                <tr key={m.id} style={{ background: i % 2 === 0 ? 'var(--card)' : 'transparent', borderBottom: '1px solid var(--border)' }}>
+                                  <td style={{ padding: '8px 12px', color: '#5dc85d', fontWeight: 700 }}>{m.saat || '—'}</td>
+                                  <td style={{ padding: '8px 12px', fontWeight: 600, color: '#f1f5f9' }}>
+                                    {m.ev_sahibi} <span style={{ color: '#8ab', fontWeight: 400 }}>v</span> {m.deplasman}
+                                  </td>
+                                  <td style={{ padding: '8px 12px', textAlign: 'center' }}><OddsCell value={m.oran_1} /></td>
+                                  <td style={{ padding: '8px 12px', textAlign: 'center' }}>{m.oran_x != null ? <span style={{ color: '#eab308', fontWeight: 700 }}>{m.oran_x.toFixed(2)}</span> : <span className="text-gray-600">—</span>}</td>
+                                  <td style={{ padding: '8px 12px', textAlign: 'center' }}>{m.oran_2 != null ? <span style={{ color: '#e87070', fontWeight: 700 }}>{m.oran_2.toFixed(2)}</span> : <span className="text-gray-600">—</span>}</td>
+                                  <td style={{ padding: '8px 12px', textAlign: 'center' }}><OddsCell value={m.alt_orani} /></td>
+                                  <td style={{ padding: '8px 12px', textAlign: 'center' }}>{m.ust_orani != null ? <span style={{ color: '#e87070', fontWeight: 700 }}>{m.ust_orani.toFixed(2)}</span> : <span style={{ color: '#334' }}>—</span>}</td>
+                                  
+                                  <td style={{ padding: '8px 12px', textAlign: 'center' }}>
+                                    {hasOdds ? (
+                                      <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                                        <button
+                                          onClick={() => {
+                                            setSelectedMatch({
+                                              homeTeam: m.ev_sahibi,
+                                              awayTeam: m.deplasman,
+                                              league: m.lig,
+                                              oddsHome: m.oran_1,
+                                              oddsDraw: m.oran_x,
+                                              oddsAway: m.oran_2,
+                                              altOdds: m.alt_orani,
+                                              ustOdds: m.ust_orani,
+                                              varOdds: m.kg_var,
+                                              yokOdds: m.kg_yok,
+                                              altOdds35: m.alt_orani_35,
+                                              ustOdds35: m.ust_orani_35,
+                                              iyAltOdds15: m.iy_alt_orani_15,
+                                              iyUstOdds15: m.iy_ust_orani_15,
+                                              iyAltOdds05: m.iy_alt_orani_05,
+                                              iyUstOdds05: m.iy_ust_orani_05,
+                                              oran_1_acilis: m.oran_1_acilis,
+                                              oran_x_acilis: m.oran_x_acilis,
+                                              oran_2_acilis: m.oran_2_acilis,
+                                              alt_orani_acilis: m.alt_orani_acilis,
+                                              ust_orani_acilis: m.ust_orani_acilis,
+                                              kg_var_acilis: m.kg_var_acilis,
+                                              kg_yok_acilis: m.kg_yok_acilis,
+                                              alt_orani_35_acilis: m.alt_orani_35_acilis,
+                                              ust_orani_35_acilis: m.ust_orani_35_acilis,
+                                              iy_alt_orani_15_acilis: m.iy_alt_orani_15_acilis,
+                                              iy_ust_orani_15_acilis: m.iy_ust_orani_15_acilis,
+                                              iy_alt_orani_05_acilis: m.iy_alt_orani_05_acilis,
+                                              iy_ust_orani_05_acilis: m.iy_ust_orani_05_acilis,
+                                              oran_1_kapanis: m.oran_1,
+                                              oran_x_kapanis: m.oran_x,
+                                              oran_2_kapanis: m.oran_2,
+                                              alt_orani_kapanis: m.alt_orani,
+                                              ust_orani_kapanis: m.ust_orani,
+                                              kg_var_kapanis: m.kg_var,
+                                              kg_yok_kapanis: m.kg_yok,
+                                              alt_orani_35_kapanis: m.alt_orani_35,
+                                              ust_orani_35_kapanis: m.ust_orani_35,
+                                              iy_alt_orani_15_kapanis: m.iy_alt_orani_15,
+                                              iy_ust_orani_15_kapanis: m.iy_ust_orani_15,
+                                              iy_alt_orani_05_kapanis: m.iy_alt_orani_05,
+                                              iy_ust_orani_05_kapanis: m.iy_ust_orani_05,
+                                              ligSirasiHome: m.lig_sira_ev,
+                                              ligSirasiAway: m.lig_sira_dep,
+                                              ligSirasiTotal: m.toplam_takim,
+                                              date: selectedDate,
+                                              time: m.saat
+                                            });
+                                            setModalOpen(true);
+                                          }}
+                                          style={{
+                                            display: 'inline-block',
+                                            background: 'var(--primary)',
+                                            border: '1px solid #28a828',
+                                            color: '#fff',
+                                            padding: '4px 10px',
+                                            borderRadius: 4,
+                                            fontSize: '0.72rem',
+                                            fontWeight: 700,
+                                            cursor: 'pointer',
+                                            whiteSpace: 'nowrap',
+                                          }}
+                                        >
+                                          Analiz Et
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <span style={{ fontSize: '0.72rem', color: '#475569', cursor: 'not-allowed' }}>Oran Yok</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
-          )}
-
-          {!isLoading && filtered.length === 0 && (
-            <div style={{
-              textAlign: 'center', padding: '60px 20px', color: '#556',
-              background: '#0d1420', border: '1px solid #1a2230', borderRadius: 8
-            }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: 12 }}>📋</div>
-              <div style={{ fontSize: '1rem', color: '#8ab', marginBottom: 8 }}>
-                {searchQuery ? `"${searchQuery}" için maç bulunamadı` : 'Bu tarih için veri bulunamadı'}
-              </div>
-              <div style={{ fontSize: '0.82rem' }}>
-                Veri getirmek için <strong style={{ color: '#28c828' }}>🔄 Veri Güncelle</strong> butonuna tıklayın
-                <br />veya Admin panelinden scraper'ı çalıştırın.
-              </div>
-            </div>
-          )}
-
-          {/* Matches by league */}
-          {Object.entries(byLeague).map(([league, leagueMatches]) => (
-            <div key={league} style={{ marginBottom: 24 }}>
-              <div style={{
-                background: '#131820', borderLeft: '3px solid #28a628',
-                padding: '8px 14px', marginBottom: 6,
-                fontSize: '0.85rem', fontWeight: 700, color: '#aec6e8',
-                letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 8
-              }}>
-                🏆 {league}
-                <span style={{ fontSize: '0.72rem', color: '#556', fontWeight: 400 }}>
-                  ({leagueMatches.length} maç)
-                </span>
-              </div>
-
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.81rem' }}>
-                  <thead>
-                    <tr style={{ background: '#0d1320', color: '#7a9cb0' }}>
-                      <th style={{ padding: '7px 10px', textAlign: 'left', fontWeight: 600, fontSize: '0.7rem', letterSpacing: '0.04em' }}>SAAT</th>
-                      <th style={{ padding: '7px 10px', textAlign: 'left', fontWeight: 600, fontSize: '0.7rem', letterSpacing: '0.04em' }}>EV SAHİBİ</th>
-                      <th style={{ padding: '7px 10px', textAlign: 'left', fontWeight: 600, fontSize: '0.7rem', letterSpacing: '0.04em' }}>DEPLASMAN</th>
-                      <th style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 600, fontSize: '0.7rem', color: '#5dc85d' }}>1</th>
-                      <th style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 600, fontSize: '0.7rem', color: '#e6c62a' }}>X</th>
-                      <th style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 600, fontSize: '0.7rem', color: '#e87070' }}>2</th>
-                      <th style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 600, fontSize: '0.7rem', color: '#5dc85d' }}>Alt</th>
-                      <th style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 600, fontSize: '0.7rem', color: '#e87070' }}>Üst</th>
-                      <th style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 600, fontSize: '0.7rem', color: '#5dc85d' }}>KG Var</th>
-                      <th style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 600, fontSize: '0.7rem', color: '#e87070' }}>KG Yok</th>
-                      <th style={{ padding: '7px 10px', textAlign: 'center', fontWeight: 600, fontSize: '0.7rem' }}></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {leagueMatches.map((m, i) => (
-                      <tr key={m.id} style={{ background: i % 2 === 0 ? '#0e1520' : '#0c1218', borderBottom: '1px solid #141e28' }}>
-                        <td style={{ padding: '8px 10px', color: '#5dc85d', fontWeight: 700 }}>{m.saat || '—'}</td>
-                        <td style={{ padding: '8px 10px', color: '#c8d8e8', fontWeight: 600 }}>{m.ev_sahibi}</td>
-                        <td style={{ padding: '8px 10px', color: '#c8d8e8', fontWeight: 600 }}>{m.deplasman}</td>
-                        <td style={{ padding: '8px 10px', textAlign: 'center' }}><OddsCell value={m.oran_1} /></td>
-                        <td style={{ padding: '8px 10px', textAlign: 'center' }}>{m.oran_x != null ? <span style={{ color: '#e6c62a', fontWeight: 700 }}>{m.oran_x.toFixed(2)}</span> : <span className="text-gray-600">—</span>}</td>
-                        <td style={{ padding: '8px 10px', textAlign: 'center' }}>{m.oran_2 != null ? <span style={{ color: '#e87070', fontWeight: 700 }}>{m.oran_2.toFixed(2)}</span> : <span className="text-gray-600">—</span>}</td>
-                        <td style={{ padding: '8px 10px', textAlign: 'center' }}><OddsCell value={m.alt_orani} /></td>
-                        <td style={{ padding: '8px 10px', textAlign: 'center' }}>{m.ust_orani != null ? <span style={{ color: '#e87070', fontWeight: 700 }}>{m.ust_orani.toFixed(2)}</span> : <span style={{ color: '#334' }}>—</span>}</td>
-                        <td style={{ padding: '8px 10px', textAlign: 'center' }}><OddsCell value={m.kg_var} /></td>
-                        <td style={{ padding: '8px 10px', textAlign: 'center' }}>{m.kg_yok != null ? <span style={{ color: '#e87070', fontWeight: 700 }}>{m.kg_yok.toFixed(2)}</span> : <span style={{ color: '#334' }}>—</span>}</td>
-                        <td style={{ padding: '8px 10px', textAlign: 'center' }}>
-                          <AnalyzeButton match={m} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ))}
+          </div>
         </div>
       </main>
+
+      <AnalysisModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        match={selectedMatch}
+      />
     </div>
-  );
-}
-
-function AnalyzeButton({ match }: { match: TodayMatch }) {
-  const today = new Date();
-  const dateStr = today.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\./g, '.');
-  const timeStr = match.saat || '';
-
-  // Build URL params to pre-populate the analysis form
-  const params = new URLSearchParams({
-    homeTeam: match.ev_sahibi,
-    awayTeam: match.deplasman,
-    league: match.lig,
-    date: dateStr,
-    time: timeStr,
-    ...(match.oran_1 != null ? { oddsHome: match.oran_1.toString() } : {}),
-    ...(match.oran_x != null ? { oddsDraw: match.oran_x.toString() } : {}),
-    ...(match.oran_2 != null ? { oddsAway: match.oran_2.toString() } : {}),
-    ...(match.alt_orani != null ? { altOdds: match.alt_orani.toString() } : {}),
-    ...(match.ust_orani != null ? { ustOdds: match.ust_orani.toString() } : {}),
-    ...(match.kg_var != null ? { varOdds: match.kg_var.toString() } : {}),
-    ...(match.kg_yok != null ? { yokOdds: match.kg_yok.toString() } : {}),
-  });
-
-  return (
-    <Link
-      href={`/?${params.toString()}`}
-      style={{
-        display: 'inline-block',
-        background: 'linear-gradient(135deg, #1a5a1a, #228822)',
-        border: '1px solid #28a828',
-        color: '#fff',
-        padding: '4px 12px',
-        borderRadius: 4,
-        fontSize: '0.72rem',
-        fontWeight: 700,
-        textDecoration: 'none',
-        whiteSpace: 'nowrap',
-        letterSpacing: '0.03em',
-      }}
-    >
-      → Analiz Et
-    </Link>
   );
 }

@@ -26,75 +26,42 @@
   --font-mono: var(--app-font-mono);
 }
 
+
 :root {
   color-scheme: dark;
   --app-font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
   --app-font-mono: Menlo, monospace;
   --radius: 0.375rem;
 
-  --background: 220 14% 7%;
-  --foreground: 210 20% 90%;
-  --border: 215 15% 22%;
-  --input: 215 15% 22%;
-  --ring: 142 69% 40%;
+  /* Premium Slate/Zinc Dark Theme */
+  --background: 222 47% 7%;  /* Slate 950 */
+  --foreground: 210 40% 98%; /* Slate 50 */
+  
+  --card: 222 47% 9%;
+  --card-foreground: 210 40% 98%;
+  
+  --popover: 222 47% 9%;
+  --popover-foreground: 210 40% 98%;
+  
+  --border: 215 28% 17%; /* Slate 800 */
+  --input: 215 28% 17%;
+  
+  --primary: 158 64% 52%; /* Emerald 400 for a pro green accent */
+  --primary-foreground: 152 76% 12%;
+  
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 98%;
+  
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  
+  --accent: 217 33% 17%;
+  --accent-foreground: 210 40% 98%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
 
-  --card: 220 12% 11%;
-  --card-foreground: 210 20% 90%;
-
-  --primary: 142 69% 40%;
-  --primary-foreground: 0 0% 100%;
-
-  --secondary: 220 10% 18%;
-  --secondary-foreground: 210 20% 85%;
-
-  --muted: 220 10% 16%;
-  --muted-foreground: 215 15% 55%;
-
-  --accent: 220 10% 18%;
-  --accent-foreground: 210 20% 90%;
-
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 0 0% 100%;
-
-  --shadow-2xs: 0 1px 1px 0 rgb(0 0 0 / 0);
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0);
-
-  --chart-1: 211 100% 47%;
-  --chart-2: 250 100% 68%;
-  --chart-3: 130 100% 28%;
-  --chart-4: 0 91% 34%;
-  --chart-5: 330 81% 60%;
-
-  /* Analysis-specific tokens */
-  --col-home-bg: #d4691e;
-  --col-home-text: #fff;
-  --col-away-bg: #1a4fa3;
-  --col-away-text: #fff;
-  --col-draw-bg: #3a3a5c;
-  --col-draw-text: #ccc;
-  --col-header-bg: #1e2330;
-  --col-header-text: #aec6e8;
-  --col-highlight-border: #28a628;
-  --col-card-yellow: #e6c62a;
-  --col-card-red: #e63232;
-  --col-odds-home: #5dc85d;
-  --col-odds-away: #e87070;
-  --col-odds-alt: #5dc85d;
-  --col-odds-ust: #e87070;
-  --col-odds-var: #5dc85d;
-  --col-odds-yok: #e87070;
-  --col-watermark: rgba(30, 160, 120, 0.18);
-  --col-watermark-text: #2dcea2;
-  --col-prediction-text: #28c828;
-  --col-team-link: #7ab8f5;
-  --col-disclaimer: #888;
-  --col-footer-slogan: #2dce9a;
+  --ring: 158 64% 52%;
 }
 
 @layer base {
@@ -114,20 +81,25 @@
 /* ──────────────────────────────────────────────
    APP SHELL
 ────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────
+   APP SHELL & PREMIUM DESIGN SYSTEM
+────────────────────────────────────────────── */
 .app-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: hsl(var(--background));
+  background-color: #0b0f17;
+  color: #f1f5f9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
 .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
-  background: #131820;
-  border-bottom: 1px solid #2a3040;
+  padding: 14px 32px;
+  background-color: #0f172a;
+  border-bottom: 1px solid #1e293b;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -136,46 +108,69 @@
 .app-logo {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--col-prediction-text);
+  gap: 10px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  cursor: pointer;
 }
 
-.logo-icon { font-size: 1.4rem; }
-.logo-text { letter-spacing: 0.03em; }
+.logo-icon { font-size: 1.25rem; }
+.logo-text { letter-spacing: -0.3px; }
+
+.sport-tabs {
+  display: flex;
+  gap: 6px;
+  background-color: #1e293b;
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.sport-tab {
+  padding: 6px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.sport-tab:hover {
+  color: #ffffff;
+}
+.sport-tab.active {
+  background-color: #2563eb;
+  color: #ffffff;
+}
 
 .app-nav { display: flex; align-items: center; gap: 12px; }
 
 .nav-btn {
-  background: transparent;
-  border: 1px solid #3a4a5a;
-  color: #aec6e8;
-  padding: 5px 14px;
-  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  padding: 6px 16px;
+  border-radius: 8px;
   font-size: 0.82rem;
-  transition: border-color 0.15s, color 0.15s;
+  font-weight: 700;
+  transition: all 0.2s;
 }
-.nav-btn:hover { border-color: var(--col-prediction-text); color: #fff; }
-
-.nav-btn-print {
-  background: #1e2d1e;
-  border: 1px solid var(--col-prediction-text);
-  color: var(--col-prediction-text);
-  padding: 5px 14px;
-  border-radius: 4px;
-  font-size: 0.82rem;
+.nav-btn:hover {
+  background: #38bdf8;
+  color: #0f172a;
+  
 }
-.nav-btn-print:hover { background: #263526; }
 
 .nav-tag {
-  font-size: 0.7rem;
-  background: #1a2a1a;
-  color: var(--col-prediction-text);
-  border: 1px solid #1e6e1e;
-  padding: 3px 10px;
+  font-size: 0.72rem;
+  background: rgba(34, 197, 94, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  padding: 4px 12px;
   border-radius: 20px;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  
 }
 
 .app-main {
@@ -746,7 +741,7 @@
 
 .admin-stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -825,7 +820,7 @@
   font-size: 0.65rem;
   font-weight: 700;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  
 }
 
 .admin-steps {
@@ -983,7 +978,7 @@
   font-size: 0.65rem;
   font-weight: 700;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  
   line-height: 16px;
   z-index: 2;
 }
@@ -1015,7 +1010,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: #0d1117;
+  background: transparent;
   border-top: 1px solid #1e2632;
   border-bottom: 1px solid #1e2632;
   font-size: 0.72rem;
@@ -1038,7 +1033,7 @@
 /* ── Target match row ──────────────────────────────────────────────────── */
 .row-target {
   background: #111a24 !important;
-  outline: 2px solid #2a5a8f;
+  border-left: 3px solid hsl(var(--primary));
   outline-offset: -2px;
 }
 .row-target td { opacity: 0.95; }
@@ -1126,4 +1121,70 @@
   padding: 1px 5px;
   border-radius: 4px;
   border: 1px solid rgba(51, 65, 85, 0.4);
+}
+
+/* Responsive sidebar and navigation styling additions */
+@media (max-width: 1024px) {
+  .sidebar-countries {
+    display: none !important;
+  }
+}
+
+.sidebar-countries button {
+  transition: all 0.15s ease-in-out;
+}
+.sidebar-countries button:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+  color: #ffffff !important;
+}
+
+/* ── Analysis Table Quick Filter Toolbar & Visual Progress Bar ───────── */
+.table-filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-btn {
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.filter-btn:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+.filter-btn.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #3b82f6;
+  
+}
+
+.analiz-progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  padding: 0 2px;
+}
+.analiz-progress-bar-bg {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.analiz-progress-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
 }

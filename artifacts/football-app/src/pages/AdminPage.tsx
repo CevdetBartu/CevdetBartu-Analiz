@@ -35,21 +35,49 @@ export default function AdminPage() {
   const [seasonsBack, setSeasons] = useState(4);
   const [spawning, setSpawning] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
+  const [customStartDate, setCustomStartDate] = useState<string>('15.08.2021');
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  const ADMIN_TOKEN = "crs-secret-admin-key-9988";
 
   const fetchStats = useCallback(async () => {
     try {
-      const r = await fetch(`${API}/stats`);
+      const r = await fetch(`${API}/stats`, {
+        headers: { "x-admin-token": ADMIN_TOKEN }
+      });
       if (!r.ok) {
         setOffline(true);
         return;
       }
       const data = await r.json();
       setStats(data);
+      if (isInitialLoad && data?.db?.en_eski) {
+        setCustomStartDate(data.db.en_eski);
+        setIsInitialLoad(false);
+      }
       setOffline(false);
     } catch {
       setOffline(true);
     }
-  }, []);
+  }, [isInitialLoad]);
+
+  const handleSaveStartDate = async () => {
+    if (!customStartDate) return;
+    try {
+      const res = await fetch(`${API}/set-start-date`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "x-admin-token": ADMIN_TOKEN 
+        },
+        body: JSON.stringify({ start_date: customStartDate })
+      });
+      const data = await res.json();
+      setMsg(data.message || "Başlangıç tarihi başarıyla güncellendi.");
+    } catch (e: any) {
+      setMsg(`Hata: ${e.message}`);
+    }
+  };
 
   // İlk yükleme + scraper çalışıyorsa her 4sn yenile
   useEffect(() => {
@@ -62,7 +90,10 @@ export default function AdminPage() {
     setSpawning(true);
     setMsg(null);
     try {
-      const r = await fetch(`${BASE}/api/admin/scraper/spawn`, { method: 'POST' });
+      const r = await fetch(`${BASE}/api/admin/scraper/spawn`, {
+        method: 'POST',
+        headers: { "x-admin-token": ADMIN_TOKEN }
+      });
       const data = await r.json();
       setMsg(data.message);
       if (data.ok) setTimeout(() => fetchStats(), 1500);
@@ -77,7 +108,10 @@ export default function AdminPage() {
     setBackupLoading(true);
     setMsg(null);
     try {
-      const r = await fetch(`${BASE}/api/admin/db/backup`, { method: 'POST' });
+      const r = await fetch(`${BASE}/api/admin/db/backup`, {
+        method: 'POST',
+        headers: { "x-admin-token": ADMIN_TOKEN }
+      });
       const data = await r.json();
       setMsg(data.message);
     } catch (e: any) {
@@ -93,7 +127,10 @@ export default function AdminPage() {
     try {
       const r = await fetch(`${API}/${endpoint}`, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': ADMIN_TOKEN
+        },
         body: body ? JSON.stringify(body) : undefined,
       });
       const data = await r.json();
@@ -109,15 +146,24 @@ export default function AdminPage() {
   const isRunning = stats?.worker?.is_running ?? false;
 
   return (
-    <div className="admin-page">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <Link href="/" className="nav-btn" style={{ textDecoration: 'none' }}>← Analiz Paneli</Link>
-        <div className="sport-tabs">
-          <Link href="/admin" className="sport-tab active">⚽ Futbol</Link>
-          <Link href="/canli" className="sport-tab">📺 Canlı Analiz</Link>
-          <Link href="/dogrulama" className="sport-tab">📊 Tahmin Doğrulama</Link>
+    <div className="admin-page" style={{ backgroundColor: "#0b0f17", color: "#f1f5f9", minHeight: "100vh" }}>
+      {/* Header Bar */}
+      
+      <header style={{ borderBottom: "1px solid var(--border)", backgroundColor: "var(--background)", padding: "16px 32px", margin: "-20px -20px 24px -20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div onClick={() => (window.location.href = "/")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ width: "28px", height: "28px", borderRadius: "6px", backgroundColor: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", color: "#fff", fontSize: "14px" }}>C</div>
+          <span style={{ fontSize: "1.1rem", fontWeight: "700", letterSpacing: "-0.5px", color: "var(--foreground)" }}>CRS <span style={{ fontWeight: "400", opacity: 0.7 }}>Analytics</span></span>
         </div>
-      </div>
+        <div style={{ display: "flex", gap: "4px", backgroundColor: "var(--card)", padding: "4px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+          <Link href="/bugun" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Bugün</Link>
+          <Link href="/canli" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Canlı</Link>
+          <Link href="/" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Manuel</Link>
+        </div>
+        <nav>
+          <Link href="/admin" style={{ color: "var(--primary)", fontSize: "13px", fontWeight: "600", textDecoration: "none" }}>Veritabanı</Link>
+        </nav>
+      </header>
+
       <div className="admin-header">
         <h1 className="admin-title">⚙️ Veri Havuzu Yönetimi</h1>
         <p className="admin-sub">SofaScore'dan geçmiş maç verisi çekme ve SQLite veritabanı yönetimi</p>
@@ -136,7 +182,7 @@ export default function AdminPage() {
             onClick={handleSpawn}
             disabled={spawning}
             style={{
-              background: spawning ? '#1a2a1a' : 'linear-gradient(135deg,#1a5a1a,#228822)',
+              background: spawning ? '#1a2a1a' : 'var(--primary)',
               border: '2px solid #28a828',
               color: '#fff',
               padding: '8px 22px',
@@ -164,7 +210,7 @@ export default function AdminPage() {
         <div className="admin-worker-status">
           <span className={`status-dot ${isRunning ? 'dot-green' : 'dot-gray'}`}></span>
           <span className="status-label">
-            {stats?.worker.status ?? (offline ? 'bilinmiyor' : 'kontrol ediliyor…')}
+            {stats?.worker?.status ?? (offline ? 'bilinmiyor' : 'kontrol ediliyor…')}
           </span>
           {stats?.worker.elapsed_sec != null && (
             <span className="status-elapsed">
@@ -191,9 +237,12 @@ export default function AdminPage() {
               onChange={e => setSeasons(Number(e.target.value))}
               disabled={isRunning}
             >
-              {[1, 2, 3, 4, 5, 6, 8, 10].map(m => (
-                <option key={m} value={m}>{m} sezon</option>
-              ))}
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15].map(m => {
+                const maxYear = new Date().getFullYear() - m + 1;
+                return (
+                  <option key={m} value={m}>{m} Sezon (Max {maxYear})</option>
+                );
+              })}
             </select>
           </div>
 
@@ -259,6 +308,10 @@ export default function AdminPage() {
               <div className="stat-lbl">Oranlı Maç</div>
             </div>
             <div className="admin-stat-box">
+              <div className="stat-num">{stats.db.ligler.length}</div>
+              <div className="stat-lbl">Toplam Lig Sayısı</div>
+            </div>
+            <div className="admin-stat-box">
               <div className="stat-num">{stats.worker.total_added}</div>
               <div className="stat-lbl">Bu Oturumda Eklenen</div>
             </div>
@@ -268,65 +321,92 @@ export default function AdminPage() {
             </div>
           </div>
 
-          <div className="admin-date-range">
-            <span>📅 Veri aralığı: </span>
-            <strong>{stats.db.en_eski ?? '—'}</strong>
-            <span> → </span>
-            <strong>{stats.db.en_yeni ?? '—'}</strong>
+          <div className="admin-date-range" style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', backgroundColor: 'var(--background)', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border)' }}>
+            <span style={{ fontSize: '13px', fontWeight: '700', color: '#cbd5e1' }}>📅 Veri Aralığı Başlangıç Tarihi:</span>
+            <input
+              type="text"
+              value={customStartDate}
+              onChange={(e) => setCustomStartDate(e.target.value)}
+              placeholder="GG.AA.YYYY (Örn: 26.05.2020)"
+              style={{
+                backgroundColor: "var(--border)",
+                border: "1px solid #3b82f6",
+                color: "#ffffff",
+                padding: "6px 12px",
+                borderRadius: "6px",
+                fontSize: "13px",
+                fontWeight: "700",
+                width: "160px"
+              }}
+            />
+            <button
+              onClick={handleSaveStartDate}
+              style={{
+                backgroundColor: "var(--primary)",
+                color: "#ffffff",
+                border: "none",
+                padding: "6px 14px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontWeight: "700",
+                fontSize: "12px",
+                boxShadow: "0 2px 8px rgba(37,99,235,0.4)"
+              }}
+            >
+              💾 Tarihi Ayarla
+            </button>
+            <span style={{ color: "#94a3b8", fontSize: "12px", marginLeft: "auto" }}>
+              Veritabanı En Yeni: <strong>{stats.db.en_yeni ?? '—'}</strong>
+            </span>
           </div>
-
-          {/* ── Ligler tablosu ── */}
-          {stats.db.ligler.length > 0 && (
-            <div className="admin-leagues-table">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Lig</th>
-                    <th>Maç Sayısı</th>
-                    <th>Pay</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.db.ligler.map((l, i) => {
-                    const pct = stats.db.total_mac > 0
-                      ? Math.round((l.mac / stats.db.total_mac) * 100)
-                      : 0;
-                    return (
-                      <tr key={l.lig}>
-                        <td className="td-num">{i + 1}</td>
-                        <td className="td-lig-name">{l.lig}</td>
-                        <td className="td-mac">{l.mac.toLocaleString('tr-TR')}</td>
-                        <td className="td-pct">
-                          <div className="pct-bar-wrap">
-                            <div className="pct-bar" style={{ width: `${pct}%` }}></div>
-                            <span className="pct-label">{pct}%</span>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
         </div>
       )}
 
       {/* ── Kullanım Kılavuzu ─────────────────────────────────────── */}
-      <div className="admin-card admin-card-info">
-        <h2 className="admin-card-title">Nasıl Çalışır?</h2>
-        <ol className="admin-steps">
-          <li>Terminalde <code>python3 scripts/scraper/run.py</code> komutunu çalıştırın.</li>
-          <li>Bu sayfada "<strong>Taramayı Başlat</strong>" butonuna tıklayın.</li>
-          <li>Scraper SofaScore'dan seçili liglerin geçmiş maçlarını otomatik çeker.</li>
-          <li>Çekilen veriler <code>scripts/scraper/gecmis_maclar.db</code> dosyasına kaydedilir.</li>
-          <li>Ana sayfadaki "<strong>Benzer Maçları Bul</strong>" özelliği bu veri havuzunu kullanır.</li>
-        </ol>
-        <div className="admin-leagues-info">
-          <strong>Takip edilen ligler:</strong> Türkiye Süper Lig, 1. Lig, UEFA Şampiyonlar/Avrupa/Konferans Ligi,
-          Premier Lig, La Liga, Bundesliga, Serie A, Ligue 1, Eredivisie, Primeira Liga ve daha fazlası.
+              {/* LİGLER LİSTESİ */}
+      {stats?.db?.ligler && stats.db.ligler.length > 0 && (
+        <div className="admin-card">
+          <h2 className="admin-card-title">Veritabanındaki Tüm Ligler ({stats.db.ligler.length})</h2>
+          <div style={{
+            display: "flex", 
+            flexWrap: "wrap", 
+            gap: "6px", 
+            maxHeight: "300px", 
+            overflowY: "auto", 
+            padding: "12px",
+            backgroundColor: "var(--background)",
+            borderRadius: "8px",
+            border: "1px solid var(--border)"
+          }}>
+            {stats.db.ligler.map((l: any, i: number) => (
+              <span key={i} style={{
+                fontSize: "11px",
+                backgroundColor: "var(--border)",
+                color: "#cbd5e1",
+                padding: "4px 8px",
+                borderRadius: "12px",
+                whiteSpace: "nowrap",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px"
+              }}>
+                {l.lig} <span style={{color: "#64748b", fontSize: "10px", fontWeight: "bold"}}>{l.mac}</span>
+              </span>
+            ))}
+          </div>
         </div>
+      )}
+
+      {/* YENİ KULLANIM KILAVUZU */}
+      <div className="admin-card admin-card-info">
+        <h2 className="admin-card-title">Sistem Nasıl Çalışır? (Yeni Nesil Mackolik Altyapısı)</h2>
+        <ol className="admin-steps">
+          <li><strong>Tamamen Otomatik:</strong> Eski manuel SofaScore/Football-Data taramaları çöpe atıldı. Sistem arka planda Mackolik CRON takvimiyle otomatik çalışır.</li>
+          <li><strong>Tarihsel Madencilik:</strong> Dünden başlayarak 2021 yılına kadar geriye dönük iddaa oranlı tüm maçlar (oranlar, alt/üst, devre/maç skorları) 10 saniye aralıklarla çekilir.</li>
+          <li><strong>Canlı Akış:</strong> Her 5 dakikada bir güncel maçların kapanış oranları ve gece yarısı ertesi günün bülteni otomatik güncellenir.</li>
+          <li><strong>Güvenli:</strong> Sistem IP banlarına (Cloudflare WAF) karşı insan simülasyonu ve limitli isteklerle çalışır.</li>
+          <li>Tüm veriler <code>scripts/scraper/gecmis_maclar.db</code> dosyasında güvendedir.</li>
+        </ol>
       </div>
     </div>
   );

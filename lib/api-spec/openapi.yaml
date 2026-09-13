@@ -150,6 +150,12 @@ paths:
       operationId: refreshTodayMatches
       tags: [today]
       summary: Manually refresh today's match data
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
       responses:
         "200":
           description: Refresh result
@@ -219,6 +225,18 @@ components:
           type: ["number", "null"]
         yokOdds:
           type: ["number", "null"]
+        altOdds35:
+          type: ["number", "null"]
+        ustOdds35:
+          type: ["number", "null"]
+        iyAltOdds15:
+          type: ["number", "null"]
+        iyUstOdds15:
+          type: ["number", "null"]
+        iyAltOdds05:
+          type: ["number", "null"]
+        iyUstOdds05:
+          type: ["number", "null"]
         avgOddsMin:
           type: ["number", "null"]
         avgOddsMax:
@@ -285,6 +303,18 @@ components:
           type: ["number", "null"]
         yokOdds:
           type: ["number", "null"]
+        altOdds35:
+          type: ["number", "null"]
+        ustOdds35:
+          type: ["number", "null"]
+        iyAltOdds15:
+          type: ["number", "null"]
+        iyUstOdds15:
+          type: ["number", "null"]
+        iyAltOdds05:
+          type: ["number", "null"]
+        iyUstOdds05:
+          type: ["number", "null"]
         avgOddsMin:
           type: ["number", "null"]
         avgOddsMax:
@@ -318,6 +348,18 @@ components:
         varOdds:
           type: ["number", "null"]
         yokOdds:
+          type: ["number", "null"]
+        altOdds35:
+          type: ["number", "null"]
+        ustOdds35:
+          type: ["number", "null"]
+        iyAltOdds15:
+          type: ["number", "null"]
+        iyUstOdds15:
+          type: ["number", "null"]
+        iyAltOdds05:
+          type: ["number", "null"]
+        iyUstOdds05:
           type: ["number", "null"]
         league:
           type: ["string", "null"]
@@ -405,6 +447,18 @@ components:
           type: ["number", "null"]
         yokOdds:
           type: ["number", "null"]
+        altOdds35:
+          type: ["number", "null"]
+        ustOdds35:
+          type: ["number", "null"]
+        iyAltOdds15:
+          type: ["number", "null"]
+        iyUstOdds15:
+          type: ["number", "null"]
+        iyAltOdds05:
+          type: ["number", "null"]
+        iyUstOdds05:
+          type: ["number", "null"]
         avgOddsMin:
           type: ["number", "null"]
         avgOddsMax:
@@ -455,6 +509,18 @@ components:
           type: ["number", "null"]
         yokOdds:
           type: ["number", "null"]
+        altOdds35:
+          type: ["number", "null"]
+        ustOdds35:
+          type: ["number", "null"]
+        iyAltOdds15:
+          type: ["number", "null"]
+        iyUstOdds15:
+          type: ["number", "null"]
+        iyAltOdds05:
+          type: ["number", "null"]
+        iyUstOdds05:
+          type: ["number", "null"]
         avgOddsMin:
           type: ["number", "null"]
         avgOddsMax:
@@ -493,6 +559,9 @@ components:
         - deplasman
         - kg_var
         - ust_25
+        - ust_35
+        - iy_ust_15
+        - iy_ust_05
         - ort_kart
         - ust_10_korner
       properties:
@@ -507,6 +576,12 @@ components:
         kg_var:
           $ref: "#/components/schemas/StatGroup"
         ust_25:
+          $ref: "#/components/schemas/StatGroup"
+        ust_35:
+          $ref: "#/components/schemas/StatGroup"
+        iy_ust_15:
+          $ref: "#/components/schemas/StatGroup"
+        iy_ust_05:
           $ref: "#/components/schemas/StatGroup"
         ort_kart:
           type: number
@@ -549,6 +624,9 @@ components:
         - lig_sirasi
         - taraf_oranlari
         - alt_ust
+        - alt_ust_35
+        - iy_alt_ust_15
+        - iy_alt_ust_05
         - var_yok
         - ortalama
         - korner_display
@@ -596,6 +674,12 @@ components:
         taraf_oranlari:
           $ref: "#/components/schemas/TarafOranlari"
         alt_ust:
+          $ref: "#/components/schemas/AltUst"
+        alt_ust_35:
+          $ref: "#/components/schemas/AltUst"
+        iy_alt_ust_15:
+          $ref: "#/components/schemas/AltUst"
+        iy_alt_ust_05:
           $ref: "#/components/schemas/AltUst"
         var_yok:
           $ref: "#/components/schemas/VarYok"
@@ -712,3 +796,10 @@ components:
           type: integer
         updated:
           type: integer
+
+    RefreshRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          nullable: true

@@ -27,7 +27,7 @@ export function MatchInputForm({ onAnalyze, isLoading, initialData }: MatchInput
     altOdds: '', ustOdds: '', varOdds: '', yokOdds: ''
   });
   const [searchFilters, setSearchFilters] = useState({
-    ligSirasiDiff: '', avgCardsTotal: '', maxResults: '5'
+    ligSirasiDiff: '', avgCardsTotal: '', maxResults: '20'
   });
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [oddsType, setOddsType] = useState<'OPENING' | 'CLOSING'>('CLOSING');
@@ -249,11 +249,12 @@ export function MatchInputForm({ onAnalyze, isLoading, initialData }: MatchInput
               <input className={inputCls} value={searchFilters.avgCardsTotal} onChange={e => setSearchFilters({...searchFilters, avgCardsTotal: e.target.value})} placeholder="6" type="number" />
             </div>
             <div className="form-field">
-              <label className={labelCls}>Sonuç Sayısı</label>
+              <label className={labelCls}>Sonuç Sayısı (Max 20)</label>
               <select className={inputCls} value={searchFilters.maxResults} onChange={e => setSearchFilters({...searchFilters, maxResults: e.target.value})}>
-                <option value="3">3</option>
-                <option value="4">4</option>
                 <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
               </select>
             </div>
           </div>

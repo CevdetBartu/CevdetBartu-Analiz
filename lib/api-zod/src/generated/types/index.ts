@@ -15,6 +15,7 @@ export * from './healthStatus';
 export * from './matchInput';
 export * from './matchRecord';
 export * from './referenceMatchInput';
+export * from './refreshRequest';
 export * from './refreshResult';
 export * from './scoreBreakdown';
 export * from './similarityQuery';

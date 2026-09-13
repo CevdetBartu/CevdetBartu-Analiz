@@ -10,8 +10,15 @@ interface AnalysisTableProps {
   analyzeResponse: AnalyzeResponse;
 }
 
-function StatPill({ label, color }: { label: string; color: string }) {
-  return <span className="stat-pill" style={{ color }}>{label}</span>;
+function StatPill({ label, color, sapma }: { label: string; color: string; sapma?: number }) {
+  // Sapma 0 ise tam opak (1.0), Sapma 15 ise daha şeffaf (0.4)
+  const opacity = sapma != null ? Math.max(0.3, 1.0 - (sapma / 20.0)) : 1.0;
+  
+  return (
+    <span className="stat-pill" style={{ color, opacity }}>
+      {label} {sapma != null && <span style={{ fontSize: '0.85em', opacity: 0.7, marginLeft: '2px' }}>±%{sapma}</span>}
+    </span>
+  );
 }
 
 function pctColor(pct: number) {
@@ -20,15 +27,68 @@ function pctColor(pct: number) {
   return '#e87070';
 }
 
-function OddsCell({ value, isWinner, isLoser }: { value: string | null | undefined; isWinner: boolean; isLoser: boolean }) {
+function OddsCell({ value, isWinner, isLoser, trend }: { value: string | null | undefined; isWinner: boolean; isLoser: boolean; trend?: 'up' | 'down' | 'none' }) {
   if (!value) return null;
   const cls = isWinner ? 'odds-win' : isLoser ? 'odds-lose' : '';
-  return <span className={cls}>{value}</span>;
+  const arrow = trend === 'up' ? <span style={{color:'#ef4444', fontSize:'0.75em', marginLeft:'2px'}}>↑</span> : trend === 'down' ? <span style={{color:'#10b981', fontSize:'0.75em', marginLeft:'2px'}}>↓</span> : null;
+  return <span className={cls}>{value}{arrow}</span>;
 }
 
 export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeResponse }: AnalysisTableProps) {
   const { analiz_ozet: ozet, tahminler, tablo_satirlari } = analyzeResponse;
-  const hasData = ozet.total_mac > 0;
+  const hasData = true; // Always show data panels, even for 0 matches so the fallback stats are visible
+
+  const [aiCommentary, setAiCommentary] = React.useState<string | null>(null);
+  const [aiLoading, setAiLoading] = React.useState(false);
+  const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+  const generateAICommentary = async () => {
+    setAiLoading(true);
+    try {
+      const res = await fetch(`${BASE}/api/ai/generate-commentary`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+           matchData: { homeTeam, awayTeam, league },
+           stats: ozet
+        })
+      });
+      const data = await res.json();
+      if (data.commentary) setAiCommentary(data.commentary);
+      else alert(data.error || "Hata oluştu.");
+    } catch (e: any) {
+       alert(e.message);
+    } finally {
+       setAiLoading(false);
+    }
+  };
+
+  const [activeTab, setActiveTab] = React.useState<'ALL' | 'HIGH_SIM' | 'OVER_25' | 'BTTS'>('ALL');
+
+  // Filter rows based on active quick filter tab
+  const filteredSatirlar = tablo_satirlari.filter((satir) => {
+    if (satir.is_target) return true; // Always show target match
+    if (activeTab === 'HIGH_SIM') {
+      const num = parseInt((satir.analiz_yuzde || '').replace(/[^0-9]/g, ''), 10) || 0;
+      return num >= 85;
+    }
+    if (activeTab === 'OVER_25') {
+      const ms = satir.ms_skor || '';
+      if (!ms.includes(':')) return false;
+      const parts = ms.split(':');
+      const g = (parseInt(parts[0], 10) || 0) + (parseInt(parts[1], 10) || 0);
+      return g >= 3;
+    }
+    if (activeTab === 'BTTS') {
+      const ms = satir.ms_skor || '';
+      if (!ms.includes(':')) return false;
+      const parts = ms.split(':');
+      const h = parseInt(parts[0], 10) || 0;
+      const a = parseInt(parts[1], 10) || 0;
+      return h > 0 && a > 0;
+    }
+    return true;
+  });
 
   return (
     <div className="analysis-card">
@@ -54,32 +114,32 @@ export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeR
       </div>
 
       {/* ── Stats Summary Bar ──────────────────────────────────────────────── */}
-      {hasData && (
-        <div className="stats-bar">
+      
+      {ozet.total_mac === 0 && (
+        <div style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '12px', borderRadius: '4px', marginBottom: '12px', border: '1px solid #ffeeba', fontSize: '14px' }}>
+          <strong>⚠️ Yeterli Veri Bulunamadı:</strong> Bu maç için belirlenen bağlamsal ve oransal filtreleri (%80+ benzerlik) geçen geçmiş maç bulunamadı. Aşağıda gösterilen yüzdeler piyasa oranlarının saf matematiksel olasılığını (Implied Probability) yansıtmaktadır.
+        </div>
+      )}
+      
+      <div className="stats-bar">
+
           <span className="stats-bar-label">{ozet.total_mac} referans maç:</span>
-          <StatPill label={ozet.ev_sahibi.label}  color={pctColor(ozet.ev_sahibi.yuzde)}  />
+          <StatPill label={ozet.ev_sahibi.label}  color={pctColor(ozet.ev_sahibi.yuzde)} sapma={ozet.ev_sahibi.sapma} isZeroMatches={ozet.total_mac === 0} />
           <span className="stats-sep">|</span>
-          <StatPill label={ozet.beraberlik.label} color={pctColor(ozet.beraberlik.yuzde)} />
+          <StatPill label={ozet.beraberlik.label} color={pctColor(ozet.beraberlik.yuzde)} sapma={ozet.beraberlik.sapma} isZeroMatches={ozet.total_mac === 0} />
           <span className="stats-sep">|</span>
-          <StatPill label={ozet.deplasman.label}  color={pctColor(ozet.deplasman.yuzde)}  />
+          <StatPill label={ozet.deplasman.label}  color={pctColor(ozet.deplasman.yuzde)} sapma={ozet.deplasman.sapma} isZeroMatches={ozet.total_mac === 0} />
           <span className="stats-sep">·</span>
-          <StatPill label={ozet.kg_var.label}  color={pctColor(ozet.kg_var.yuzde)}  />
+          <StatPill label={ozet.kg_var.label}  color={pctColor(ozet.kg_var.yuzde)} sapma={ozet.kg_var.sapma} isZeroMatches={ozet.total_mac === 0} />
           <span className="stats-sep">·</span>
-          <StatPill label={ozet.ust_25.label}  color={pctColor(ozet.ust_25.yuzde)}  />
-          <span className="stats-sep">·</span>
-          <span className="stat-pill" style={{ color: ozet.ort_kart >= 4.5 ? '#e87070' : '#5dc85d' }}>
-            Ort. Kart: <strong>{ozet.ort_kart.toFixed(1)}</strong>
-          </span>
-          {ozet.ort_korner != null && (
+          <StatPill label={ozet.ust_25.label}  color={pctColor(ozet.ust_25.yuzde)} sapma={ozet.ust_25.sapma} isZeroMatches={ozet.total_mac === 0} />
+          {ozet.ust_35 && (
             <>
               <span className="stats-sep">·</span>
-              <span className="stat-pill" style={{ color: ozet.ort_korner >= 10 ? '#e87070' : '#5dc85d' }}>
-                Ort. Korner: <strong>{ozet.ort_korner.toFixed(1)}</strong>
-              </span>
-              <span className="stats-sep">|</span>
-              <StatPill label={ozet.ust_10_korner.label} color={pctColor(ozet.ust_10_korner.yuzde)} />
+              <StatPill label={ozet.ust_35.label}  color={pctColor(ozet.ust_35.yuzde)} sapma={ozet.ust_35.sapma} isZeroMatches={ozet.total_mac === 0} />
             </>
           )}
+
           {ozet.sik_ms && (
             <>
               <span className="stats-sep">·</span>
@@ -93,7 +153,96 @@ export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeR
             </>
           )}
         </div>
+
+      {/* Model & Calibration Panel */}
+      {hasData && (
+        <div style={{ display: "flex", gap: "16px", padding: "12px 16px", backgroundColor: "#0b0f17", borderBottom: "1px solid var(--border)", flexWrap: "wrap" }}>
+           <div style={{ flex: 1, minWidth: "250px", fontSize: "13px", color: "#94a3b8" }}>
+              <strong style={{ color: "#fff", display: "block", marginBottom: "4px" }}>🧪 Algoritma & Ağırlıklar</strong>
+              Hesaplama: <span style={{ color: "#a8c4e0" }}>Öklid Mesafesi (Log-Olasılık)</span><br/>
+              Marj: <span style={{ color: "#a8c4e0" }}>Bookmaker Marjından Arındırılmış (True Prob)</span><br/>
+              Ağırlıklar: <span style={{ color: "#a8c4e0" }}>MS: 1.0 | 2.5 A/Ü: 0.4 | KG: 0.4</span>
+           </div>
+           
+           {ozet.lig_dagilimi && Object.keys(ozet.lig_dagilimi).length > 0 && (
+             <div style={{ flex: 1, minWidth: "250px", fontSize: "13px", color: "#94a3b8" }}>
+                <strong style={{ color: "#fff", display: "block", marginBottom: "4px" }}>📊 Lig Dağılımı (Top 3)</strong>
+                {Object.entries(ozet.lig_dagilimi)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 3)
+                  .map(([lig, count]) => (
+                     <div key={lig} style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
+                       <span>{lig}</span>
+                       <span style={{ color: "#a8c4e0" }}>%{Math.round((count / ozet.total_mac) * 100)}</span>
+                     </div>
+                  ))}
+             </div>
+           )}
+        </div>
       )}
+
+      {/* AI Commentary Section */}
+      {hasData && (
+        <div style={{ padding: "16px", backgroundColor: "#1e293b", borderBottom: "1px solid var(--border)" }}>
+          {!aiCommentary ? (
+             <button 
+                onClick={generateAICommentary} 
+                disabled={aiLoading}
+                style={{
+                  background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+                  color: "#fff",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  fontWeight: "bold",
+                  cursor: aiLoading ? "wait" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px"
+                }}
+             >
+                {aiLoading ? "Analiz Yazılıyor..." : "✨ AI Tipster Analizi Oluştur"}
+             </button>
+          ) : (
+             <div style={{ padding: "16px", backgroundColor: "#0f172a", borderRadius: "8px", borderLeft: "4px solid #8b5cf6", position: "relative" }}>
+                <span style={{ position: "absolute", top: "-10px", left: "12px", background: "#8b5cf6", color: "#fff", padding: "2px 8px", borderRadius: "12px", fontSize: "10px", fontWeight: "bold", textTransform: "uppercase" }}>
+                   CevdetBartu AI Tipster
+                </span>
+                <p style={{ margin: 0, color: "#f8fafc", fontSize: "14.5px", lineHeight: 1.6, fontStyle: "italic" }}>
+                   "{aiCommentary}"
+                </p>
+             </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Table Quick Filter Toolbar ────────────────────────────────────── */}
+      <div className="table-filter-bar" style={{ padding: "8px 14px", backgroundColor: "#0b0f17", borderBottom: "1px solid var(--border)" }}>
+        <button
+          className={`filter-btn ${activeTab === 'ALL' ? 'active' : ''}`}
+          onClick={() => setActiveTab('ALL')}
+        >
+          TÜM REFERANS MAÇLAR ({tablo_satirlari.length - 1})
+        </button>
+        <button
+          className={`filter-btn ${activeTab === 'HIGH_SIM' ? 'active' : ''}`}
+          onClick={() => setActiveTab('HIGH_SIM')}
+        >
+          ⚽ YÜKSEK BENZERLİK (&gt;%85)
+        </button>
+        <button
+          className={`filter-btn ${activeTab === 'OVER_25' ? 'active' : ''}`}
+          onClick={() => setActiveTab('OVER_25')}
+        >
+          🔥 2.5 ÜST BİTENLER
+        </button>
+        <button
+          className={`filter-btn ${activeTab === 'BTTS' ? 'active' : ''}`}
+          onClick={() => setActiveTab('BTTS')}
+        >
+          🤝 KG VAR BİTENLER
+        </button>
+      </div>
 
       {/* ── Table ──────────────────────────────────────────────────────────── */}
       <div className="table-wrapper">
@@ -104,87 +253,91 @@ export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeR
               <th className="th-ht col-highlight">Devre</th>
               <th className="th-ft">MSkor</th>
               <th className="th-teams">Benzer Karşılaşmalar</th>
-              <th className="th-prev">Önceki</th>
-              <th className="th-flag">🚩</th>
-              <th className="th-cards col-highlight">Card</th>
-              <th className="th-lig">Lig Sırası</th>
+              
+              
+              
               <th className="th-odds">Taraf Oranları</th>
-              <th className="th-altust col-highlight">Alt / Üst</th>
-              <th className="th-varyok col-highlight">Var / Yok</th>
-              <th className="th-avg">Ortalama</th>
-              <th className="th-korner col-highlight">Korner</th>
-              <th className="th-im">i/m</th>
+              <th className="th-altust col-highlight">2.5 A/Ü</th>
+              
+              
             </tr>
           </thead>
           <tbody>
-            {tablo_satirlari.map((satir: TabloSatiri) => {
+            {filteredSatirlar.map((satir: TabloSatiri) => {
               const { taraf_oranlari: t, alt_ust: au, var_yok: vy } = satir;
+              const numPct = parseInt((satir.analiz_yuzde || '').replace(/[^0-9]/g, ''), 10) || 0;
 
               return (
                 <tr key={satir.id} className={satir.row_renk}>
-                  {/* Analiz % */}
+                  {/* Analiz % with Visual Progress Bar */}
                   <td className="td-analiz">
-                    {!satir.is_target && <span className="analiz-badge">{satir.analiz_yuzde}</span>}
+                    {!satir.is_target && (
+                      <div className="analiz-progress-wrapper">
+                        <span className="analiz-badge">{satir.analiz_yuzde}</span>
+                        <div className="analiz-progress-bar-bg">
+                          <div
+                            className="analiz-progress-bar-fill"
+                            style={{
+                              width: `${Math.min(100, Math.max(10, numPct))}%`,
+                              background: numPct >= 75
+                                ? 'var(--primary)'
+                                : numPct >= 50
+                                ? 'var(--primary)'
+                                : 'var(--primary)'
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </td>
 
                   {/* İY Devre */}
                   <td className={`td-score col-highlight${satir.iy_skor_renk ? ` ${satir.iy_skor_renk}` : ''}${satir.iy_skor_sik_mi ? ' score-mostcommon' : ''}`}>
                     {satir.is_target
-                      ? (satir.iy_tahmini ? <span className="score-hint">{satir.iy_tahmini}?</span> : '')
-                      : (satir.iy_skor ?? '')}
+                      ? (satir.iy_tahmini ? <span className="score-hint">{satir.iy_tahmini}</span> : '')
+                      : (satir.iy_skor ? satir.iy_skor.replace(/\?/g, '') : '')}
                   </td>
 
                   {/* MS */}
                   <td className={`td-score${satir.ms_skor_renk ? ` ${satir.ms_skor_renk}` : ''}${satir.ms_skor_sik_mi ? ' score-mostcommon' : ''}`}>
                     {satir.is_target
-                      ? (satir.ms_tahmini ? <span className="score-hint">{satir.ms_tahmini}?</span> : '')
-                      : (satir.ms_skor ?? '')}
+                      ? (satir.ms_tahmini ? <span className="score-hint">{satir.ms_tahmini}</span> : '')
+                      : (satir.ms_skor ? satir.ms_skor.replace(/\?/g, '') : '')}
                   </td>
 
                   {/* Teams */}
                   <td className="td-teams">
                     {satir.is_target
-                      ? <span className="team-highlight">{satir.takimlar}</span>
-                      : <span>{satir.takimlar}</span>}
+                      ? <div><span className="team-highlight">{satir.takimlar}</span>{satir.tarih_lig && <div style={{fontSize: '0.70rem', color: '#60a5fa', marginTop: '2px'}}>{satir.tarih_lig}</div>}</div>
+                      : <div>
+                          <span className="team-names">{satir.takimlar}</span>
+                          {satir.tarih_lig && <div className="team-league-hint" style={{fontSize: '0.70rem', color: '#94a3b8', marginTop: '2px'}}>{satir.tarih_lig}</div>}
+                        </div>
+                    }
                   </td>
 
-                  {/* Önceki */}
-                  <td className="td-prev">{satir.onceki_skor ?? ''}</td>
+                  
 
-                  {/* Flag */}
-                  <td className="td-flag">
-                    {satir.kirmizi_kart_var_mi ? <span className="flag-red">●</span> : ''}
-                  </td>
+                  
 
-                  {/* Cards */}
-                  <td className={`td-cards col-highlight${satir.kart_yuksek_mi ? ' cards-high' : ''}`}>
-                    {satir.kart_display ? <CardDisplay display={satir.kart_display} /> : ''}
-                  </td>
-
-                  {/* Lig Sırası */}
-                  <td className="td-lig">{satir.lig_sirasi ?? ''}</td>
+                  
 
                   {/* Taraf Oranları */}
                   <td className="td-odds text-center">
                     {(t?.ev || t?.ber || t?.dep) && (
                       <div className="odds-stack">
                         <div className="odds-main-row">
-                          <OddsCell value={t.ev}  isWinner={t.kazanan === 'ev'}  isLoser={!!t.kazanan && t.kazanan !== 'ev'}  />
+                          <OddsCell value={t.ev}  isWinner={t.kazanan === 'ev'}  isLoser={!!t.kazanan && t.kazanan !== 'ev'} trend={(t as any).ev_trend} />
                           {t.ev && '-'}
-                          <OddsCell value={t.ber} isWinner={t.kazanan === 'ber'} isLoser={!!t.kazanan && t.kazanan !== 'ber'} />
+                          <OddsCell value={t.ber} isWinner={t.kazanan === 'ber'} isLoser={!!t.kazanan && t.kazanan !== 'ber'} trend={(t as any).ber_trend} />
                           {t.ber && '-'}
-                          <OddsCell value={t.dep} isWinner={t.kazanan === 'dep'} isLoser={!!t.kazanan && t.kazanan !== 'dep'} />
+                          <OddsCell value={t.dep} isWinner={t.kazanan === 'dep'} isLoser={!!t.kazanan && t.kazanan !== 'dep'} trend={(t as any).dep_trend} />
                         </div>
-                        {((t as any).ev_acilis || (t as any).ber_acilis || (t as any).dep_acilis) && (
-                          <div className="odds-sub-row" title="Açılış Oranları">
-                            Aç: {(t as any).ev_acilis || '-'}-{(t as any).ber_acilis || '-'}-{(t as any).dep_acilis || '-'}
-                          </div>
-                        )}
                       </div>
                     )}
                   </td>
 
-                  {/* Alt / Üst */}
+                  {/* 2.5 Alt / Üst */}
                   <td className="td-altust col-highlight text-center">
                     {(au?.alt || au?.ust) && (
                       <div className="odds-stack">
@@ -193,43 +346,13 @@ export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeR
                           {au.alt && '-'}
                           <OddsCell value={au.ust} isWinner={au.kazanan === 'ust'} isLoser={!!au.kazanan && au.kazanan !== 'ust'} />
                         </div>
-                        {((au as any).alt_acilis || (au as any).ust_acilis) && (
-                          <div className="odds-sub-row" title="Açılış Oranları">
-                            Aç: {(au as any).alt_acilis || '-'}-{(au as any).ust_acilis || '-'}
-                          </div>
-                        )}
                       </div>
                     )}
                   </td>
 
-                  {/* Var / Yok */}
-                  <td className="td-varyok col-highlight text-center">
-                    {(vy?.var || vy?.yok) && (
-                      <div className="odds-stack">
-                        <div className="odds-main-row">
-                          <OddsCell value={vy.var} isWinner={vy.kazanan === 'var'} isLoser={!!vy.kazanan && vy.kazanan !== 'var'} />
-                          {vy.var && '-'}
-                          <OddsCell value={vy.yok} isWinner={vy.kazanan === 'yok'} isLoser={!!vy.kazanan && vy.kazanan !== 'yok'} />
-                        </div>
-                        {((vy as any).var_acilis || (vy as any).yok_acilis) && (
-                          <div className="odds-sub-row" title="Açılış Oranları">
-                            Aç: {(vy as any).var_acilis || '-'}-{(vy as any).yok_acilis || '-'}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </td>
+                  
 
-                  {/* Ortalama */}
-                  <td className="td-avg">{satir.ortalama ?? ''}</td>
-
-                  {/* Korner */}
-                  <td className="td-korner col-highlight">{satir.korner_display ?? ''}</td>
-
-                  {/* i/m */}
-                  <td className={`td-im${satir.im_renk ? ` ${satir.im_renk}` : ''}`}>
-                    {satir.im_sonuc ?? ''}
-                  </td>
+                  
                 </tr>
               );
             })}
@@ -265,11 +388,11 @@ function CardDisplay({ display }: { display: string }) {
   const redNum = parseInt(red, 10) || 0;
   return (
     <>
-      <span className="card-yellow">{yh}</span>
+      <span className="card-yellow">🟨 {yh}</span>
       {' - '}
       <span className="card-yellow">{ya}</span>
       {' - '}
-      <span className={redNum > 0 ? 'card-red' : ''}>{red}</span>
+      <span className={redNum > 0 ? 'card-red' : ''}>{redNum > 0 ? `🟥 ${red}` : red}</span>
     </>
   );
 }

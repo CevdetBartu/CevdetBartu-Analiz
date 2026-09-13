@@ -5,6 +5,8 @@ Tablo: scraper_state — hangi tarihler işlendi, durum takibi
 """
 
 import sqlite3
+import os
+import json
 import logging
 from typing import Optional
 from config import DB_PATH
@@ -62,6 +64,18 @@ def init_db() -> None:
                 ust_orani_acilis REAL,
                 kg_var_acilis    REAL,
                 kg_yok_acilis    REAL,
+                alt_orani_35        REAL,          -- 3.5 Altı
+                ust_orani_35        REAL,          -- 3.5 Üstü
+                alt_orani_35_acilis REAL,
+                ust_orani_35_acilis REAL,
+                iy_alt_orani_15        REAL,          -- İlk Yarı 1.5 Altı
+                iy_ust_orani_15        REAL,          -- İlk Yarı 1.5 Üstü
+                iy_alt_orani_15_acilis REAL,
+                iy_ust_orani_15_acilis REAL,
+                iy_alt_orani_05        REAL,          -- İlk Yarı 0.5 Altı
+                iy_ust_orani_05        REAL,          -- İlk Yarı 0.5 Üstü
+                iy_alt_orani_05_acilis REAL,
+                iy_ust_orani_05_acilis REAL,
                 kaynak           TEXT DEFAULT 'sofascore',
                 kaynak_id        INTEGER,       -- SofaScore event ID
                 olusturma_tarihi TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -78,6 +92,24 @@ def init_db() -> None:
             ("ust_orani_acilis", "REAL"),
             ("kg_var_acilis", "REAL"),
             ("kg_yok_acilis", "REAL"),
+            ("alt_orani_35", "REAL"),
+            ("ust_orani_35", "REAL"),
+            ("alt_orani_35_acilis", "REAL"),
+            ("ust_orani_35_acilis", "REAL"),
+            ("iy_alt_orani_15", "REAL"),
+            ("iy_ust_orani_15", "REAL"),
+            ("iy_alt_orani_15_acilis", "REAL"),
+            ("iy_ust_orani_15_acilis", "REAL"),
+            ("iy_alt_orani_05", "REAL"),
+            ("iy_ust_orani_05", "REAL"),
+            ("iy_alt_orani_05_acilis", "REAL"),
+            ("iy_ust_orani_05_acilis", "REAL"),
+            ("kita", "TEXT"),
+            ("lig_seviyesi", "TEXT"),
+            ("teknik_direktor_ev", "TEXT"),
+            ("teknik_direktor_dep", "TEXT"),
+            ("hakem", "TEXT"),
+            ("stadyum", "TEXT"),
         ]
         for name, dtype in cols:
             try:
@@ -131,7 +163,11 @@ def upsert_match(row: dict, conn=None) -> bool:
              ort_min, ort_max,
              oran_1_acilis, oran_x_acilis, oran_2_acilis,
              alt_orani_acilis, ust_orani_acilis, kg_var_acilis, kg_yok_acilis,
-             kaynak, kaynak_id)
+             alt_orani_35, ust_orani_35, alt_orani_35_acilis, ust_orani_35_acilis,
+             iy_alt_orani_15, iy_ust_orani_15, iy_alt_orani_15_acilis, iy_ust_orani_15_acilis,
+             iy_alt_orani_05, iy_ust_orani_05, iy_alt_orani_05_acilis, iy_ust_orani_05_acilis,
+             kaynak, kaynak_id,
+             kita, lig_seviyesi, teknik_direktor_ev, teknik_direktor_dep, hakem, stadyum)
         VALUES
             (:tarih, :saat, :lig, :ev_sahibi, :deplasman,
              :devre_skoru, :mac_skoru, :onceki_skorlar,
@@ -142,7 +178,11 @@ def upsert_match(row: dict, conn=None) -> bool:
              :ort_min, :ort_max,
              :oran_1_acilis, :oran_x_acilis, :oran_2_acilis,
              :alt_orani_acilis, :ust_orani_acilis, :kg_var_acilis, :kg_yok_acilis,
-             :kaynak, :kaynak_id)
+             :alt_orani_35, :ust_orani_35, :alt_orani_35_acilis, :ust_orani_35_acilis,
+             :iy_alt_orani_15, :iy_ust_orani_15, :iy_alt_orani_15_acilis, :iy_ust_orani_15_acilis,
+             :iy_alt_orani_05, :iy_ust_orani_05, :iy_alt_orani_05_acilis, :iy_ust_orani_05_acilis,
+             :kaynak, :kaynak_id,
+             :kita, :lig_seviyesi, :teknik_direktor_ev, :teknik_direktor_dep, :hakem, :stadyum)
         ON CONFLICT(ev_sahibi, deplasman, tarih) DO UPDATE SET
             devre_skoru = COALESCE(excluded.devre_skoru, devre_skoru),
             mac_skoru = CASE WHEN excluded.mac_skoru != '?:?' THEN excluded.mac_skoru ELSE mac_skoru END,
@@ -151,6 +191,9 @@ def upsert_match(row: dict, conn=None) -> bool:
             kirmizi_kart = COALESCE(excluded.kirmizi_kart, kirmizi_kart),
             korner_ev = COALESCE(excluded.korner_ev, korner_ev),
             korner_dep = COALESCE(excluded.korner_dep, korner_dep),
+            lig_sira_ev = COALESCE(excluded.lig_sira_ev, lig_sira_ev),
+            lig_sira_dep = COALESCE(excluded.lig_sira_dep, lig_sira_dep),
+            toplam_takim = COALESCE(excluded.toplam_takim, toplam_takim),
             oran_1 = COALESCE(excluded.oran_1, oran_1),
             oran_x = COALESCE(excluded.oran_x, oran_x),
             oran_2 = COALESCE(excluded.oran_2, oran_2),
@@ -165,8 +208,32 @@ def upsert_match(row: dict, conn=None) -> bool:
             ust_orani_acilis = COALESCE(excluded.ust_orani_acilis, ust_orani_acilis),
             kg_var_acilis = COALESCE(excluded.kg_var_acilis, kg_var_acilis),
             kg_yok_acilis = COALESCE(excluded.kg_yok_acilis, kg_yok_acilis),
-            im_6 = COALESCE(excluded.im_6, im_6)
+            alt_orani_35 = COALESCE(excluded.alt_orani_35, alt_orani_35),
+            ust_orani_35 = COALESCE(excluded.ust_orani_35, ust_orani_35),
+            alt_orani_35_acilis = COALESCE(excluded.alt_orani_35_acilis, alt_orani_35_acilis),
+            ust_orani_35_acilis = COALESCE(excluded.ust_orani_35_acilis, ust_orani_35_acilis),
+            iy_alt_orani_15 = COALESCE(excluded.iy_alt_orani_15, iy_alt_orani_15),
+            iy_ust_orani_15 = COALESCE(excluded.iy_ust_orani_15, iy_ust_orani_15),
+            iy_alt_orani_15_acilis = COALESCE(excluded.iy_alt_orani_15_acilis, iy_alt_orani_15_acilis),
+            iy_ust_orani_15_acilis = COALESCE(excluded.iy_ust_orani_15_acilis, iy_ust_orani_15_acilis),
+            iy_alt_orani_05 = COALESCE(excluded.iy_alt_orani_05, iy_alt_orani_05),
+            iy_ust_orani_05 = COALESCE(excluded.iy_ust_orani_05, iy_ust_orani_05),
+            iy_alt_orani_05_acilis = COALESCE(excluded.iy_alt_orani_05_acilis, iy_alt_orani_05_acilis),
+            iy_ust_orani_05_acilis = COALESCE(excluded.iy_ust_orani_05_acilis, iy_ust_orani_05_acilis),
+            im_6 = COALESCE(excluded.im_6, im_6),
+            kita = COALESCE(excluded.kita, kita),
+            lig_seviyesi = COALESCE(excluded.lig_seviyesi, lig_seviyesi),
+            teknik_direktor_ev = COALESCE(excluded.teknik_direktor_ev, teknik_direktor_ev),
+            teknik_direktor_dep = COALESCE(excluded.teknik_direktor_dep, teknik_direktor_dep),
+            hakem = COALESCE(excluded.hakem, hakem),
+            stadyum = COALESCE(excluded.stadyum, stadyum)
     """
+    
+    # Yeni eklenecek key'ler row içinde yoksa None olarak verelim (Geriye dönük uyumluluk)
+    for key in ['kita', 'lig_seviyesi', 'teknik_direktor_ev', 'teknik_direktor_dep', 'hakem', 'stadyum']:
+        if key not in row:
+            row[key] = None
+
     my_conn = conn if conn else get_conn()
     try:
         cur = my_conn.execute(sql, row)
@@ -199,6 +266,11 @@ def get_stats() -> dict:
         ).fetchone()
         oldest = oldest[0] if oldest else None
         newest = newest[0] if newest else None
+
+        # Check user custom configured start date from custom_settings.json
+        custom_start = get_custom_setting("custom_start_date")
+        en_eski_final = custom_start if custom_start else oldest
+
         with_odds = conn.execute(
             "SELECT COUNT(*) FROM gecmis_maclar WHERE oran_1 IS NOT NULL"
         ).fetchone()[0]
@@ -206,8 +278,10 @@ def get_stats() -> dict:
         return {
             "total_mac":  total,
             "oranli_mac": with_odds,
-            "en_eski":    oldest,
+            "en_eski":    en_eski_final,
+            "en_eski_db": oldest,
             "en_yeni":    newest,
+            "custom_start_date": custom_start,
             "ligler":     [{"lig": r["lig"], "mac": r["n"]} for r in by_league],
         }
     finally:
@@ -217,19 +291,96 @@ def get_stats() -> dict:
 def get_state(key: str, default: Optional[str] = None) -> Optional[str]:
     conn = get_conn()
     try:
-        row = conn.execute("SELECT value FROM scraper_state WHERE key=?", (key,)).fetchone()
-        return row["value"] if row else default
+        cur = conn.execute("SELECT value FROM scraper_state WHERE key = ?", (key,))
+        row = cur.fetchone()
+        return row[0] if row else default
+    except Exception:
+        return default
     finally:
         conn.close()
-
 
 def set_state(key: str, value: str) -> None:
     conn = get_conn()
     try:
-        conn.execute(
-            "INSERT OR REPLACE INTO scraper_state (key, value) VALUES (?, ?)",
-            (key, value)
-        )
+        conn.execute("INSERT OR REPLACE INTO scraper_state (key, value) VALUES (?, ?)", (key, value))
         conn.commit()
+    except Exception as e:
+        logger.error(f"set_state error: {e}")
     finally:
         conn.close()
+
+
+SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "custom_settings.json")
+
+def get_custom_setting(key: str, default: Optional[str] = None) -> Optional[str]:
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data.get(key, default)
+        except Exception:
+            pass
+    return default
+
+def set_custom_setting(key: str, value: str) -> None:
+    data = {}
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception:
+            data = {}
+    data[key] = value
+    try:
+        with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logger.error(f"Error saving custom setting: {e}")
+
+
+def clean_zero_odds_leagues(conn=None) -> int:
+    """
+    Sıfır Oranlı Lig Filtresi:
+    Hiçbir maçında oran verisi (oran_1, oran_x, oran_2, oran_1_acilis, alt_orani)
+    olmayan ligleri veritabanından tamamen siler.
+    Ancak en az 1 maçında bile oran olan liglere dokunmaz.
+    Döndürür: Silinen maç sayısı.
+    """
+    import time
+    sql = """
+        DELETE FROM gecmis_maclar
+        WHERE lig IN (
+            SELECT lig
+            FROM gecmis_maclar
+            GROUP BY lig
+            HAVING COUNT(oran_1) = 0
+               AND COUNT(oran_x) = 0
+               AND COUNT(oran_2) = 0
+               AND COUNT(oran_1_acilis) = 0
+               AND COUNT(alt_orani) = 0
+        )
+    """
+    for attempt in range(5):
+        my_conn = conn if conn else get_conn()
+        try:
+            cur = my_conn.execute(sql)
+            deleted_count = cur.rowcount
+            if not conn:
+                my_conn.commit()
+            if deleted_count > 0:
+                logger.info(f"Sıfır oranlı lig filtresi uygulandı: {deleted_count} maç veritabanından temizlendi.")
+            return deleted_count
+        except sqlite3.OperationalError as e:
+            if "locked" in str(e).lower() and attempt < 4:
+                time.sleep(1.5)
+                continue
+            logger.error(f"clean_zero_odds_leagues hatası: {e}")
+            return 0
+        except Exception as e:
+            logger.error(f"clean_zero_odds_leagues hatası: {e}")
+            return 0
+        finally:
+            if not conn:
+                my_conn.close()
+    return 0
+

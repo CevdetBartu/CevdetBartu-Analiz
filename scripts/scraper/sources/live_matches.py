@@ -1,251 +1,208 @@
 import logging
-import sys
-import os
+import urllib.request
+import re
+import json
+import ssl
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from sessions import safe_get
-from config import SOFASCORE_TOURNAMENTS
-
 logger = logging.getLogger("scraper.live_matches")
 
-SYSTEM_TOURNAMENT_IDS = set(SOFASCORE_TOURNAMENTS.values())
+# Global in-memory cache for live matches rolling window history
+live_history = {}
 
-def frac_to_dec(frac_str):
-    if not frac_str:
-        return None
-    try:
-        if "/" in frac_str:
-            p1, p2 = frac_str.split("/")
-            return round(float(p1) / float(p2) + 1.0, 2)
-        return round(float(frac_str) + 1.0, 2)
-    except Exception:
-        return None
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
 
-def fetch_match_details(event):
-    eid = event.get("id")
-    home_name = event.get("homeTeam", {}).get("name")
-    away_name = event.get("awayTeam", {}).get("name")
-    
-    # Calculate live minute
-    status_time = event.get("statusTime", {})
-    timestamp = status_time.get("timestamp")
-    initial = status_time.get("initial", 0)
-    
-    current_timestamp = int(time.time())
-    
-    if timestamp:
-        elapsed_seconds = current_timestamp - timestamp
-        minute = int((elapsed_seconds + initial) / 60)
-        max_seconds = status_time.get("max", 5400)
-        max_minutes = int(max_seconds / 60)
-        minute = min(minute, max_minutes)
-        # Prevent minute being negative or 0
-        minute = max(1, minute)
-    else:
-        minute = 45 # Default fallback
+def parse_flashscore_feed(feed_str):
+    parts = feed_str.split('~')
+    stats = {}
+    is_match_section = True
+    for part in parts:
+        cleaned = re.sub(r'[^\x20-\x7E]+', '|', part)
+        if not cleaned.startswith('|'): cleaned = '|' + cleaned
+        if not cleaned.endswith('|'): cleaned = cleaned + '|'
         
-    # 1. Fetch statistics
-    stats_url = f"https://api.sofascore.com/api/v1/event/{eid}/statistics"
-    stats_data = safe_get(stats_url, is_sub=True) or {}
-    
-    # 2. Fetch odds
-    odds_url = f"https://api.sofascore.com/api/v1/event/{eid}/odds/1/all"
-    odds_data = safe_get(odds_url, is_sub=True) or {}
-    
-    # Process Statistics
-    stats_map = {
-        "possession_h": 50, "possession_a": 50,
-        "shots_target_h": 0, "shots_target_a": 0,
-        "shots_off_h": 0, "shots_off_a": 0,
-        "corners_h": 0, "corners_a": 0,
-        "yellow_h": 0, "yellow_a": 0,
-        "red_h": 0, "red_a": 0,
-        "fouls_h": 0, "fouls_a": 0,
-        "touches_in_box_h": 0, "touches_in_box_a": 0,
-        "final_third_h": 0, "final_third_a": 0,
-        "big_chances_h": 0, "big_chances_a": 0,
-        "saves_h": 0, "saves_a": 0,
-        "blocked_shots_h": 0, "blocked_shots_a": 0
-    }
-    
-    # Try parsing period ALL stats
-    for p in stats_data.get("statistics", []):
-        if p.get("period") == "ALL":
-            for g in p.get("groups", []):
-                for item in g.get("statisticsItems", []):
-                    key = item.get("key")
-                    h_val = item.get("homeValue", 0)
-                    a_val = item.get("awayValue", 0)
-                    
-                    if key == "ballPossession":
-                        stats_map["possession_h"] = h_val
-                        stats_map["possession_a"] = a_val
-                    elif key == "shotsOnGoal":
-                        stats_map["shots_target_h"] = h_val
-                        stats_map["shots_target_a"] = a_val
-                    elif key == "totalShotsOnGoal":
-                        stats_map["shots_total_h"] = h_val
-                        stats_map["shots_total_a"] = a_val
-                    elif key == "cornerKicks":
-                        stats_map["corners_h"] = h_val
-                        stats_map["corners_a"] = a_val
-                    elif key == "yellowCards":
-                        stats_map["yellow_h"] = h_val
-                        stats_map["yellow_a"] = a_val
-                    elif key == "redCards":
-                        stats_map["red_h"] = h_val
-                        stats_map["red_a"] = a_val
-                    elif key == "fouls":
-                        stats_map["fouls_h"] = h_val
-                        stats_map["fouls_a"] = a_val
-                    elif key == "touchesInOppBox":
-                        stats_map["touches_in_box_h"] = h_val
-                        stats_map["touches_in_box_a"] = a_val
-                    elif key == "finalThirdEntries":
-                        stats_map["final_third_h"] = h_val
-                        stats_map["final_third_a"] = a_val
-                    elif key == "bigChanceCreated":
-                        stats_map["big_chances_h"] = h_val
-                        stats_map["big_chances_a"] = a_val
-                    elif key == "goalkeeperSaves":
-                        stats_map["saves_h"] = h_val
-                        stats_map["saves_a"] = a_val
-                    elif key == "blockedScoringAttempt":
-                        stats_map["blocked_shots_h"] = h_val
-                        stats_map["blocked_shots_a"] = a_val
-
-    # Post process shots off target
-    stats_map["shots_off_h"] = max(0, stats_map.get("shots_total_h", 0) - stats_map["shots_target_h"])
-    stats_map["shots_off_a"] = max(0, stats_map.get("shots_total_a", 0) - stats_map["shots_target_a"])
-    
-    # Calculate Live Pressure Index (LPI)
-    pressure_h = (stats_map["shots_target_h"] * 10) + (stats_map["shots_off_h"] * 5) + (stats_map["corners_h"] * 3)
-    pressure_a = (stats_map["shots_target_a"] * 10) + (stats_map["shots_off_a"] * 5) + (stats_map["corners_a"] * 3)
-    
-    total_pressure = pressure_h + pressure_a
-    if total_pressure > 0:
-        rel_h = round((pressure_h / total_pressure) * 100)
-        rel_a = 100 - rel_h
-    else:
-        rel_h, rel_a = 50, 50
-        
-    tempo = min(100, round((total_pressure / minute) * 35))
-    
-    # Calculate Team Game Index (TGI) activity per minute
-    # tgi = (shots_on_target * 15) + (shots_off_target * 6) + (corners * 5) + (touches_in_box * 3) + (final_third_entries * 1.5)
-    tgi_h = (stats_map["shots_target_h"] * 15) + (stats_map["shots_off_h"] * 6) + (stats_map["corners_h"] * 5) + (stats_map["touches_in_box_h"] * 3) + (stats_map["final_third_h"] * 1.5)
-    tgi_a = (stats_map["shots_target_a"] * 15) + (stats_map["shots_off_a"] * 6) + (stats_map["corners_a"] * 5) + (stats_map["touches_in_box_a"] * 3) + (stats_map["final_third_a"] * 1.5)
-    
-    act_h = tgi_h / minute
-    act_a = tgi_a / minute
-    
-    def get_color_status(act):
-        if act >= 4.0:
-            return "green"
-        if act >= 2.5:
-            return "blue"
-        if act >= 1.2:
-            return "yellow"
-        return "grey"
-        
-    status_color_h = get_color_status(act_h)
-    status_color_a = get_color_status(act_a)
-    
-    # Process Odds
-    pre_match_odds = {"1": None, "X": None, "2": None}
-    markets = odds_data.get("markets", [])
-    
-    # Priority 1: Market with isLive: false (pre-match odds)
-    pre_market = None
-    for m in markets:
-        if m.get("marketGroup") == "1X2" and not m.get("isLive", True):
-            pre_market = m
-            break
+        if '|SE|' in cleaned:
+            is_match_section = 'match' in cleaned.lower()
             
-    # Priority 2: Fallback to market with isLive: true (but use initialFractionalValue)
-    if not pre_market:
-        for m in markets:
-            if m.get("marketGroup") == "1X2":
-                pre_market = m
-                break
-                
-    if pre_market:
-        choices = pre_market.get("choices", [])
-        is_live_market = pre_market.get("isLive", False)
+        if not is_match_section: continue
         
-        for choice in choices:
-            name = choice.get("name")
-            if name in pre_match_odds:
-                frac = choice.get("initialFractionalValue") if is_live_market else (choice.get("fractionalValue") or choice.get("initialFractionalValue"))
-                dec = frac_to_dec(frac)
-                if dec:
-                    pre_match_odds[name] = dec
+        sg = re.search(r'\|SG\|([^|]+)\|', cleaned)
+        sh = re.search(r'\|SH\|([^|]+)\|', cleaned)
+        si = re.search(r'\|SI\|([^|]+)\|', cleaned)
+        if sg and sh and si:
+            stats[sg.group(1).strip()] = {'home': sh.group(1).strip(), 'away': si.group(1).strip()}
+    return stats
 
-    # Build final details object
-    return {
-        "id": eid,
-        "homeTeam": home_name,
-        "awayTeam": away_name,
-        "league": event.get("tournament", {}).get("name", ""),
-        "country": event.get("tournament", {}).get("category", {}).get("name", ""),
-        "score_h": event.get("homeScore", {}).get("current", 0),
-        "score_a": event.get("awayScore", {}).get("current", 0),
-        "score_ht_h": event.get("homeScore", {}).get("period1", 0),
-        "score_ht_a": event.get("awayScore", {}).get("period1", 0),
-        "minute": minute,
-        "status": event.get("status", {}).get("type", "inprogress"),
-        "status_description": event.get("status", {}).get("description", ""),
-        "stats": stats_map,
-        "pressure": {
-            "home": rel_h,
-            "away": rel_a,
-            "tempo": tempo
-        },
-        "status_color": {
-            "home": status_color_h,
-            "away": status_color_a
-        },
-        "pre_match_odds": pre_match_odds
-    }
+def safe_float(s):
+    if not s: return 0.0
+    try:
+        return float(s.replace('%', '').strip())
+    except Exception:
+        return 0.0
+
+def safe_int(s):
+    if not s: return 0
+    try:
+        return int(s.replace('%', '').strip())
+    except Exception:
+        return 0
+
+def process_single_match(match_info):
+    mid = match_info['id']
+    url = f'https://m.flashscore.com/match/{mid}/?t=stats'
+    raw_stats = {}
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, context=ctx, timeout=5) as resp:
+            html = resp.read().decode('utf-8')
+        env = re.search(r'window\.environment\s*=\s*(\{.*?\});', html, flags=re.DOTALL)
+        if env:
+            feed = json.loads(env.group(1)).get('props', {}).get('feed', '')
+            raw_stats = parse_flashscore_feed(feed)
+            
+        # Also fetch summary to get HT score
+        req_sum = urllib.request.Request(f'https://m.flashscore.com/match/{mid}/', headers=headers)
+        with urllib.request.urlopen(req_sum, context=ctx, timeout=5) as resp_sum:
+            sum_html = resp_sum.read().decode('utf-8')
+        m_ht = re.search(r'<h4>1st Half:\s*<b>(\d+)-(\d+)</b></h4>', sum_html)
+        if m_ht:
+            match_info['score_ht_h'] = int(m_ht.group(1))
+            match_info['score_ht_a'] = int(m_ht.group(2))
+            
+        m_odds = re.search(r'<p class="p-set odds-detail[^"]*">.*?<a[^>]*>([\d\.]+)</a>\s*\|\s*<a[^>]*>([\d\.]+)</a>\s*\|\s*<a[^>]*>([\d\.]+)</a>', sum_html)
+        if m_odds:
+            match_info['pre_match_odds'] = {
+                "1": m_odds.group(1),
+                "X": m_odds.group(2),
+                "2": m_odds.group(3)
+            }
+
+
+    except Exception as e:
+        logger.debug(f"Stats fetch error for {mid}: {e}")
+
+    # Map to standard format
+    s = {}
+    def get_val(key, side, func=safe_int):
+        return func(raw_stats.get(key, {}).get(side, '0'))
+        
+    s['possession_h'] = get_val('Ball possession', 'home')
+    s['possession_a'] = get_val('Ball possession', 'away')
+    s['shots_target_h'] = get_val('Shots on target', 'home')
+    s['shots_target_a'] = get_val('Shots on target', 'away')
+    s['shots_off_h'] = get_val('Shots off target', 'home')
+    s['shots_off_a'] = get_val('Shots off target', 'away')
+    s['shots_total_h'] = get_val('Total shots', 'home')
+    s['shots_total_a'] = get_val('Total shots', 'away')
+    s['corners_h'] = get_val('Corner kicks', 'home')
+    s['corners_a'] = get_val('Corner kicks', 'away')
+    s['yellow_h'] = get_val('Yellow cards', 'home')
+    s['yellow_a'] = get_val('Yellow cards', 'away')
+    s['red_h'] = get_val('Red cards', 'home')
+    s['red_a'] = get_val('Red cards', 'away')
+    s['fouls_h'] = get_val('Fouls', 'home')
+    s['fouls_a'] = get_val('Fouls', 'away')
+    
+    # Advanced / xG metrics
+    s['xg_h'] = get_val('Expected goals (xG)', 'home', safe_float)
+    s['xg_a'] = get_val('Expected goals (xG)', 'away', safe_float)
+    s['big_chances_h'] = get_val('Big chances', 'home')
+    s['big_chances_a'] = get_val('Big chances', 'away')
+    s['touches_in_box_h'] = get_val('Touches in opposition box', 'home')
+    s['touches_in_box_a'] = get_val('Touches in opposition box', 'away')
+    s['shots_inside_box_h'] = get_val('Shots inside the box', 'home')
+    s['shots_inside_box_a'] = get_val('Shots inside the box', 'away')
+    
+    match_info['stats'] = s
+    
+    # Calculate Pressing / Alarm Colors
+    minute_str = match_info['minute']
+    minute = safe_int(minute_str) if str(minute_str).isdigit() else 45
+    if '+' in str(minute_str):
+        minute = safe_int(str(minute_str).split('+')[0])
+
+    match_info['status_color'] = {'home': 'gray', 'away': 'gray'}
+    match_info['pressure'] = {'home': 0, 'away': 0, 'tempo': 0}
+    
+    if minute >= 10:
+        # Simple Pressing Index (Shots on Target + Corners + Big Chances)
+        press_h = s['shots_target_h'] * 2 + s['corners_h'] * 1.5 + s['big_chances_h'] * 3 + s['shots_inside_box_h']
+        press_a = s['shots_target_a'] * 2 + s['corners_a'] * 1.5 + s['big_chances_a'] * 3 + s['shots_inside_box_a']
+        tempo = press_h + press_a + (s['shots_total_h'] + s['shots_total_a'])
+        
+        match_info['pressure'] = {
+            'home': round(press_h, 1),
+            'away': round(press_a, 1),
+            'tempo': round(tempo, 1)
+        }
+        
+        # ALARM LOGIC (Green = Heavy Pressure, Yellow = Moderate Pressure)
+        # Condition for Home Green:
+        # Either (xG > 1.2 & score == 0) OR (Big Chances >= 2 & score == 0) OR (corners > 6 & shots on target >= 5)
+        if match_info['score_h'] == 0 and (s['xg_h'] >= 1.2 or s['big_chances_h'] >= 2):
+            match_info['status_color']['home'] = 'green'
+        elif s['possession_h'] > 60 and (s['shots_target_h'] >= 4 or s['corners_h'] >= 5):
+            match_info['status_color']['home'] = 'yellow'
+            
+        if match_info['score_a'] == 0 and (s['xg_a'] >= 1.2 or s['big_chances_a'] >= 2):
+            match_info['status_color']['away'] = 'green'
+        elif s['possession_a'] > 60 and (s['shots_target_a'] >= 4 or s['corners_a'] >= 5):
+            match_info['status_color']['away'] = 'yellow'
+            
+    return match_info
 
 def get_live_matches_data():
-    url = "https://api.sofascore.com/api/v1/sport/football/events/live"
+    logger.info("Fetching live matches from Flashscore (100% FS Fallback Engine)...")
     try:
-        data = safe_get(url)
-        if not data:
-            return []
-            
-        events = data.get("events", [])
-        if not events:
-            return []
-            
-        # Sadece sistemimizdeki popüler liglere ait ve oynanmakta olan maçları filtrele
-        live_events = [
-            ev for ev in events 
-            if ev.get("status", {}).get("type", "") == "inprogress"
-            and ev.get("tournament", {}).get("uniqueTournament", {}).get("id") in SYSTEM_TOURNAMENT_IDS
-        ]
-        
-        # Limit details queries
-        live_events = live_events[:30]
-        
-        results = []
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            future_to_event = {
-                executor.submit(fetch_match_details, ev): ev 
-                for ev in live_events
-            }
-            for future in future_to_event:
-                try:
-                    res = future.result()
-                    if res:
-                        results.append(res)
-                except Exception as e:
-                    logger.error(f"Error fetching match details: {e}")
-                    
-        return results
+        req = urllib.request.Request("https://m.flashscore.com/?s=2", headers=headers)
+        with urllib.request.urlopen(req, context=ctx, timeout=8) as response:
+            html = response.read().decode("utf-8")
     except Exception as e:
-        logger.error(f"Error in get_live_matches_data: {e}")
+        logger.error(f"Error fetching flashscore homepage: {e}")
         return []
+        
+    matches = []
+    leagues = html.split('<h4>')
+    for l in leagues[1:]:
+        league_name = l.split('</h4>')[0].strip()
+        league_name = re.sub(r'<[^>]+>', '', league_name).strip()
+        if league_name.endswith("Standings"):
+            league_name = league_name[:-9].strip()
+            
+        for match_chunk in re.split(r'<br />|<br/>', l):
+            if 'class="live"' in match_chunk:
+                m = re.search(r'<span class="live">([^<]+)</span>([^<]+)<a href="/match/([^/]+)/[^>]*>([^<]+)</a>', match_chunk)
+                if m:
+                    minute = m.group(1).strip()
+                    teams = m.group(2).strip()
+                    match_id = m.group(3)
+                    score = m.group(4).strip()
+                    
+                    try:
+                        home, away = teams.split(' - ', 1)
+                        home_score, away_score = score.split('-', 1)
+                        matches.append({
+                            'id': match_id,
+                            'homeTeam': home.strip(),
+                            'awayTeam': away.strip(),
+                            'league': league_name,
+                            'score_h': int(home_score.strip()),
+                            'score_a': int(away_score.strip()),
+                            'minute': minute,
+                            'country': league_name.split(':')[0] if ':' in league_name else 'World',
+                            'status': 'inprogress',
+                            'status_description': minute
+                        })
+                    except Exception as e:
+                        pass
+                        
+    # Fetch stats concurrently
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        final_matches = list(executor.map(process_single_match, matches))
+        
+    logger.info(f"Successfully processed {len(final_matches)} live matches from Flashscore.")
+    return final_matches

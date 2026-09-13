@@ -15,8 +15,11 @@ router.get("/today-matches", async (req, res): Promise<void> => {
   if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
     targetDate = dateParam;
   } else {
-    const now = new Date();
-    targetDate = now.toISOString().slice(0, 10);
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    targetDate = `${year}-${month}-${day}`;
   }
 
   const result = getTodayMatchesFromDb(targetDate);
@@ -25,7 +28,7 @@ router.get("/today-matches", async (req, res): Promise<void> => {
 
 router.post("/today-matches/refresh", async (req, res): Promise<void> => {
   try {
-    const dateParam = typeof req.body.date === "string" ? req.body.date : undefined;
+    const dateParam = typeof req.body?.date === "string" ? req.body.date : undefined;
     const result = await refreshTodayMatches(dateParam);
     res.json(result);
   } catch (e: any) {

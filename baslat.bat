@@ -1,25 +1,37 @@
-@echo off
-title CevdetBartu Futbol Analiz Sistemi
-chcp 65001 > nul
-cd /d "c:\Users\Okyanus\Downloads\ReplitExport-saraccevdetbart\Match-Data-Hub"
+﻿@echo off
+echo =======================================================
+echo CevdetBartu Futbol Analiz Sistemi Baslatiliyor...
+echo =======================================================
+echo.
+echo Lutfen acilan 4 siyah ekrani (terminali) KAPATMAYIN.
+echo Arka planda calismalari gerekiyor.
+echo.
 
-echo ====================================================
-echo   CEVDETBARTU FUTBOL ANALIZ SISTEMI BASLATILIYOR
-echo ====================================================
+REM 1. API Sunucusunu (Arka Ucu) Baslat
+echo 1. API Sunucusu (Backend - Port 8080) Baslatiliyor...
+start "API Sunucusu (Backend)" cmd /k "pnpm --filter @workspace/api-server run dev"
 
-echo 1. API Sunucusu Baslatiliyor...
-start "API Sunucusu" cmd /k "pnpm --filter @workspace/api-server run dev"
+REM 2. Frontend'i (On Yuz) Baslat
+echo 2. Arayuz (Frontend - Port 5173) Baslatiliyor...
+start "Arayuz (Frontend)" cmd /k "pnpm --filter @workspace/football-app run dev"
 
-echo 2. Arayüz (Frontend) Baslatiliyor...
-start "Arayüz (Frontend)" cmd /k "pnpm --filter @workspace/football-app run dev"
+REM 3. Python Flask ve Scraper'i Baslat
+echo 3. Python Scraper ve Flask API Baslatiliyor...
+start "Python Scraper" cmd /k "python scripts\scraper\run.py"
 
-echo 3. Veri Çekici (Scraper) Baslatiliyor...
-start "Veri Cekici (Scraper)" cmd /k "set PYTHONIOENCODING=utf-8 && .venv\Scripts\python scripts/scraper/run.py"
+REM 4. Mackolik Gecmis Veri Madencisi (Gecmise donuk tum maclari ceker)
+echo 4. Mackolik Veritabani Madencisi Baslatiliyor...
+start "Mackolik Madencisi" cmd /c "gecmis_maclari_devam_ettir.bat"
 
-echo ====================================================
-echo   Sistem basariyla baslatildi!
-echo   Tarayicinizdan http://localhost:5173 adresine girin.
-echo   Bu pencereyi kapatabilirsiniz, diger pencereler 
-echo   arka planda calismaya devam edecektir.
-echo ====================================================
-timeout /t 5
+echo.
+echo =======================================================
+echo Tum servisler baslatildi!
+echo 5 saniye icinde tarayiciniz otomatik olarak acilacaktir...
+echo =======================================================
+timeout /t 5 >nul
+
+REM Uygulamayi varsayilan tarayicida ac
+start http://localhost:5173/
+
+echo Sistem basariyla acildi. Bu pencereyi kapatabilirsiniz (diger 4 siyah ekrani KESINLIKLE kapatmayin).
+pause
