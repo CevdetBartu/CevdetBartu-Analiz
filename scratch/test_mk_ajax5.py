@@ -1,0 +1,1 @@
+import requests; headers = {'User-Agent': 'Mozilla/5.0', 'Referer': 'https://arsiv.mackolik.com/Iddaa-Programi', 'X-Requested-With': 'XMLHttpRequest'}; r = requests.get('https://arsiv.mackolik.com/AjaxHandlers/IddaaHandler.ashx?type=morebets&id=4543122', headers=headers); print(r.status_code, r.text[:200])

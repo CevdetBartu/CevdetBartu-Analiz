@@ -1,0 +1,1 @@
+import requests, bs4; data={'txtSearch': 'Fenerbahce'}; r = requests.post('https://arsiv.mackolik.com/SearchWithOdds.aspx', data=data, headers={'User-Agent': 'Mozilla/5.0'}); soup = bs4.BeautifulSoup(r.text, 'html.parser'); open('scratch/fener_odds.html', 'w', encoding='utf-8').write(r.text); print(len(r.text))

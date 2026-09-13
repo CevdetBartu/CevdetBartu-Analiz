@@ -1,0 +1,1 @@
+import requests, bs4; r = requests.get('https://arsiv.mackolik.com/Puan-Durumu', headers={'User-Agent': 'Mozilla/5.0'}); soup = bs4.BeautifulSoup(r.text, 'html.parser'); print([a['href'] for a in soup.find_all('a', href=True) if 'Puan-Durumu' in a['href']][:10])

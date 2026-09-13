@@ -1,0 +1,1 @@
+import requests; r = requests.get('https://arsiv.mackolik.com/AjaxHandlers/IddaaHandler.ashx?type=morebets&id=4543122', headers={'User-Agent': 'Mozilla/5.0'}); open('scratch/morebets2.html', 'w', encoding='utf-8').write(r.text)

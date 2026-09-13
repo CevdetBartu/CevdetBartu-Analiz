@@ -1,0 +1,1 @@
+import requests; print(len(requests.get('https://arsiv.mackolik.com/AjaxHandlers/LiveHandler.ashx', headers={'User-Agent': 'Mozilla/5.0'}).text)); print(len(requests.get('https://arsiv.mackolik.com/AjaxHandlers/LiveScoreHandler.ashx', headers={'User-Agent': 'Mozilla/5.0'}).text))

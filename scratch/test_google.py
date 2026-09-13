@@ -1,0 +1,1 @@
+import urllib.request, urllib.parse; html = urllib.request.urlopen('https://html.duckduckgo.com/html/?q=' + urllib.parse.quote('site:mackolik.com puan durumu premier lig')).read().decode('utf-8'); import bs4; soup = bs4.BeautifulSoup(html, 'html.parser'); print([a['href'] for a in soup.find_all('a', class_='result__url')])

@@ -1,0 +1,100 @@
+      else alert(data.error || "Hata oluştu.");
+    } catch (e: any) {
+       alert(e.message);
+    } finally {
+       setAiLoading(false);
+    }
+  };
+
+  const [activeTab, setActiveTab] = React.useState<'ALL' | 'HIGH_SIM' | 'OVER_25' | 'BTTS'>('ALL');
+
+  // Filter rows based on active quick filter tab
+  const filteredSatirlar = tablo_satirlari.filter((satir) => {
+    if (satir.is_target) return true; // Always show target match
+    if (activeTab === 'HIGH_SIM') {
+      const num = parseInt((satir.analiz_yuzde || '').replace(/[^0-9]/g, ''), 10) || 0;
+      return num >= 85;
+    }
+    if (activeTab === 'OVER_25') {
+      const ms = satir.ms_skor || '';
+      if (!ms.includes(':')) return false;
+      const parts = ms.split(':');
+      const g = (parseInt(parts[0], 10) || 0) + (parseInt(parts[1], 10) || 0);
+      return g >= 3;
+    }
+    if (activeTab === 'BTTS') {
+      const ms = satir.ms_skor || '';
+      if (!ms.includes(':')) return false;
+      const parts = ms.split(':');
+      const h = parseInt(parts[0], 10) || 0;
+      const a = parseInt(parts[1], 10) || 0;
+      return h > 0 && a > 0;
+    }
+    return true;
+  });
+
+  return (
+    <div className="analysis-card">
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <div className="analysis-header">
+        <div className="analysis-header-left">
+          <div className="match-datetime">{date}{time ? ` - ${time}` : ''}</div>
+          <div className="match-league">{league}</div>
+          <div className="match-teams">
+            <span className="team-link">{homeTeam}</span>
+            <span className="team-separator"> - </span>
+            <span className="team-link">{awayTeam}</span>
+          </div>
+        </div>
+
+        <div className="analysis-watermark">Analyzed by CevdetBartu</div>
+
+        <div className="analysis-predictions">
+          {tahminler.map((pred, i) => (
+            <div key={i} className="prediction-item">{pred}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Stats Summary Bar ──────────────────────────────────────────────── */}
+      {hasData && (
+        <div className="stats-bar">
+          <span className="stats-bar-label">{ozet.total_mac} referans maç:</span>
+          <StatPill label={ozet.ev_sahibi.label}  color={pctColor(ozet.ev_sahibi.yuzde)}  />
+          <span className="stats-sep">|</span>
+          <StatPill label={ozet.beraberlik.label} color={pctColor(ozet.beraberlik.yuzde)} />
+          <span className="stats-sep">|</span>
+          <StatPill label={ozet.deplasman.label}  color={pctColor(ozet.deplasman.yuzde)}  />
+          <span className="stats-sep">·</span>
+          <StatPill label={ozet.kg_var.label}  color={pctColor(ozet.kg_var.yuzde)}  />
+          <span className="stats-sep">·</span>
+          <StatPill label={ozet.ust_25.label}  color={pctColor(ozet.ust_25.yuzde)}  />
+          {ozet.ust_35 && (
+            <>
+              <span className="stats-sep">·</span>
+              <StatPill label={ozet.ust_35.label}  color={pctColor(ozet.ust_35.yuzde)}  />
+            </>
+          )}
+
+          {ozet.sik_ms && (
+            <>
+              <span className="stats-sep">·</span>
+              <span className="stat-pill" style={{ color: '#a8c4e0' }}>Sık MS: <strong>{ozet.sik_ms}</strong></span>
+            </>
+          )}
+          {ozet.sik_iy && (
+            <>
+              <span className="stats-sep">·</span>
+              <span className="stat-pill" style={{ color: '#a8c4e0' }}>Sık İY: <strong>{ozet.sik_iy}</strong></span>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* AI Commentary Section */}
+      {hasData && (
+        <div style={{ padding: "16px", backgroundColor: "#1e293b", borderBottom: "1px solid var(--border)" }}>
+          {!aiCommentary ? (
+             <button 
+                onClick={generateAICommentary} 
+                disabled={aiLoading}

@@ -1,0 +1,1 @@
+import requests, json, bs4; html = requests.get('https://www.mackolik.com/canli-sonuclar', headers={'User-Agent': 'Mozilla/5.0'}).text; soup = bs4.BeautifulSoup(html, 'html.parser'); print([script.text[:100] for script in soup.find_all('script') if 'window' in script.text or '__' in script.text])

@@ -1,0 +1,43 @@
+{
+  "active_pending": {
+    "hyp_2026-07-20_live_green_alarm_edge": {
+      "id": "hyp_2026-07-20_live_green_alarm_edge",
+      "created_at": "2026-07-20T07:10:00.000000+00:00",
+      "description": "Canlı Maç Basınç Yeşil Alarmı (Threat=25.0, Dakika 15-85), tetiklendikten sonraki 15 dakika içinde Poisson baseline değerinin (~36.2%) üzerinde anlamlı bir gol isabet oranı (t > 1.96, p < 0.05) sergiler.",
+      "market": "live_next_goal_15m",
+      "status": "pending_validation",
+      "validation_window": {
+        "start": "2026-08-01",
+        "end": "2026-08-31"
+      },
+      "interim_note": "In-sample $N=184$ kümesinde baselinedan $+6.19\\%$ yukarıda, 2 maçlık duyarlılık testini geçti. Ağustos out-of-sample doğrulamasını bekliyor."
+    }
+  },
+  "archived_rejected": {
+    "hyp_2026-07-21_continent_gating": {
+      "id": "hyp_2026-07-21_continent_gating",
+      "status": "rejected",
+      "reason": "Tam adımlamasız 131.495 maçlık veritabanında ceza taraması yapıldığında ROI tüm değerlerde negatif alanda kalmış (ROI in [-8.07%, -4.84%]) ve genelleşememiştir."
+    },
+    "hyp_2026-07-21_strict_confidence_gate_70": {
+      "id": "hyp_2026-07-21_strict_confidence_gate_70",
+      "status": "rejected",
+      "reason": "Dönemler arası yüksek kararsızlık (Mayıs +%2.38, Haziran -%11.71) ve N=18 dar örnekleminde 2 maçlık kaymayla ROI'nin negatife düşmesi nedeniyle reddedilmiştir."
+    },
+    "hyp_2026-07-21_ms1_low_odds_filter_130": {
+      "id": "hyp_2026-07-21_ms1_low_odds_filter_130",
+      "status": "rejected",
+      "reason": "Model A zaten p_h * o1 >= 1.05 değer eşiği koyduğu için o1 < 1.40 oranlarına hiç bahis açmamaktadır. Filtre tüm eşiklerde (-%6.73 ile -%7.84 ROI) etkisiz kalmıştır."
+    },
+    "hyp_2026-07-20_2.5_ust_alpha": {
+      "id": "hyp_2026-07-20_2.5_ust_alpha",
+      "status": "rejected",
+      "reason": "Bonferroni-düzeltmeli p=0.03487 > 0.0167 eşiğini geçememiş, ara değerlendirmede p=0.39295 ile reddedilmiştir."
+    },
+    "hyp_2026-07-21_model_d_market_calibration": {
+      "id": "hyp_2026-07-21_model_d_market_calibration",
+      "status": "untested_theoretical_proposal",
+      "reason": "Henüz in-sample backtestten geçirilmemiş teorik öneri. Üretim koduna veya Ağustos out-of-sample aday listesine alınamaz."
+    }
+  }
+}

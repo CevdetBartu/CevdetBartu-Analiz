@@ -8,6 +8,7 @@ import { findSimilarMatches } from "../lib/similarity";
 import { analyze } from "../lib/analyzeEngine";
 import { generateSEOBlogPost } from "../lib/geminiEngine";
 import { requireAdmin } from "../lib/auth";
+import { requireUser } from "../lib/userAuthMiddleware";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = path.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
@@ -32,7 +33,7 @@ router.get("/blog", (req, res) => {
 });
 
 // GET /api/blog/:slug
-router.get("/blog/:slug", (req, res) => {
+router.get("/blog/:slug", requireUser, (req, res) => {
   try {
     const post = db.prepare("SELECT * FROM blog_posts WHERE slug = ?").get(req.params.slug);
     if (!post) {
@@ -114,15 +115,15 @@ router.post("/blog/generate-daily", requireAdmin, async (req, res): Promise<void
 
       // Save to database
       const stats = analyzeData.analiz_ozet;
-      const oranlar = [
-        { isim: "Ev Sahibi (MS1)", deger: parseFloat(stats.ev_sahibi?.yuzde || 0) },
-        { isim: "Beraberlik (MSX)", deger: parseFloat(stats.beraberlik?.yuzde || 0) },
-        { isim: "Deplasman (MS2)", deger: parseFloat(stats.deplasman?.yuzde || 0) },
-        { isim: "2.5 Üst", deger: parseFloat(stats.ust_25?.yuzde || 0) },
-        { isim: "Karşılıklı Gol Var (KG Var)", deger: parseFloat(stats.kg_var?.yuzde || 0) }
+      const edges = [
+        { isim: "Ev Sahibi (MS1)", deger: analyzeData.real_edge_home || -99 },
+        { isim: "Beraberlik (MSX)", deger: analyzeData.real_edge_draw || -99 },
+        { isim: "Deplasman (MS2)", deger: analyzeData.real_edge_away || -99 },
+        { isim: "2.5 Üst", deger: analyzeData.real_edge_over25 || -99 },
+        { isim: "Karşılıklı Gol Var (KG Var)", deger: analyzeData.real_edge_btts || -99 }
       ];
-      oranlar.sort((a, b) => b.deger - a.deger);
-      const prediction = oranlar[0].isim;
+      edges.sort((a, b) => b.deger - a.deger);
+      const prediction = edges[0].isim;
 
       const insertStmt = db.prepare(`
         INSERT INTO blog_posts (match_id, title, content, prediction, slug, category, excerpt, read_time) 
@@ -135,7 +136,7 @@ router.post("/blog/generate-daily", requireAdmin, async (req, res): Promise<void
         blogData.content, 
         prediction,
         blogData.slug,
-        blogData.category,
+        targetMatch.lig,
         blogData.excerpt,
         blogData.read_time
       );

@@ -25,16 +25,28 @@ router.use("/admin", (req, res, next) => {
   next();
 });
 
+import { requireUser } from "../lib/userAuthMiddleware";
+
 router.use(healthRouter);
-router.use(matchesRouter);
+router.use(matchesRouter); // Tarihsel mac verileri
+router.use(todayRouter); // Anasayfa icin lazim
+router.use(spawnRouter);
+router.use(streamProxyRouter);
+
+// Korumali rotalar (Kullanici girisi gerektirir)
+router.use("/analyze", requireUser);
+router.use("/coupon", requireUser);
+router.use("/coupon-of-the-day", requireUser);
+router.use("/basket", requireUser);
+router.use("/live-matches", requireUser);
+router.use("/ai", requireUser);
+
+// Rotalari bagla
 router.use(analyzeRouter);
 router.use(adminRouter);
-router.use(todayRouter);
 router.use(couponRouter);
-router.use(spawnRouter);
 router.use(basketMatchesRouter);
 router.use(liveRouter);
-router.use(streamProxyRouter);
 router.use("/ai", aiRouter);
 router.use(couponWizardRouter);
 

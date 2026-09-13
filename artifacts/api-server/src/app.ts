@@ -5,6 +5,7 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import blogRouter from "./routes/blog";
 import authRouter from "./routes/auth";
+import userAuthRouter from "./routes/userAuth";
 
 const app: Express = express();
 
@@ -40,6 +41,7 @@ const dbPath = path.resolve(__dirnameLocal, "../../scripts/scraper/gecmis_maclar
 
 app.use("/api", router);
 app.use("/api", authRouter);
+app.use("/api/auth", userAuthRouter);
 app.use("/api", blogRouter);
 
 app.get("/sitemap.xml", (req, res) => {

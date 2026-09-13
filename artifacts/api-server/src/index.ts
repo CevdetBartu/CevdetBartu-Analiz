@@ -16,6 +16,29 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
+import Database from "better-sqlite3";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirnameLocal = path.dirname(fileURLToPath(import.meta.url));
+const dbPath = path.resolve(__dirnameLocal, "../../scripts/scraper/gecmis_maclar.db");
+
+// Veritabannda users tablosunu olutur (Yoksa)
+try {
+  const db = new Database(dbPath, { readonly: false });
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  logger.info("Users tablosu kontrol edildi/oluşturuldu.");
+} catch (e: any) {
+  logger.error({ err: e }, "DB users tablo oluturma hatas");
+}
+
 app.listen(port, (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");

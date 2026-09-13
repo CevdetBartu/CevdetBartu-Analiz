@@ -1,0 +1,1 @@
+import requests; r1 = requests.get('https://vd.mackolik.com/livedata?date=26/08/2026'); r2 = requests.get('https://vd.mackolik.com/livedata?date=25/08/2026'); print(len(r1.text), len(r2.text)); print(r1.text[:200] == r2.text[:200])

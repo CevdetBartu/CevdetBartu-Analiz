@@ -10,14 +10,17 @@ interface AnalysisTableProps {
   analyzeResponse: AnalyzeResponse;
 }
 
-function StatPill({ label, color, sapma }: { label: string; color: string; sapma?: number }) {
-  // Sapma 0 ise tam opak (1.0), Sapma 15 ise daha şeffaf (0.4)
-  const opacity = sapma != null ? Math.max(0.3, 1.0 - (sapma / 20.0)) : 1.0;
-  
+function StatPill({ label, color, sapma, isZeroMatches }: { label: string; color: string; sapma?: number; isZeroMatches?: boolean }) {
+  const parts = label.split('%');
+  const title = parts[0]?.trim() || label;
+  const val = parts[1] ? `%${parts[1].trim()}` : '';
+
   return (
-    <span className="stat-pill" style={{ color, opacity }}>
-      {label} {sapma != null && <span style={{ fontSize: '0.85em', opacity: 0.7, marginLeft: '2px' }}>±%{sapma}</span>}
-    </span>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#1e293b', borderTop: `3px solid ${color}`, borderRadius: '6px', padding: '10px 12px', flex: 1, minWidth: '120px', boxShadow: '0 4px 6px rgba(0,0,0,0.2)' }}>
+      <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px', fontWeight: 600, textAlign: 'center' }}>{title}</span>
+      <span style={{ fontSize: '1.3rem', color: color, fontWeight: 800 }}>{val || label}</span>
+      {sapma != null && !isZeroMatches && <span style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>±%{sapma} sapma</span>}
+    </div>
   );
 }
 
@@ -35,6 +38,7 @@ function OddsCell({ value, isWinner, isLoser, trend }: { value: string | null | 
 }
 
 export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeResponse }: AnalysisTableProps) {
+  if (!analyzeResponse) return null;
   const { analiz_ozet: ozet, tahminler, tablo_satirlari } = analyzeResponse;
   const hasData = true; // Always show data panels, even for 0 matches so the fallback stats are visible
 
@@ -104,7 +108,7 @@ export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeR
           </div>
         </div>
 
-        <div className="analysis-watermark">Analyzed by CevdetBartu</div>
+        <div className="analysis-watermark">Analyzed by KargaTahmin</div>
 
         <div className="analysis-predictions">
           {tahminler.map((pred, i) => (
@@ -121,61 +125,54 @@ export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeR
         </div>
       )}
       
-      <div className="stats-bar">
-
-          <span className="stats-bar-label">{ozet.total_mac} referans maç:</span>
-          <StatPill label={ozet.ev_sahibi.label}  color={pctColor(ozet.ev_sahibi.yuzde)} sapma={ozet.ev_sahibi.sapma} isZeroMatches={ozet.total_mac === 0} />
-          <span className="stats-sep">|</span>
-          <StatPill label={ozet.beraberlik.label} color={pctColor(ozet.beraberlik.yuzde)} sapma={ozet.beraberlik.sapma} isZeroMatches={ozet.total_mac === 0} />
-          <span className="stats-sep">|</span>
-          <StatPill label={ozet.deplasman.label}  color={pctColor(ozet.deplasman.yuzde)} sapma={ozet.deplasman.sapma} isZeroMatches={ozet.total_mac === 0} />
-          <span className="stats-sep">·</span>
-          <StatPill label={ozet.kg_var.label}  color={pctColor(ozet.kg_var.yuzde)} sapma={ozet.kg_var.sapma} isZeroMatches={ozet.total_mac === 0} />
-          <span className="stats-sep">·</span>
-          <StatPill label={ozet.ust_25.label}  color={pctColor(ozet.ust_25.yuzde)} sapma={ozet.ust_25.sapma} isZeroMatches={ozet.total_mac === 0} />
-          {ozet.ust_35 && (
-            <>
-              <span className="stats-sep">·</span>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid #1e293b' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 600 }}>İSTATİSTİKSEL ÖZET ({ozet.total_mac} referans maç)</span>
+            {ozet.sik_ms && (
+              <span style={{ fontSize: '0.8rem', backgroundColor: '#334155', padding: '4px 10px', borderRadius: '12px', color: '#e2e8f0' }}>
+                En Sık MS: <strong style={{ color: '#fff' }}>{ozet.sik_ms}</strong>
+                {ozet.sik_iy && <span style={{ marginLeft: '8px', paddingLeft: '8px', borderLeft: '1px solid #475569' }}>İY: <strong>{ozet.sik_iy}</strong></span>}
+              </span>
+            )}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', width: '100%' }}>
+            <StatPill label={ozet.ev_sahibi.label}  color={pctColor(ozet.ev_sahibi.yuzde)} sapma={ozet.ev_sahibi.sapma} isZeroMatches={ozet.total_mac === 0} />
+            <StatPill label={ozet.beraberlik.label} color={pctColor(ozet.beraberlik.yuzde)} sapma={ozet.beraberlik.sapma} isZeroMatches={ozet.total_mac === 0} />
+            <StatPill label={ozet.deplasman.label}  color={pctColor(ozet.deplasman.yuzde)} sapma={ozet.deplasman.sapma} isZeroMatches={ozet.total_mac === 0} />
+            <StatPill label={ozet.kg_var.label}  color={pctColor(ozet.kg_var.yuzde)} sapma={ozet.kg_var.sapma} isZeroMatches={ozet.total_mac === 0} />
+            <StatPill label={ozet.ust_25.label}  color={pctColor(ozet.ust_25.yuzde)} sapma={ozet.ust_25.sapma} isZeroMatches={ozet.total_mac === 0} />
+            {ozet.ust_35 && (
               <StatPill label={ozet.ust_35.label}  color={pctColor(ozet.ust_35.yuzde)} sapma={ozet.ust_35.sapma} isZeroMatches={ozet.total_mac === 0} />
-            </>
-          )}
-
-          {ozet.sik_ms && (
-            <>
-              <span className="stats-sep">·</span>
-              <span className="stat-pill" style={{ color: '#a8c4e0' }}>Sık MS: <strong>{ozet.sik_ms}</strong></span>
-            </>
-          )}
-          {ozet.sik_iy && (
-            <>
-              <span className="stats-sep">·</span>
-              <span className="stat-pill" style={{ color: '#a8c4e0' }}>Sık İY: <strong>{ozet.sik_iy}</strong></span>
-            </>
-          )}
+            )}
+          </div>
         </div>
 
       {/* Model & Calibration Panel */}
       {hasData && (
-        <div style={{ display: "flex", gap: "16px", padding: "12px 16px", backgroundColor: "#0b0f17", borderBottom: "1px solid var(--border)", flexWrap: "wrap" }}>
-           <div style={{ flex: 1, minWidth: "250px", fontSize: "13px", color: "#94a3b8" }}>
-              <strong style={{ color: "#fff", display: "block", marginBottom: "4px" }}>🧪 Algoritma & Ağırlıklar</strong>
-              Hesaplama: <span style={{ color: "#a8c4e0" }}>Öklid Mesafesi (Log-Olasılık)</span><br/>
-              Marj: <span style={{ color: "#a8c4e0" }}>Bookmaker Marjından Arındırılmış (True Prob)</span><br/>
-              Ağırlıklar: <span style={{ color: "#a8c4e0" }}>MS: 1.0 | 2.5 A/Ü: 0.4 | KG: 0.4</span>
+        <div style={{ display: "flex", gap: "16px", padding: "16px 20px", backgroundColor: "#0f172a", borderBottom: "1px solid #1e293b", flexWrap: "wrap" }}>
+           <div style={{ flex: 1, minWidth: "280px", fontSize: "13px", color: "#94a3b8", backgroundColor: '#1e293b', padding: '16px', borderRadius: '8px', border: '1px solid #334155' }}>
+              <strong style={{ color: "#fff", display: "block", marginBottom: "8px", fontSize: "14px" }}>🧪 Algoritma & Ağırlıklar</strong>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Hesaplama:</span> <strong style={{ color: "#e2e8f0" }}>Öklid Mesafesi</strong></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Marj:</span> <strong style={{ color: "#e2e8f0" }}>True Prob. (Arındırılmış)</strong></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Ağırlıklar:</span> <strong style={{ color: "#e2e8f0" }}>MS: 1.0 | A/Ü: 0.4 | KG: 0.4</strong></div>
+              </div>
            </div>
            
            {ozet.lig_dagilimi && Object.keys(ozet.lig_dagilimi).length > 0 && (
-             <div style={{ flex: 1, minWidth: "250px", fontSize: "13px", color: "#94a3b8" }}>
-                <strong style={{ color: "#fff", display: "block", marginBottom: "4px" }}>📊 Lig Dağılımı (Top 3)</strong>
-                {Object.entries(ozet.lig_dagilimi)
-                  .sort((a, b) => b[1] - a[1])
-                  .slice(0, 3)
-                  .map(([lig, count]) => (
-                     <div key={lig} style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
-                       <span>{lig}</span>
-                       <span style={{ color: "#a8c4e0" }}>%{Math.round((count / ozet.total_mac) * 100)}</span>
-                     </div>
-                  ))}
+             <div style={{ flex: 1, minWidth: "280px", fontSize: "13px", color: "#94a3b8", backgroundColor: '#1e293b', padding: '16px', borderRadius: '8px', border: '1px solid #334155' }}>
+                <strong style={{ color: "#fff", display: "block", marginBottom: "8px", fontSize: "14px" }}>📊 Lig Dağılımı (Top 3)</strong>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {Object.entries(ozet.lig_dagilimi)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3)
+                    .map(([lig, count]) => (
+                       <div key={lig} style={{ display: "flex", justifyContent: "space-between" }}>
+                         <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }}>{lig}</span>
+                         <strong style={{ color: "#38bdf8" }}>%{Math.round((count / ozet.total_mac) * 100)}</strong>
+                       </div>
+                    ))}
+                </div>
              </div>
            )}
         </div>
@@ -183,30 +180,35 @@ export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeR
 
       {/* AI Commentary Section */}
       {hasData && (
-        <div style={{ padding: "16px", backgroundColor: "#1e293b", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ padding: '16px 20px', backgroundColor: '#0f172a', borderBottom: '1px solid #1e293b' }}>
           {!aiCommentary ? (
-             <button 
-                onClick={generateAICommentary} 
-                disabled={aiLoading}
-                style={{
-                  background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
-                  color: "#fff",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  fontWeight: "bold",
-                  cursor: aiLoading ? "wait" : "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px"
-                }}
-             >
-                {aiLoading ? "Analiz Yazılıyor..." : "✨ AI Tipster Analizi Oluştur"}
-             </button>
+            <button
+              onClick={generateAICommentary}
+              disabled={aiLoading}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '12px 24px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: 700,
+                cursor: aiLoading ? 'not-allowed' : 'pointer',
+                opacity: aiLoading ? 0.8 : 1,
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                fontSize: '15px',
+                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)'
+              }}
+              onMouseEnter={(e) => !aiLoading && (e.currentTarget.style.transform = 'translateY(-1px)')}
+              onMouseLeave={(e) => !aiLoading && (e.currentTarget.style.transform = 'none')}
+            >
+              <span style={{ fontSize: '18px' }}>✨</span> 
+              {aiLoading ? "Yapay Zeka Analiz Ediyor..." : "AI Tipster Analizi Oluştur"}
+            </button>
           ) : (
              <div style={{ padding: "16px", backgroundColor: "#0f172a", borderRadius: "8px", borderLeft: "4px solid #8b5cf6", position: "relative" }}>
                 <span style={{ position: "absolute", top: "-10px", left: "12px", background: "#8b5cf6", color: "#fff", padding: "2px 8px", borderRadius: "12px", fontSize: "10px", fontWeight: "bold", textTransform: "uppercase" }}>
-                   CevdetBartu AI Tipster
+                   KargaTahmin AI Tipster
                 </span>
                 <p style={{ margin: 0, color: "#f8fafc", fontSize: "14.5px", lineHeight: 1.6, fontStyle: "italic" }}>
                    "{aiCommentary}"

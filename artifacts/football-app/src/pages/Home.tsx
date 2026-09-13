@@ -36,8 +36,8 @@ export default function Home() {
       <nav>
         <div className="wrap">
           <div className="logo">
-            <div className="logo-mark">C</div>
-            CRS Analytics
+            <img src="/logo.jpg" alt="KargaTahmin Logo" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+            KargaTahmin
           </div>
           <div className="navlinks">
             <Link href="/bugun">Analiz Ara</Link>
@@ -59,7 +59,7 @@ export default function Home() {
             geçmişle <span className="accent">karşılaştırın</span>.
           </h1>
           <p className="sub">
-            CRS Analytics, bugünün maç oranlarını geçmişte oynanmış binlerce maçla eşleştirir; lig, ülke ve kıta bağlamını da hesaba katarak size şeffaf bir olasılık tablosu sunar.
+            KargaTahmin, bugünün maç oranlarını geçmişte oynanmış binlerce maçla eşleştirir; lig, ülke ve kıta bağlamını da hesaba katarak size şeffaf bir olasılık tablosu sunar.
           </p>
           <div className="hero-ctas">
             <Link className="btn-primary" href="/bugun">Ücretsiz analiz yap</Link>
@@ -208,7 +208,7 @@ export default function Home() {
 
       <footer>
         <div className="wrap">
-          CRS Analytics — İddaa oranları geçmiş verilerle karşılaştırılarak sunulur, yatırım tavsiyesi değildir.
+          KargaTahmin — İddaa oranları geçmiş verilerle karşılaştırılarak sunulur, yatırım tavsiyesi değildir.
         </div>
       </footer>
     </div>

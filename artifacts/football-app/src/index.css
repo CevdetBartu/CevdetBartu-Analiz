@@ -440,9 +440,9 @@
 .analysis-table td:last-child { border-right: none; }
 
 /* Row result coloring */
-.row-home { background: rgba(212, 105, 30, 0.18); }
-.row-away { background: rgba(26, 79, 163, 0.18); }
-.row-draw { background: rgba(58, 58, 92, 0.18); }
+.row-home { background: rgba(212, 105, 30, 0.04); border-left: 4px solid #d4691e; }
+.row-away { background: rgba(26, 79, 163, 0.04); border-left: 4px solid #3b82f6; }
+.row-draw { background: rgba(148, 163, 184, 0.04); border-left: 4px solid #64748b; }
 
 /* Score cell coloring */
 .score-home {

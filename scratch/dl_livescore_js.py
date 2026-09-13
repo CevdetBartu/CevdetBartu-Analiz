@@ -1,0 +1,1 @@
+import requests; open('scratch/livescore-go.js', 'w', encoding='utf-8').write(requests.get('https://cm.mackolik.com/js5/Mackolik/Livescore/livescore-go.js?v=22.169', headers={'User-Agent': 'Mozilla/5.0'}).text)

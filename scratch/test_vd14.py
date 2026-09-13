@@ -1,0 +1,1 @@
+import requests; m = requests.get('https://vd.mackolik.com/livedata?date=02/01/2021').json()['m']; print('Total:', len(m)); print('With odds:', len([x for x in m if x[18] and x[18] != '0.00'])); print('Index 17==1:', len([x for x in m if x[17] == 1]))

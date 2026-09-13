@@ -1,0 +1,1 @@
+from bs4 import BeautifulSoup; soup = BeautifulSoup(open('scratch/mackolik.html', encoding='utf-8').read(), 'html.parser'); print(soup.find_all('tr', {'class': 'iddaa-oyna-title2'})[0].find_next_sibling('tr').find_next_sibling('tr'))

@@ -1,0 +1,1 @@
+﻿import requests; html = requests.get('https://arsiv.mackolik.com/Iddaa-Programi', headers={'User-Agent': 'Mozilla/5.0'}).text; print('MS 1' in html); open('scratch/mk.html', 'w', encoding='utf-8').write(html)

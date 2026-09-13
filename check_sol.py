@@ -1,0 +1,1 @@
+﻿import sqlite3; conn = sqlite3.connect('scripts/scraper/gecmis_maclar.db'); cur = conn.cursor(); cur.execute('SELECT ev_sahibi, oran_1, alt_orani FROM gecmis_maclar WHERE ev_sahibi LIKE \'%Sol de%\' OR ev_sahibi LIKE \'%Trinidense%\''); print(cur.fetchall())

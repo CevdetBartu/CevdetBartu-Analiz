@@ -148,7 +148,7 @@ export function DashboardView({ date, time, league, homeTeam, awayTeam, similarM
   const countLeague = refs.filter(isMatchSameLeague).length;
   const countOdds = refs.filter(isMatchOddsSimilar).length;
 
-  // 1. CRS Analiz Maç Filtreleme Sistemi
+  // 1. KargaTahmin Analiz Maç Filtreleme Sistemi
   const filteredMatches = refs.filter(m => {
     // Sezon Yılı Filtresi
     if (selectedYear !== '0') {
@@ -165,7 +165,7 @@ export function DashboardView({ date, time, league, homeTeam, awayTeam, similarM
 
   const effectiveTotal = filteredMatches.length;
 
-  // 2. CRS Analiz Gelişmiş Matematiksel Motor (Mesafe Ağırlıklı + Zaman Sönümlemeli + Bayesyen Yumuşatma)
+  // 2. KargaTahmin Analiz Gelişmiş Matematiksel Motor (Mesafe Ağırlıklı + Zaman Sönümlemeli + Bayesyen Yumuşatma)
   const msSkorFreq: Record<string, { count: number; weight: number }> = {};
   const iyMsFreq: Record<string, { count: number; weight: number }> = {};
   const iySkorFreq: Record<string, { count: number; weight: number }> = {};
@@ -263,10 +263,10 @@ export function DashboardView({ date, time, league, homeTeam, awayTeam, similarM
   return (
     <div style={{ background: '#090d16', color: '#ffffff', minHeight: '100vh', padding: '16px', fontFamily: 'Inter, sans-serif' }}>
       
-      {/* Top Navigation Bar (CRS Analiz Header) */}
+      {/* Top Navigation Bar (KargaTahmin Analiz Header) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '12px' }}>
         <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#94a3b8', letterSpacing: '0.5px' }}>
-          🏆 {league.toUpperCase()} CRS ANALİZ RAPORU
+          🏆 {league.toUpperCase()} KargaTahmin ANALİZ RAPORU
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', color: '#f8fafc', padding: '6px 14px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
@@ -345,7 +345,7 @@ export function DashboardView({ date, time, league, homeTeam, awayTeam, similarM
         </div>
       </div>
 
-      {/* 5-Column Categorical Matrix (CRS Analiz Screenshot Exact Replica) */}
+      {/* 5-Column Categorical Matrix (KargaTahmin Analiz Screenshot Exact Replica) */}
       <div style={{ marginBottom: '36px' }}>
         {/* Table Header Row */}
         <div style={{

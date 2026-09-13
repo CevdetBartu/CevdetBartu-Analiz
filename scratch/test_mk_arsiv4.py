@@ -1,0 +1,1 @@
+import requests, bs4; r = requests.get('https://arsiv.mackolik.com/Genis-Ekran-Iddaa-Programi', headers={'User-Agent': 'Mozilla/5.0'}); open('scratch/mackolik_genis.html', 'w', encoding='utf-8').write(r.text)

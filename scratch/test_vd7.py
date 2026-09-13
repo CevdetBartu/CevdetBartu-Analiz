@@ -1,0 +1,1 @@
+import requests, json; data = requests.get('https://vd.mackolik.com/livedata?date=26/08/2026').json(); print(data.keys()); print({k: type(data[k]) for k in data.keys()}); print(len(data.get('m', [])))

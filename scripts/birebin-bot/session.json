@@ -1,0 +1,179 @@
+{
+  "cookies": [
+    {
+      "name": "taboola_session_id",
+      "value": "v2_b4b8cf43ea7c3e8c8f34e3556aacee0c_84d98774-44b6-4608-96f5-287744b5c33f-tuct118a2daf_1787865135_1787865135_CNawjgYQjpFVGOr5w6iENCABKAEw2QE4juENQJbmDUjX89kDUP___________wFYAGAAaIjUuOP05KTOXXABgAEAiAEAkAEA",
+      "domain": ".taboola.com",
+      "path": "/birebin-sc-tr/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "ASP.NET_SessionId",
+      "value": "5m5ymkw0v3eap2g3dh0dekb3",
+      "domain": "www.birebin.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "cb",
+      "value": "2026-08-06",
+      "domain": "www.birebin.com",
+      "path": "/",
+      "expires": 1819401136.426393,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_gcl_au",
+      "value": "1.1.456117379.1787865136",
+      "domain": ".birebin.com",
+      "path": "/",
+      "expires": 1795641136,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "t_gid",
+      "value": "84d98774-44b6-4608-96f5-287744b5c33f-tuct118a2daf",
+      "domain": ".taboola.com",
+      "path": "/",
+      "expires": 1819401146.624448,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "t_pt_gid",
+      "value": "84d98774-44b6-4608-96f5-287744b5c33f-tuct118a2daf",
+      "domain": ".taboola.com",
+      "path": "/",
+      "expires": 1819401146.624627,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None",
+      "partitionKey": "https://birebin.com",
+      "_crHasCrossSiteAncestor": true
+    },
+    {
+      "name": "_ga",
+      "value": "GA1.1.611585999.1787865137",
+      "domain": ".birebin.com",
+      "path": "/",
+      "expires": 1822425136.547449,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_EHDP9JNP0X",
+      "value": "GS2.1.s1787865136$o1$g1$t1787865136$j60$l0$h0",
+      "domain": ".birebin.com",
+      "path": "/",
+      "expires": 1822425136.565967,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "IDE",
+      "value": "AHWqTUkA6uw2WnIuabCD1AcWXw6-RKfpNaMvuLUB4g8VKid3ipjKYfrAxlAQjbBEGPI",
+      "domain": ".doubleclick.net",
+      "path": "/",
+      "expires": 1822425136.647701,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "uid",
+      "value": "7b255074-f21d-4739-97a2-ec3063bebd4d",
+      "domain": ".criteo.com",
+      "path": "/",
+      "expires": 1821561136.980403,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "cto_bundle",
+      "value": "nPa8ul9UVVhPMjA2bEFRc3ZkM2x3NTJDdW9BMjRhR05ZMFlnUXVnZ3dtOUpHSzBIeDFQcUtuME1SZHlBQ21BVGRGcnBmczFHcUtmRTFTTmhoYVEzZkVFZkY5N3VDJTJGZHc4bWozSWFrMFpIU0hoOHExbHJqTk0lMkJ4T0YlMkZzeno3YzZrVkhVVTRxUVJ5c1Z4ejNYVDk0ejlEU0NCdmclM0QlM0Q",
+      "domain": ".criteo.com",
+      "path": "/",
+      "expires": 1821561137.211088,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None",
+      "partitionKey": "https://birebin.com",
+      "_crHasCrossSiteAncestor": true
+    },
+    {
+      "name": "cto_bundle",
+      "value": "1SCIkl95ZFVSVnowVlpidSUyRkJ4Nmx0cmprSVgwbXpmZjRMbTQ2blFtdHh3Y3llaGxRSDRtTjVaaDI2YUdPTThhMVg1c2RVeXdBUU9PdXdhWVRrQmwyWkxxZkgyWjZON3JSbGJ3VnBMVXRKcCUyQlc5cEFEcHl0U1lkMWgwOXFZWXdtamVSc1ElMkZqUjk4Q1FVUkJiWm1YdG02WHpnMEElM0QlM0Q",
+      "domain": ".birebin.com",
+      "path": "/",
+      "expires": 1822029137,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://www.birebin.com",
+      "localStorage": [
+        {
+          "name": "jwt",
+          "value": "eyJhbGciOiJBMjU2S1ciLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwidHlwIjoiSldUIn0._d_9Y_zGFwvFvBtITzbNUyjdCm95TpiYiNQJpoig04JqLb309y4fbiX2lP9sfM4J3o-BJGwFs09HQJejC0Vejsl6iX7fNAfW.H9dw4UH4aNSEgzlKc1xzrw.nm62FqY0l4ljUAxTXxv0rLtxxIDA9dgK1qHbfc5I5VhuqM4Dc3kdFI2NZT1gys495zudGlKWihm0A9nx4r67eTOj9Dq24JWQAJC2zGI5PzBoEvQQ11mv0zMYHTK8dx8b3fFknfj4Dxe5pUMOD6uqltfqKGCiAaHQw90bMDum4ydgl0H8Dhd9-izy34qpJFjtoFduOgbfJwRWTCi7BAl2vwqUviz_qz5AdiujDx7UvLkvZRy75cEu2XBmPI9l9_l7FlhjweiaOsW-_wTpzaR5y1qpygdBmn5mWeKOxOkcTtmerVHSDnId4c0LYT0oUC6OxIwF-iabK5HgUNpzc_i4czpcd7yU82Yia5u3D5TGg6aPTIGN_jTQBGHVDrnzfefEnV7k5jbnrQh_0O1c_geJ-7xFrAmRC7dczS1F8yMVeskssOPd7R_sLviCtCfVWZ0syZlQzX6QIxqsG6IPlM2aeCAjptj3rorH2PM4XorbmWcUlX19pOKy3BMENgqqCTXOKN0ttyKMKChKAgnhZafA2A7DFcZRZswc5a9GuV4rqI03HjQmzPkheMvuz0UIROASx65bZs6VnolaTw38NRGL0g.-J-guYJoyhfORaeAVCiw51QhkmKNLwf0Df3Cis8AHCo"
+        },
+        {
+          "name": "eng_mt",
+          "value": "{\"ver\":36,\"sessionStartTime\":1787865136366,\"scrollDepth\":0,\"sessionDepth\":[\"1781872999\"],\"timeOnSite\":0,\"crossSessionsData\":{\"sessionsHistory\":[1787865136366]},\"numOfTimesMetricsSent\":2}"
+        },
+        {
+          "name": "1394830:session-data",
+          "value": "v2_b4b8cf43ea7c3e8c8f34e3556aacee0c_84d98774-44b6-4608-96f5-287744b5c33f-tuct118a2daf_1787865135_1787865135_CNawjgYQjpFVGOr5w6iENCABKAEw2QE4juENQJbmDUjX89kDUP___________wFYAGAAaIjUuOP05KTOXXABgAEAiAEAkAEA"
+        },
+        {
+          "name": "Segment",
+          "value": "3"
+        },
+        {
+          "name": "cto_bundle",
+          "value": "1SCIkl95ZFVSVnowVlpidSUyRkJ4Nmx0cmprSVgwbXpmZjRMbTQ2blFtdHh3Y3llaGxRSDRtTjVaaDI2YUdPTThhMVg1c2RVeXdBUU9PdXdhWVRrQmwyWkxxZkgyWjZON3JSbGJ3VnBMVXRKcCUyQlc5cEFEcHl0U1lkMWgwOXFZWXdtamVSc1ElMkZqUjk4Q1FVUkJiWm1YdG02WHpnMEElM0QlM0Q"
+        },
+        {
+          "name": "_il",
+          "value": "true"
+        },
+        {
+          "name": "taboola global:user-id",
+          "value": "84d98774-44b6-4608-96f5-287744b5c33f-tuct118a2daf"
+        },
+        {
+          "name": "rememberMe",
+          "value": "true"
+        },
+        {
+          "name": "_gcl_ls",
+          "value": "{\"schema\":\"gcl\",\"version\":1,\"gsid_dc\":{\"value\":{\"joinId\":\"6nLLW3OR90b17gyjPkvoNhiigqiQELF3Pw\",\"lastJoinedTimeMs\":1787865136301},\"expires\":1787865436301},\"gcl_ctr\":{\"value\":{\"value\":0,\"timeouts\":0,\"errors\":0,\"eopCount\":0,\"creationTimeMs\":1787865136302},\"expires\":1795641136302}}"
+        },
+        {
+          "name": "_rt",
+          "value": "eyJtIjo3MDM1NjIyM30="
+        },
+        {
+          "name": "bmt-speed",
+          "value": "1"
+        }
+      ]
+    }
+  ]
+}

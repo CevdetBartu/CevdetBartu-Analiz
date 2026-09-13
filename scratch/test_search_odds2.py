@@ -1,0 +1,1 @@
+import requests, bs4; r = requests.get('https://arsiv.mackolik.com/SearchWithOdds.aspx', headers={'User-Agent': 'Mozilla/5.0'}); soup = bs4.BeautifulSoup(r.text, 'html.parser'); print([i.get('name') for i in soup.find_all('input')])

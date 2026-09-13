@@ -1,0 +1,1 @@
+import requests, json; data1 = requests.get('https://vd.mackolik.com/livedata?date=26/08/2026').json(); data2 = requests.get('https://vd.mackolik.com/livedata?date=25/08/2026').json(); data3 = requests.get('https://vd.mackolik.com/livedata?date=01/01/2021').json(); print(len(data1['m']), len(data2['m']), len(data3['m'])); print(data3['m'][0])

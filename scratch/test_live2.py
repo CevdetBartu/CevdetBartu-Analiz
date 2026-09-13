@@ -1,0 +1,1 @@
+import requests, bs4; html = requests.get('https://arsiv.mackolik.com/Canli-Sonuclar', headers={'User-Agent': 'Mozilla/5.0'}).text; soup = bs4.BeautifulSoup(html, 'html.parser'); print(len(soup.find_all('tr')))

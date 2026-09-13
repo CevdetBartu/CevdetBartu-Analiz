@@ -1,0 +1,1 @@
+import requests; headers = {'User-Agent': 'Mozilla/5.0', 'Referer': 'https://arsiv.mackolik.com/Canli-Sonuclar', 'X-Requested-With': 'XMLHttpRequest'}; print(len(requests.get('https://arsiv.mackolik.com/AjaxHandlers/LiveHandler.ashx', headers=headers).text))

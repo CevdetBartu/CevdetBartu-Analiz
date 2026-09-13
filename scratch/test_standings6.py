@@ -1,0 +1,1 @@
+import requests, bs4; r = requests.get('https://arsiv.mackolik.com', headers={'User-Agent': 'Mozilla/5.0'}); soup = bs4.BeautifulSoup(r.text, 'html.parser'); print([a['href'] for a in soup.find_all('a', href=True) if 'ingiltere' in a['href'].lower() or 'premier' in a['href'].lower()][:10])

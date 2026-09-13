@@ -1,0 +1,1 @@
+﻿import sys; sys.path.append('scripts/scraper'); from sources.today_matches import _get; events = _get('/sport/football/events/live'); print(events.get('events', [])[0]['id'] if events else 'No events')

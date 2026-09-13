@@ -1,0 +1,1 @@
+import requests, bs4; r = requests.get('https://arsiv.mackolik.com/Iddaa-Programi', headers={'User-Agent': 'Mozilla/5.0'}); soup = bs4.BeautifulSoup(r.text, 'html.parser'); print(soup.find('td', {'rateSort': 'tarih_1'}).text)

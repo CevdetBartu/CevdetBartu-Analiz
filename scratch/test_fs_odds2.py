@@ -1,0 +1,1 @@
+import urllib.request, ssl; ctx = ssl.create_default_context(); ctx.check_hostname = False; ctx.verify_mode = ssl.CERT_NONE; req = urllib.request.Request('https://m.flashscore.com.tr/mac/nPmxtnDO/', headers={'User-Agent': 'Mozilla/5.0'}); html = urllib.request.urlopen(req, context=ctx).read().decode('utf-8'); print('oran' in html, 'iddaa' in html.lower())

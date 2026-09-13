@@ -1,0 +1,1 @@
+import requests, bs4; html = requests.get('https://www.mackolik.com/canli-sonuclar', headers={'User-Agent': 'Mozilla/5.0'}).text; soup = bs4.BeautifulSoup(html, 'html.parser'); print(soup.find('div', {'class': 'match-row'}) or soup.find('div', {'class': 'p0c-competition-tables__match-row'}) or soup.find(class_=lambda x: x and 'match' in x.lower()))

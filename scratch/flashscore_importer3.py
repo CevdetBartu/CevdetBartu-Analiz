@@ -1,0 +1,1 @@
+import urllib.request; req = urllib.request.Request('https://m.flashscore.com.tr/?d=-1', headers={'User-Agent': 'Mozilla/5.0'}); open('scratch/flash.html', 'w', encoding='utf-8').write(urllib.request.urlopen(req).read().decode('utf-8'))
