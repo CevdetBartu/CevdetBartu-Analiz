@@ -209,6 +209,13 @@ export interface AnalyzeResponse {
   analiz_ozet: AnalyzeOzet;
   tahminler: string[];
   tablo_satirlari: TabloSatiri[];
+  poisson_probs?: {
+    pHome: number;
+    pDraw: number;
+    pAway: number;
+    pOver25: number;
+    pBtts: number;
+  };
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -339,15 +346,6 @@ export function analyze(
   referenceMatches: AnalyzeRefMatch[],
   config?: AnalyzeConfig
 ): AnalyzeResponse {
-  const fs = require('fs');
-  fs.appendFileSync('analyze_log.txt', JSON.stringify({
-    targetTeam: targetMatch.homeTeam,
-    targetOdds: targetMatch.oddsHome,
-    refMatchesCount: referenceMatches.length,
-    firstRefTeam: referenceMatches[0]?.homeTeam,
-    firstRefOdds: referenceMatches[0]?.oddsHome
-  }) + '\\n');
-
   const consensusWeightSim = config?.consensusWeightSimilarity ?? 0.6;
   const consensusWeightPoisson = 1.0 - consensusWeightSim;
   let M = config?.betaBinomialM ?? 4.0;
@@ -436,9 +434,9 @@ export function analyze(
       const htxx = parseScore(m.htScore);
         
       if (htxx && ft) {
-        if (htxx.home > htxx.away && ft.home < ft.away) { iyMs1_2Count++; console.log('BINGO 1/2!', m.htScore, m.ftScore); }
+        if (htxx.home > htxx.away && ft.home < ft.away) iyMs1_2Count++;
         if (htxx.home < htxx.away && ft.home > ft.away) iyMs2_1Count++;
-    }
+      }
 
     // FT score freq
     const ftKey = `${ft.home}:${ft.away}`;
@@ -1244,7 +1242,18 @@ export function analyze(
     });
   });
 
-  return { analiz_ozet, tahminler, tablo_satirlari };
+  return { 
+    analiz_ozet, 
+    tahminler, 
+    tablo_satirlari,
+    poisson_probs: {
+      pHome: pHomeWin,
+      pDraw: pDraw,
+      pAway: pAwayWin,
+      pOver25: pOver25,
+      pBtts: pBtts
+    }
+  };
 }
 
 export interface ModelDResult {
@@ -1298,38 +1307,38 @@ export function calculateModelD(
   const simBtts = ozet.kg_var.yuzde / 100.0;
 
   // Derive raw Poisson probabilities from modelA
-  const pHome = simHome;
-  const pDraw = simDraw;
-  const pAway = simAway;
-  const pOver = simOver;
-  const pBtts = simBtts;
+  const pHome = modelA.poisson_probs?.pHome ?? simHome;
+  const pDraw = modelA.poisson_probs?.pDraw ?? simDraw;
+  const pAway = modelA.poisson_probs?.pAway ?? simAway;
+  const pOver = modelA.poisson_probs?.pOver25 ?? simOver;
+  const pBtts = modelA.poisson_probs?.pBtts ?? simBtts;
 
+  // Blended probabilities
   const p_home = alpha_sides * simHome + (1.0 - alpha_sides) * pHome;
   const p_draw = alpha_sides * simDraw + (1.0 - alpha_sides) * pDraw;
   const p_away = alpha_sides * simAway + (1.0 - alpha_sides) * pAway;
   const p_over25 = alpha_goals * simOver + (1.0 - alpha_goals) * pOver;
   const p_btts = alpha_goals * simBtts + (1.0 - alpha_goals) * pBtts;
 
-  // KULLANICI TALEBİ: "sanal oran yine ekliyor sanırım. bunu tamamen yasakla."
-  // Eksik oranları varsayılan (sanal) bir oranla değiştirmemek için 0 kullanıyoruz.
   const oH = targetMatch.oddsHome ?? 0;
   const oD = targetMatch.oddsDraw ?? 0;
   const oA = targetMatch.oddsAway ?? 0;
   const oOver = targetMatch.ustOdds ?? 0;
   const oBtts = targetMatch.varOdds ?? 0;
 
-  // Formül 4: Gerçek Edge Skoru = (P_consensus * Oran - 1) * Örneklem_Güven_Katsayısı
-  const real_edge_home = (p_home * oH - 1.0) * sample_factor;
-  const real_edge_draw = (p_draw * oD - 1.0) * sample_factor;
-  const real_edge_away = (p_away * oA - 1.0) * sample_factor;
-  const real_edge_over25 = (p_over25 * oOver - 1.0) * sample_factor;
-  const real_edge_btts = (p_btts * oBtts - 1.0) * sample_factor;
+  const getEdge = (p: number, o: number) => o > 1.0 ? (p - 1.0 / o) * sample_factor : 0;
+  const real_edge_home = getEdge(p_home, oH);
+  const real_edge_draw = getEdge(p_draw, oD);
+  const real_edge_away = getEdge(p_away, oA);
+  const real_edge_over25 = getEdge(p_over25, oOver);
+  const real_edge_btts = getEdge(p_btts, oBtts);
 
-  // Formül 2: Value-Adjusted Sizing (Quarter-Kelly)
-  const calcStake = (prob: number, odds: number): number => {
-    if (odds <= 1.0) return 0;
-    const f_star = (prob * odds - 1.0) / (odds - 1.0);
-    return Math.max(0, Math.min(0.10, f_star * 0.25));
+  // Formül 2: Value-adjusted Quarter-Kelly (Max 3.5% instead of 10% to match analyzeEngine's default max risk)
+  const calcStake = (p: number, o: number) => {
+    if (o <= 1.0) return 0;
+    const b = o - 1.0;
+    const f = (p * b - (1.0 - p)) / b;
+    return Math.max(0, Math.min(0.035, f * 0.25));
   };
 
   const stake_home = calcStake(p_home, oH);
