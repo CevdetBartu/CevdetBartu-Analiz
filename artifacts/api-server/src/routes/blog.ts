@@ -21,7 +21,7 @@ router.get("/blog", (req, res) => {
     const posts = db.prepare(`
       SELECT b.*, t.oran_1, t.oran_x, t.oran_2 
       FROM blog_posts b 
-      LEFT JOIN today_matches t ON b.match_id = t.id 
+      LEFT JOIN gecmis_maclar t ON b.match_id = t.id 
       ORDER BY b.created_at DESC LIMIT 20
     `).all();
     res.json(posts);

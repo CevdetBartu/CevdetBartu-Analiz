@@ -183,7 +183,7 @@ export default function Home() {
                     <span>{p.oran_2 ? p.oran_2.toFixed(2) : "-"}</span>
                   </div>
                   <div className="pick">
-                    Sistem tahmini: {p.predicted_pick || "Analiz bekleniyor"}
+                    Sistem tahmini: {p.prediction || "Analiz bekleniyor"}
                   </div>
                 </Link>
               ))
