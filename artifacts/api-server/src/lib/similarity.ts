@@ -146,16 +146,176 @@ export function scoreMatch(query: SimilarityQuery, match: HistoricalMatch): Simi
   };
 }
 
+
+const countryMap: Record<string, string[]> = {
+  "turkiye": ["turkey", "turkiye", "turkish", "süper lig", "tff", "1. lig"],
+  "ingiltere": ["england", "ingiltere", "english", "premier league", "championship", "league one"],
+  "ispanya": ["spain", "ispanya", "spanish", "la liga", "segunda"],
+  "almanya": ["germany", "almanya", "german", "bundesliga", "2. bundesliga"],
+  "italya": ["italy", "italya", "italian", "serie a", "serie b"],
+  "fransa": ["france", "fransa", "french", "ligue 1", "ligue 2"],
+  "hollanda": ["netherlands", "hollanda", "dutch", "eredivisie"],
+  "portekiz": ["portugal", "portekiz", "portuguese", "primeira"],
+  "abd": ["usa", "abd", "american", "united states", "major league soccer", "mls"],
+  "brezilya": ["brazil", "brezilya", "brazilian", "serie a", "serie b"],
+  "arjantin": ["argentina", "arjantin", "argentine", "liga profesional"],
+  "norvec": ["norway", "norvec", "norwegian", "eliteserien"]
+};
+
+
+
+export function getLeagueContinent(leagueName?: string | null): string {
+  if (!leagueName) return "UNKNOWN";
+  const norm = leagueName.toLowerCase();
+  
+  if (norm.includes("uefa") || norm.includes("champions league") || norm.includes("europa") || norm.includes("euro")) return "EUROPE";
+  if (norm.includes("libertadores") || norm.includes("sudamericana") || norm.includes("copa america")) return "SOUTH_AMERICA";
+  if (norm.includes("afc") || norm.includes("asian")) return "ASIA";
+  if (norm.includes("caf") || norm.includes("african")) return "AFRICA";
+  if (norm.includes("concacaf") || norm.includes("gold cup")) return "NORTH_AMERICA";
+  if (norm.includes("world cup") || norm.includes("fifa")) return "WORLD";
+
+  // Domestic Mapping
+  const europe = ["ingiltere", "almanya", "italya", "ispanya", "fransa", "turkiye", "hollanda", "portekiz", "belcika", "iskocya", "yunanistan", "rusya", "ukrayna", "isvicre", "avusturya", "isvec", "norvec", "danimarka", "polonya", "romanya", "sirbistan", "hirvatistan", "cek", "macaristan", "irlanda", "galler", "finlandiya", "izlanda", "slovakya", "slovenya", "bulgaristan", "bosna", "karadag", "makedonya", "kosova", "arnavutluk", "kibris", "gurcistan", "ermenistan", "azerbaycan", "kazakistan", "estonya", "letonya", "litvanya", "belarus", "galler", "kuzey irlanda"];
+  const south_america = ["brezilya", "arjantin", "kolombiya", "sili", "peru", "uruguay", "ekvador", "paraguay", "bolivya", "venezuela"];
+  const north_america = ["abd", "meksika", "kanada", "kosta rika", "honduras", "panama", "jamaika", "el salvador", "guatemala"];
+  const asia = ["japonya", "guney kore", "cin", "avustralya", "iran", "suudi arabistan", "bae", "katar", "ozbekistan", "irak", "umman", "suriye", "urdun", "bahreyn", "kuveyt", "yemen", "lbnan", "filistin", "hindistan", "tayland", "vietnam", "malezya", "endonezya", "singapur"];
+  const africa = ["misir", "fas", "cezayir", "tunus", "senegal", "nijerya", "kamerun", "fildisi", "gana", "mali", "guney afrika", "zambiya", "uganda", "kenya"];
+
+  if (europe.some(c => norm.includes(c))) return "EUROPE";
+  if (south_america.some(c => norm.includes(c))) return "SOUTH_AMERICA";
+  if (north_america.some(c => norm.includes(c))) return "NORTH_AMERICA";
+  if (asia.some(c => norm.includes(c))) return "ASIA";
+  if (africa.some(c => norm.includes(c))) return "AFRICA";
+
+  return "UNKNOWN";
+}
+
+export function isNationalTeamMatch(leagueName?: string | null): boolean {
+  if (!leagueName) return false;
+  const norm = leagueName.toLowerCase();
+  return norm.includes("world cup") || 
+         norm.includes("dünya kupası") || 
+         norm.includes("nations league") || 
+         norm.includes("euro ") || 
+         norm.includes("avrupa şampiyonası") || 
+         norm.includes("copa america") || 
+         norm.includes("olimpiyat") || 
+         norm.includes("olympic") ||
+         norm.includes("africa cup") ||
+         norm.includes("asian cup");
+}
+
+export function isContinentalClubMatch(leagueName?: string | null): boolean {
+  if (!leagueName) return false;
+  const norm = leagueName.toLowerCase();
+  if (isNationalTeamMatch(leagueName)) return false;
+  return norm.includes("champions league") || 
+         norm.includes("şampiyonlar ligi") ||
+         norm.includes("europa") || 
+         norm.includes("avrupa ligi") ||
+         norm.includes("conference") ||
+         norm.includes("konferans") ||
+         norm.includes("libertadores") || 
+         norm.includes("sudamericana") ||
+         norm.includes("afc champions") ||
+         norm.includes("caf champions");
+}
+
 export function findSimilarMatches(
   query: SimilarityQuery,
   allMatches: HistoricalMatch[]
 ): SimilarMatchResult[] {
-  const scored = allMatches
-    .map(m => scoreMatch(query, m))
-    .filter(m => m.similarityScore >= 70) // %70 ve üzeri benzerlik barajı
-    .sort((a, b) => b.similarityScore - a.similarityScore);
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+  const qLig = query.league ? norm(query.league) : "";
+  const qIsNational = isNationalTeamMatch(query.league);
+  const qIsContinentalClub = isContinentalClubMatch(query.league);
+  const qContinent = query.kita || getLeagueContinent(query.league);
 
-  const maxResults = query.maxResults ?? scored.length;
+  let targetCountrySynonyms: string[] = [];
+  if (!qIsContinentalClub && !qIsNational) {
+    for (const [key, synonyms] of Object.entries(countryMap)) {
+      if (synonyms.some(syn => qLig.startsWith(syn) || qLig.includes(syn))) {
+        targetCountrySynonyms = synonyms;
+        break;
+      }
+    }
+  }
 
-  return scored.slice(0, Math.max(maxResults, 3));
+  const isTargetMatchSameCountry = (mLigRawParam: string) => {
+    if (targetCountrySynonyms.length > 0) {
+      return targetCountrySynonyms.some(syn => {
+        const regex = new RegExp(`\\b${syn}\\b`, 'i');
+        return regex.test(mLigRawParam);
+      });
+    }
+    const qLigRawNorm = (query.league || "").toLowerCase();
+    const mLigRawNorm = mLigRawParam.toLowerCase();
+    return qLigRawNorm === mLigRawNorm || qLigRawNorm.includes(mLigRawNorm) || mLigRawNorm.includes(qLigRawNorm);
+  };
+
+  // Pre-score all matches
+  const scoredAll = allMatches.map(m => scoreMatch(query, m));
+
+  const results: SimilarMatchResult[] = [];
+
+  for (const item of scoredAll) {
+    const mLigRaw = item.match.league || "";
+    const mLig = norm(mLigRaw);
+    const mIsNational = isNationalTeamMatch(mLigRaw);
+    const mIsContinentalClub = isContinentalClubMatch(mLigRaw);
+    const mContinent = getLeagueContinent(mLigRaw);
+    const mIsFriendly = mLig.includes("hazirlik") || mLig.includes("friendly");
+    const qIsFriendly = qLig.includes("hazirlik") || qLig.includes("friendly");
+
+    let rawScore = item.similarityScore;
+    let bonus = 0;
+
+    // Yüksek öncelikli kurallar
+    if (qIsFriendly !== mIsFriendly) {
+        bonus -= 20.0;
+    }
+    
+    if (qIsNational !== mIsNational) {
+        bonus -= 15.0; 
+    }
+
+    // Bağlamsal Bonuslar / Penaltılar
+    if (qIsContinentalClub) {
+      if (mIsContinentalClub) {
+        bonus += 2.0;
+      } else if (mContinent !== "UNKNOWN" && qContinent !== "UNKNOWN" && mContinent === qContinent) {
+        bonus += 0.0;
+      } else {
+        bonus -= 5.0; 
+      }
+    } else if (qIsNational) {
+      if (mContinent !== "UNKNOWN" && qContinent !== "UNKNOWN" && mContinent === qContinent) {
+        bonus += 3.0;
+      } else {
+        bonus -= 2.0;
+      }
+    } else {
+      // Yerel Ligler
+      if (isTargetMatchSameCountry(mLigRaw)) {
+        bonus += 5.0; // Aynı ülke bonusu
+      } else if (mContinent !== "UNKNOWN" && qContinent !== "UNKNOWN" && mContinent === qContinent) {
+        bonus += 1.5; // Aynı kıta bonusu
+      } else {
+        bonus -= 4.0; // Farklı kıta penaltısı
+      }
+    }
+    
+    item.similarityScore = Math.max(0.0, Math.min(100.0, rawScore + bonus));
+    item.scoreBreakdown.rawScore = Math.round(rawScore * 10) / 10;
+    item.scoreBreakdown.contextBonus = bonus;
+    results.push(item);
+  }
+
+  // Tüm maçları sırala
+  results.sort((a, b) => b.similarityScore - a.similarityScore);
+
+  const finalResults = query.strict100 ? results.filter(m => Math.round(m.similarityScore) === 100) : results.filter(m => m.similarityScore >= 0);
+  const maxResults = query.strict100 ? Math.min(query.maxResults ?? 150, 150) : query.maxResults ?? 150;
+  return finalResults.slice(0, maxResults);
 }
