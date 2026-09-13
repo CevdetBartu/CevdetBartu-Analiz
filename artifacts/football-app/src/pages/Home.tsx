@@ -6,43 +6,21 @@ const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [liveMatches, setLiveMatches] = useState<any[]>([]);
-  const [topMatches, setTopMatches] = useState<any[]>([]);
-  const [heroMatch, setHeroMatch] = useState<any>(null);
+  const [matchCount, setMatchCount] = useState<number>(0);
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const fetchLiveMatches = () => {
-      fetch(`${BASE}/api/matches/live`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && Array.isArray(data)) {
-            setLiveMatches(data.filter(m => m.status !== 'FINISHED').slice(0, 15));
-          }
-        })
-        .catch((e) => console.error("Error fetching live matches", e));
-    };
-
-    fetchLiveMatches();
-    const liveInterval = setInterval(fetchLiveMatches, 15000); // periyodik (15sn)
-
-    // Fetch today's matches for hero preview and quick list
+    // Fetch today's matches to get the total count
     fetch(`${BASE}/api/matches/today`)
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data.matches)) {
-          const matches = data.matches.filter((m: any) => m.oran_1 > 0);
-          
-          if (matches.length > 0) {
-            setHeroMatch(matches[0]);
-            setTopMatches(matches.slice(1, 5));
-          }
+          setMatchCount(data.matches.length);
         }
       })
       .catch((e) => console.error("Error fetching today matches", e));
 
-    // Fetch blog posts
+    // Fetch blog posts (now includes real odds and predicted_pick)
     fetch(`${BASE}/api/blog`)
       .then((res) => res.json())
       .then((data) => {
@@ -51,187 +29,180 @@ export default function Home() {
         }
       })
       .catch((e) => console.error("Error fetching blog posts", e));
-
-    return () => clearInterval(liveInterval);
   }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      setLocation(`/bugun?q=${encodeURIComponent(searchQuery)}`);
-    }
-  };
 
   return (
     <div className="crs-home">
       <nav>
         <div className="wrap">
           <div className="logo">
-            <div className="logo-icon logo-mark">C</div>
+            <div className="logo-mark">C</div>
             CRS Analytics
           </div>
           <div className="navlinks">
             <Link href="/bugun">Analiz Ara</Link>
             <Link href="/blog">Analizler</Link>
-            <Link href="/canli">
-              <span className="live-dot"></span>Canlı Maçlar
-            </Link>
+            <Link href="#nasil-calisir">Nasıl Çalışır</Link>
+            <span className="free-badge">Şimdilik tamamen ücretsiz</span>
+            <Link className="cta-btn" href="/bugun">Ücretsiz Başla</Link>
           </div>
         </div>
       </nav>
 
-      {/* TICKER */}
-      <div className="ticker">
-        <div className="ticker-track mono">
-          {liveMatches.length > 0 ? (
-            // Duplicate the list to make the infinite scroll smooth
-            [...liveMatches, ...liveMatches, ...liveMatches].map((m, i) => {
-               // Fake up/down trend for demo if we don't have real live odds trend
-               const isUp = i % 2 === 0;
-               const odds = m.pre_match_odds?.["1"] || "-";
-               return (
-                <span key={i}>
-                  {m.homeTeam} - {m.awayTeam} &nbsp;<b>{odds}</b> 
-                  {odds !== "-" && (
-                    <span className={isUp ? "up" : "down"}>
-                      {isUp ? "▲0.03" : "▼0.02"}
-                    </span>
-                  )}
-                </span>
-              );
-            })
-          ) : (
-            <span>Canlı veri bekleniyor...</span>
-          )}
-        </div>
-      </div>
-
       <header className="hero">
-        <div className="wrap hero-grid">
-          <div>
-            <h1>
-              Bir maçın oranı,<br />
-              daha önce <span className="accent">150 kez</span> açılmıştı.
-            </h1>
-            <p className="sub">
-              CRS motoru, bugünün oranlarını geçmişte oynanan binlerce maçla karşılaştırır; bağlamı (lig, kıta, ülke) ve olasılığı birlikte tartar.
-            </p>
-            <form className="search-box" onSubmit={handleSearch}>
-              <input
-                type="text"
-                placeholder="Takım veya lig ara — örn. Galatasaray, Ekvador Pro Lig"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button type="submit">Analiz Et</button>
-            </form>
-            <div className="hero-tags">
-              <span className="tag">583 maç bugün</span>
-              <span className="tag">150 referans / analiz</span>
-              <span className="tag">Kıta & ülke bağlamı</span>
+        <div className="wrap">
+          <div className="eyebrow">
+            Yeni · <b>150 referans maçlık</b> karşılaştırma motoru canlıda
+          </div>
+          <h1>
+            Oranları tahmin etmeyin,<br />
+            geçmişle <span className="accent">karşılaştırın</span>.
+          </h1>
+          <p className="sub">
+            CRS Analytics, bugünün maç oranlarını geçmişte oynanmış binlerce maçla eşleştirir; lig, ülke ve kıta bağlamını da hesaba katarak size şeffaf bir olasılık tablosu sunar.
+          </p>
+          <div className="hero-ctas">
+            <Link className="btn-primary" href="/bugun">Ücretsiz analiz yap</Link>
+            <Link className="btn-secondary" href="#nasil-calisir">Nasıl çalıştığını gör</Link>
+          </div>
+          <div className="hero-stats">
+            <div className="hstat">
+              <b>{matchCount > 0 ? `${matchCount}+` : "..."}</b>
+              <span>bugün analiz edilen maç</span>
+            </div>
+            <div className="hstat">
+              <b>150</b>
+              <span>referans maç / analiz</span>
+            </div>
+            <div className="hstat">
+              <b>0 ₺</b>
+              <span>üyelik ücreti</span>
             </div>
           </div>
-
-          {heroMatch ? (
-            <div className="preview-card">
-              <div className="preview-head">
-                <div>
-                  <div className="league">{heroMatch.lig.toUpperCase()}</div>
-                  <div className="matchname">
-                    {heroMatch.ev_sahibi} v {heroMatch.deplasman}
-                  </div>
-                </div>
-              </div>
-              <div className="preview-odds">
-                <div className="odd-pill">
-                  <div className="lbl">MS1</div>
-                  <div className="val">{heroMatch.oran_1}</div>
-                </div>
-                <div className="odd-pill">
-                  <div className="lbl">MSX</div>
-                  <div className="val">{heroMatch.oran_x}</div>
-                </div>
-                <div className="odd-pill">
-                  <div className="lbl">MS2</div>
-                  <div className="val">{heroMatch.oran_2}</div>
-                </div>
-              </div>
-              <div className="sim-row">
-                <span>150 referans maç</span>
-                <b>Ev sahibi %... ±%...</b>
-              </div>
-              <div className="sim-row">
-                <span>Lig dağılımı</span>
-                <b>{heroMatch.lig} %...</b>
-              </div>
-              <div className="sim-row">
-                <span>2.5 üst</span>
-                <b>%... ±%...</b>
-              </div>
-              <div className="kelly-badge">
-                <span>Kelly önerisi</span>
-                <span className="mono">Detaylı analiz için tıklayın</span>
-              </div>
-              <Link href={`/bugun?q=${encodeURIComponent(heroMatch.ev_sahibi)}`} style={{position:"absolute", top:0, left:0, width:"100%", height:"100%", opacity: 0}} />
-            </div>
-          ) : (
-            <div className="preview-card" style={{ opacity: 0.5 }}>
-              <div className="preview-head">Günün Maçı Yükleniyor...</div>
-            </div>
-          )}
         </div>
       </header>
 
-      <section className="section">
-        <div className="wrap split">
-          <div className="split-col">
-            <h3>ANALİZ ARACI</h3>
-            <h2>Şu an incelenen maçlar</h2>
-            <div className="quicklist">
-              {topMatches.length > 0 ? (
-                topMatches.map((m, i) => (
-                  <Link key={i} className="quickrow" href={`/bugun?q=${encodeURIComponent(m.ev_sahibi)}`}>
-                    <div>
-                      <div className="qname">
-                        {m.ev_sahibi} - {m.deplasman}
-                      </div>
-                      <div className="qleague">{m.lig}</div>
-                    </div>
-                    <div className="qval mono">Analiz Et ➔</div>
-                  </Link>
-                ))
-              ) : (
-                <div className="quickrow">Yükleniyor...</div>
-              )}
+      <section className="section" id="nasil-calisir">
+        <div className="wrap">
+          <div className="section-tag">NASIL ÇALIŞIR</div>
+          <div className="section-title">Tek platformda, dört katmanlı analiz</div>
+          <div className="section-sub">
+            Her özellik, kara kutu olmadan çalışacak şekilde tasarlandı — hangi verinin sonucu nasıl etkilediğini her zaman görebilirsiniz.
+          </div>
+          <div className="feature-grid">
+            <div className="feature">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <h3>Geçmiş oran eşleştirme</h3>
+              <p>Bugünün oranları, veritabanındaki binlerce maçla olasılık bazında karşılaştırılır.</p>
+            </div>
+            <div className="feature">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="1.6"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+              <h3>Bağlamsal filtreleme</h3>
+              <p>Aynı ülke, aynı kıta ve lig seviyesi otomatik olarak benzerlik skoruna dahil edilir.</p>
+            </div>
+            <div className="feature">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="1.6"><path d="M4 19V5M4 19h16M9 15l3-4 3 3 4-6"/></svg>
+              <h3>Şeffaf algoritma paneli</h3>
+              <p>Ham benzerlik skorunu ve uygulanan bağlamsal bonusu ayrı ayrı görürsünüz.</p>
+            </div>
+            <div className="feature">
+              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="1.6"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z"/></svg>
+              <h3>Risk göstergesi</h3>
+              <p>Çeyrek Kelly mantığıyla hesaplanan öneri, tahmini değeri ve riski birlikte gösterir.</p>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="split-col">
-            <h3>BLOG / ANALİZ</h3>
-            <h2>Son analizler</h2>
-            <div className="blogcards">
-              {blogPosts.length > 0 ? (
-                blogPosts.map((p, i) => (
-                  <Link key={i} className="blogcard" href={`/blog/${p.slug || p.id}`}>
-                    <div className="oddchip">
-                      BLOG<br/>YAZISI
-                    </div>
-                    <div className="body">
-                      <div className="meta">Tarih: {new Date(p.created_at).toLocaleDateString("tr-TR")}</div>
-                      <div className="title">{p.title}</div>
-                      <div className="pick" style={{ color: "var(--text-3)" }}>{p.excerpt || "Otomatik analiz raporu..."}</div>
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="blogcard">
-                  <div className="body">
-                    <div className="title">Blog yazısı bulunamadı.</div>
-                  </div>
-                </div>
-              )}
+      <section className="section">
+        <div className="wrap">
+          <div className="section-tag">ADIM ADIM</div>
+          <div className="section-title">Bir analiz üç adımda tamamlanır</div>
+          <div className="steps">
+            <div className="step">
+              <div className="num">01</div>
+              <h3>Maçı ara</h3>
+              <p>Takım veya lig adıyla arayın; bugün oynanan {matchCount > 0 ? `${matchCount}+` : ""} maç arasından anında bulun.</p>
+            </div>
+            <div className="step">
+              <div className="num">02</div>
+              <h3>Referansları inceleyin</h3>
+              <p>Sistem 150 geçmiş maçı benzerlik sırasına göre listeler, her birinin bağlamını gösterir.</p>
+            </div>
+            <div className="step">
+              <div className="num">03</div>
+              <h3>Olasılığı değerlendirin</h3>
+              <p>Güven aralığıyla birlikte sunulan olasılıkları kendi değerlendirmenize katın.</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="stats-band">
+            <div className="grid">
+              <div className="item">
+                <b>150</b>
+                <span>referans maç / analiz</span>
+              </div>
+              <div className="item">
+                <b>%100</b>
+                <span>ücretsiz erişim</span>
+              </div>
+              <div className="item">
+                <b>7/24</b>
+                <span>güncellenen oran verisi</span>
+              </div>
+            </div>
+            <div className="note">
+              Şu an tüm özellikler herkese açık. İleride topluluğumuz büyüdükçe isteğe bağlı üyelik seçenekleri ekleyeceğiz.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="section-tag">BLOG</div>
+          <div className="section-title">Son analizler</div>
+          <div className="section-sub">
+            Öne çıkan maçlar için hazırladığımız detaylı yazılar.
+          </div>
+          <div className="blog-grid">
+            {blogPosts.length > 0 ? (
+              blogPosts.map((p, i) => (
+                <Link key={i} className="blogcard" href={`/blog/${p.slug || p.id}`}>
+                  <div className="meta">
+                    {p.category || "Genel"} · {new Date(p.created_at).toLocaleDateString("tr-TR", { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </div>
+                  <div className="title">{p.title}</div>
+                  <div className="oddrow">
+                    <span>{p.oran_1 ? p.oran_1.toFixed(2) : "-"}</span>
+                    <span>{p.oran_x ? p.oran_x.toFixed(2) : "-"}</span>
+                    <span>{p.oran_2 ? p.oran_2.toFixed(2) : "-"}</span>
+                  </div>
+                  <div className="pick">
+                    Sistem tahmini: {p.predicted_pick || "Analiz bekleniyor"}
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="blogcard">
+                <div className="title">Blog yazısı bulunamadı.</div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="free-cta">
+        <div className="wrap">
+          <h2>Şu an tamamen ücretsiz, kayıt bile gerekmiyor</h2>
+          <p>
+            Markamızı büyütmeye odaklandığımız bu dönemde tüm analiz araçlarını herkese açık tutuyoruz. İleride topluluğumuzla birlikte gelişen bir üyelik sistemi de sunacağız.
+          </p>
+          <Link className="btn-primary" href="/bugun">Hemen bir maç analiz et</Link>
         </div>
       </section>
 
