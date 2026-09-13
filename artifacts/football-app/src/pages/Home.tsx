@@ -11,7 +11,7 @@ export default function Home() {
 
   useEffect(() => {
     // Fetch today's matches to get the total count
-    fetch(`${BASE}/api/matches/today`)
+    fetch(`${BASE}/api/today-matches`)
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data.matches)) {
