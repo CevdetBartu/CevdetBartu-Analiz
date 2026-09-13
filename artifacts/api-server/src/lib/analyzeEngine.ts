@@ -252,9 +252,11 @@ function rowClass(s: string | null | undefined): string {
   return '';
 }
 
-function fmtOdds(v: number | null | undefined): string | null {
-  if (v == null || v <= 1.0) return null;
-  return v.toFixed(2).replace('.', ',');
+function fmtOdds(v: number | string | null | undefined): string | null {
+  if (v == null) return null;
+  const num = typeof v === 'string' ? parseFloat(v) : v;
+  if (isNaN(num) || num <= 1.0) return null;
+  return num.toFixed(2).replace('.', ',');
 }
 
 function fmtCard(v: number | null | undefined, pad = true): string {
@@ -380,6 +382,8 @@ export function analyze(
   let htSimSum = 0;
   const simScores: number[] = [];
 
+  let sumWSquared = 0;
+
   for (const m of referenceMatches) {
     const targetD = parseDate(targetMatch.date);
     const refD = parseDate(m.matchDate);
@@ -395,6 +399,7 @@ export function analyze(
     // Kernel-weighted similarity using squared similarity score + Time Decay
     const w = Math.pow(sim, 2) * decay;
     simSum += w;
+    sumWSquared += w * w;
 
     const ft = parseScore(m.ftScore);
     if (!ft) continue;
@@ -479,6 +484,10 @@ export function analyze(
     }
   }
 
+  const effectiveSampleSize = sumWSquared > 0
+    ? Math.round(((simSum * simSum) / sumWSquared) * 10) / 10
+    : 0;
+
   // --- BAYESIAN SHRINKAGE OPTIMIZATION (Bayesyen Büzülme) ---
   // İstatistiki overfitting'i engellemek için küçük örneklem yüzdelerini market/global baz eğrisine çeker
   
@@ -554,8 +563,7 @@ export function analyze(
   const avgSim = simScores.length > 0 ? (simScores.reduce((a, b) => a + b, 0) / simScores.length) : 0;
 
   // Adaptive M (Bayesyen büzülme gücü)
-  // M = 8 / sqrt(N_benzer)
-  M = total > 0 ? (8.0 / Math.sqrt(total)) : 4.0;
+  M = config?.betaBinomialM ?? (effectiveSampleSize > 0 ? (8.0 / Math.sqrt(effectiveSampleSize)) : 4.0);
   const M_ht = htValidCount > 0 ? (8.0 / Math.sqrt(htValidCount)) : M;
   const M_corner = kornerCount > 0 ? (8.0 / Math.sqrt(kornerCount)) : M;
 
