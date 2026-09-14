@@ -73,6 +73,25 @@ try {
 
 
   logger.info("Users table checked/updated.");
+
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS user_predictions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        match_id INTEGER NOT NULL,
+        prediction_type TEXT NOT NULL,
+        predicted_value TEXT NOT NULL,
+        status TEXT DEFAULT 'pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        resolved_at DATETIME DEFAULT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        UNIQUE(user_id, match_id, prediction_type)
+      )
+    `);
+    logger.info("user_predictions table checked/updated.");
+  } catch(e) {}
+
 } catch (e: any) {
 
   logger.error({ err: e }, "DB users tablo oluturma hatas");
@@ -86,4 +105,5 @@ app.listen(port, (err) => {
 
   logger.info({ port }, "Server listening");
   startDailyMatchScheduler();
+  startPredictionResolver();
 });

@@ -3,6 +3,7 @@ import { useGetTodayMatches, useRefreshTodayMatches } from '@workspace/api-clien
 import { Link } from 'wouter';
 import { isAuthenticated } from '../lib/auth';
 import { AnalysisModal } from '../components/AnalysisModal';
+import { PredictModal } from '../components/PredictModal';
 import { CouponWizard } from '../components/CouponWizard';
 
 interface TodayMatch {
@@ -80,6 +81,7 @@ export default function TodayMatchesPage() {
   // Modal Analysis States
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [predictModalOpen, setPredictModalOpen] = useState(false);
 
   const { data, isLoading, refetch } = useGetTodayMatches({ date: selectedDate });
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -437,6 +439,31 @@ export default function TodayMatchesPage() {
                                   <td style={{ padding: '8px 12px', textAlign: 'center' }}>
                                     {hasOdds ? (
                                       <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                                        <button
+                                          onClick={() => {
+                                            setSelectedMatch({
+                                              id: m.id,
+                                              saat: m.saat,
+                                              homeTeam: m.ev_sahibi,
+                                              awayTeam: m.deplasman,
+                                              league: m.lig,
+                                              oddsHome: m.oran_1,
+                                              oddsDraw: m.oran_x,
+                                              oddsAway: m.oran_2,
+                                              altOdds: m.alt_orani,
+                                              ustOdds: m.ust_orani,
+                                              varOdds: m.kg_var,
+                                              yokOdds: m.kg_yok
+                                            });
+                                            setPredictModalOpen(true);
+                                          }}
+                                          title="Tahmin Et"
+                                          style={{
+                                            padding: '4px 8px', background: '#10b981', color: 'white', border: 'none',
+                                            borderRadius: '6px', fontSize: '11px', fontWeight: 600, cursor: 'pointer'
+                                          }}>
+                                          Tahmin
+                                        </button>
                                         <button
                                           onClick={() => {
                                             setSelectedMatch({

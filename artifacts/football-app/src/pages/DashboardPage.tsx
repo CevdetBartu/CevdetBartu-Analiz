@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation, Link } from 'wouter';
 import { fetchWithAuth, getUserEmail, removeToken, removeUserEmail } from '../lib/auth';
-import { User, LogOut, Key, Trash2, Calendar, Crown, Shield } from 'lucide-react';
+import { User, LogOut, Key, Trash2, Calendar, Crown, Shield, Target } from 'lucide-react';
 
 const BASE = import.meta.env.VITE_API_URL || "";
 
@@ -105,6 +105,21 @@ export default function DashboardPage() {
             )}
 
             
+
+            {/* Tahminlerim Kısayolu */}
+            <div className="md:col-span-1 space-y-6">
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
+                <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                  <Target size={20} className="text-emerald-500" /> Tahmin Merkezi
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                  Maçlara yaptığınız tahminleri, başarı oranınızı ve geçmiş kuponlarınızı takip edin.
+                </p>
+                <Link href="/tahminlerim" className="block w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 font-bold text-center rounded-lg transition-colors border border-emerald-200">
+                  Tahmin Geçmişim
+                </Link>
+              </div>
+            </div>
             {/* Profil Bilgileri */}
             <div className="md:col-span-2 space-y-6">
               <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">

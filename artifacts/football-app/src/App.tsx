@@ -36,6 +36,7 @@ function Router() {
       <Route path="/canli-tv" component={LiveMatchesPage} />
       <Route path="/admin" component={AdminPage} />
       <Route path="/admin/kullanicilar" component={AdminUsersPage} />
+        <Route path="/tahminlerim" component={PredictionsPage} />
       <Route path="*">
         <div className="flex items-center justify-center min-h-screen">
           <p className="text-white">Sayfa bulunamadı</p>

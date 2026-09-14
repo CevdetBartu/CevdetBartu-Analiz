@@ -13,6 +13,7 @@ import liveRouter from "./live";
 import streamProxyRouter from "./streamProxy";
 import aiRouter from "./ai";
 import couponWizardRouter from "./couponWizard";
+import predictionsRouter from "./predictions";
 import adminDashboardRouter from "./adminDashboard";
 import announcementsRouter from "./announcements";
 
@@ -62,5 +63,6 @@ router.use(basketMatchesRouter);
 router.use(liveRouter);
 router.use("/ai", aiRouter);
 router.use(couponWizardRouter);
+router.use("/predictions", requireUser, predictionsRouter);
 
 export default router;
