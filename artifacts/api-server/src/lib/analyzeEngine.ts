@@ -756,21 +756,15 @@ export function analyze(
 
   const calcKelly = (prob: number, odds: number | null | undefined): KellyOnerisi => {
     const o = odds ?? 0;
-    if (o <= 1.0) return { oran: o, kasa_yuzdesi: 0, edge: 0, tavsiye: "Bahis Yapma (DeÄŸersiz Oran)" };
+    if (o <= 1.0) return { oran: o, kasa_yuzdesi: 0, edge: 0, tavsiye: "DÝKKAT: Model edge piyasayý yenememektedir, bahis tavsiye edilmez." };
     const edge = prob - (1.0 / o);
-    if (edge <= 0) {
-      return { oran: o, kasa_yuzdesi: 0, edge: Math.round(edge * 1000) / 10, tavsiye: "Bahis Yapma (DeÄŸersiz Oran)" };
-    }
-    const b = o - 1.0;
-    const f = (prob * b - (1.0 - prob)) / b;
-    const q_f = Math.min(0.035, Math.max(0, f * 0.25));
-    const pct = Math.round(q_f * 1000) / 10;
     return {
       oran: o,
-      kasa_yuzdesi: pct,
+      kasa_yuzdesi: 0,
       edge: Math.round(edge * 1000) / 10,
-      tavsiye: pct > 0 ? `KasanÄ±n %${pct.toFixed(1)}'i kadar oyna` : "Bahis Yapma (DeÄŸersiz Oran)"
+      tavsiye: "DÝKKAT: Model edge piyasayý yenememektedir, bahis tavsiye edilmez."
     };
+  };
   };
 
   kellyHome = calcKelly(finalHomePct / 100, targetMatch.oddsHome);
@@ -1374,5 +1368,7 @@ export function calculateModelD(
     tahminler
   };
 }
+
+
 
 
