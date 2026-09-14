@@ -2,7 +2,7 @@
  * Football Statistics Analysis Engine
  * Accepts a target match + reference matches, returns a render-ready JSON.
  */
-import { getLeagueGoalAverages, getTeamStandingsFallback } from './scraperDb';
+import { getLeagueGoalAverages, getTeamStandingsFallback } from "./scraperDb";
 
 export interface AnalyzeRefMatch {
   similarityScore?: number;
@@ -137,34 +137,34 @@ export interface AnalyzeOzet {
   } | null;
 }
 
-export type OddsWinner = 'ev' | 'ber' | 'dep' | null;
-export type AltUstWinner = 'alt' | 'ust' | null;
-export type VarYokWinner = 'var' | 'yok' | null;
+export type OddsWinner = "ev" | "ber" | "dep" | null;
+export type AltUstWinner = "alt" | "ust" | null;
+export type VarYokWinner = "var" | "yok" | null;
 
 export interface TarafOranlari {
   ev: string | null;
   ber: string | null;
   dep: string | null;
   kazanan: OddsWinner;
-  ev_trend?: 'up' | 'down' | 'flat' | null;
-  ber_trend?: 'up' | 'down' | 'flat' | null;
-  dep_trend?: 'up' | 'down' | 'flat' | null;
+  ev_trend?: "up" | "down" | "flat" | null;
+  ber_trend?: "up" | "down" | "flat" | null;
+  dep_trend?: "up" | "down" | "flat" | null;
 }
 
 export interface AltUst {
   alt: string | null;
   ust: string | null;
   kazanan: AltUstWinner;
-  alt_trend?: 'up' | 'down' | 'flat' | null;
-  ust_trend?: 'up' | 'down' | 'flat' | null;
+  alt_trend?: "up" | "down" | "flat" | null;
+  ust_trend?: "up" | "down" | "flat" | null;
 }
 
 export interface VarYok {
   var: string | null;
   yok: string | null;
   kazanan: VarYokWinner;
-  var_trend?: 'up' | 'down' | 'flat' | null;
-  yok_trend?: 'up' | 'down' | 'flat' | null;
+  var_trend?: "up" | "down" | "flat" | null;
+  yok_trend?: "up" | "down" | "flat" | null;
 }
 
 export interface TabloSatiri {
@@ -216,48 +216,50 @@ export interface AnalyzeResponse {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function parseScore(s: string | null | undefined): { home: number; away: number } | null {
+function parseScore(
+  s: string | null | undefined,
+): { home: number; away: number } | null {
   if (!s) return null;
-  const clean = s.trim().replace(/\?/g, '').replace(/\s/g, '');
+  const clean = s.trim().replace(/\?/g, "").replace(/\s/g, "");
   const m = clean.match(/^(\d+)[:\-](\d+)$/);
   if (!m) return null;
   return { home: parseInt(m[1], 10), away: parseInt(m[2], 10) };
 }
 
-function resultType(s: string | null | undefined): 'ev' | 'ber' | 'dep' | null {
+function resultType(s: string | null | undefined): "ev" | "ber" | "dep" | null {
   const p = parseScore(s);
   if (!p) return null;
-  if (p.home > p.away) return 'ev';
-  if (p.home < p.away) return 'dep';
-  return 'ber';
+  if (p.home > p.away) return "ev";
+  if (p.home < p.away) return "dep";
+  return "ber";
 }
 
 function scoreClass(s: string | null | undefined): string | null {
   const r = resultType(s);
-  if (r === 'ev') return 'score-home';
-  if (r === 'dep') return 'score-away';
-  if (r === 'ber') return 'score-draw';
+  if (r === "ev") return "score-home";
+  if (r === "dep") return "score-away";
+  if (r === "ber") return "score-draw";
   return null;
 }
 
 function rowClass(s: string | null | undefined): string {
   const r = resultType(s);
-  if (r === 'ev') return 'row-home';
-  if (r === 'dep') return 'row-away';
-  if (r === 'ber') return 'row-draw';
-  return '';
+  if (r === "ev") return "row-home";
+  if (r === "dep") return "row-away";
+  if (r === "ber") return "row-draw";
+  return "";
 }
 
 function fmtOdds(v: number | string | null | undefined): string | null {
   if (v == null) return null;
-  const num = typeof v === 'string' ? parseFloat(v) : v;
+  const num = typeof v === "string" ? parseFloat(v) : v;
   if (isNaN(num) || num <= 1.0) return null;
-  return num.toFixed(2).replace('.', ',');
+  return num.toFixed(2).replace(".", ",");
 }
 
 function fmtCard(v: number | null | undefined, pad = true): string {
-  if (v == null) return '00';
-  return pad ? String(v).padStart(2, '0') : String(v);
+  if (v == null) return "00";
+  return pad ? String(v).padStart(2, "0") : String(v);
 }
 
 function mostCommon(freq: Record<string, number>): string | null {
@@ -269,7 +271,11 @@ function mostCommon(freq: Record<string, number>): string | null {
 
 function statGroup(count: number, total: number, label: string): StatGroup {
   const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-  return { sayi: count, yuzde: pct, label: `${label} ${count}/${total} (${pct}%)` };
+  return {
+    sayi: count,
+    yuzde: pct,
+    label: `${label} ${count}/${total} (${pct}%)`,
+  };
 }
 
 function parseDate(s: string | null | undefined): Date | null {
@@ -278,21 +284,29 @@ function parseDate(s: string | null | undefined): Date | null {
   // YYYY-MM-DD
   let m = clean.match(/^(\d{4})[-/](\d{2})[-/](\d{2})$/);
   if (m) {
-    return new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
+    return new Date(
+      parseInt(m[1], 10),
+      parseInt(m[2], 10) - 1,
+      parseInt(m[3], 10),
+    );
   }
   // DD.MM.YYYY
   m = clean.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
   if (m) {
-    return new Date(parseInt(m[3], 10), parseInt(m[2], 10) - 1, parseInt(m[1], 10));
+    return new Date(
+      parseInt(m[3], 10),
+      parseInt(m[2], 10) - 1,
+      parseInt(m[1], 10),
+    );
   }
   return null;
 }
 
 function imRenk(im: string | null | undefined): string {
-  if (!im) return '';
-  if (im === '2/1') return 'im-special';
-  if (im === '1/1') return 'im-good';
-  return '';
+  if (!im) return "";
+  if (im === "2/1") return "im-special";
+  if (im === "1/1") return "im-good";
+  return "";
 }
 
 function calcOrtalamaString(item: any): string {
@@ -317,7 +331,7 @@ function calcOrtalamaString(item: any): string {
     const maxO = Math.max(...odds);
     return `${fmtOdds(minO)}-${fmtOdds(maxO)}`;
   }
-  return '';
+  return "";
 }
 
 function factorial(n: number): number {
@@ -335,14 +349,14 @@ function poissonProb(k: number, lambda: number): number {
 
 export interface AnalyzeConfig {
   consensusWeightSimilarity?: number; // default 0.6
-  betaBinomialM?: number;              // default 4.0
-  timeDecayScale?: number;            // default 540.0
+  betaBinomialM?: number; // default 4.0
+  timeDecayScale?: number; // default 540.0
 }
 
 export function analyze(
   targetMatch: AnalyzeTargetMatch,
   referenceMatches: AnalyzeRefMatch[],
-  config?: AnalyzeConfig
+  config?: AnalyzeConfig,
 ): AnalyzeResponse {
   const consensusWeightSim = config?.consensusWeightSimilarity ?? 0.6;
   const consensusWeightPoisson = 1.0 - consensusWeightSim;
@@ -352,13 +366,24 @@ export function analyze(
   const total = referenceMatches.length;
 
   // ── 1. Aggregate stats ────────────────────────────────────────────────────
-  let homeWins = 0, draws = 0, awayWins = 0;
-  let bttsCount = 0, over25Count = 0;
-  let over45Count = 0, gol6PlusCount = 0;
-  let iyMs1_2Count = 0, iyMs2_1Count = 0;
-  let over35Count = 0, iyOver15Count = 0, iyOver05Count = 0;
-  let totalGoals = 0, totalCards = 0, cardCount = 0;
-  let totalKorner = 0, kornerCount = 0, ust10CornerCount = 0;
+  let homeWins = 0,
+    draws = 0,
+    awayWins = 0;
+  let bttsCount = 0,
+    over25Count = 0;
+  let over45Count = 0,
+    gol6PlusCount = 0;
+  let iyMs1_2Count = 0,
+    iyMs2_1Count = 0;
+  let over35Count = 0,
+    iyOver15Count = 0,
+    iyOver05Count = 0;
+  let totalGoals = 0,
+    totalCards = 0,
+    cardCount = 0;
+  let totalKorner = 0,
+    kornerCount = 0,
+    ust10CornerCount = 0;
   let totalHomeGoalsRef = 0;
   let totalAwayGoalsRef = 0;
   let validGoalsMatches = 0;
@@ -385,13 +410,15 @@ export function analyze(
     const refD = parseDate(m.matchDate);
     let decay = 1.0;
     if (targetD && refD) {
-      const daysDiff = Math.abs((targetD.getTime() - refD.getTime()) / (1000 * 60 * 60 * 24));
+      const daysDiff = Math.abs(
+        (targetD.getTime() - refD.getTime()) / (1000 * 60 * 60 * 24),
+      );
       decay = Math.exp(-daysDiff / decayScale);
     }
 
     const sim = m.similarityScore ?? 100;
     simScores.push(sim);
-    
+
     // Kernel-weighted similarity using squared similarity score + Time Decay
     const w = Math.pow(sim, 2) * decay;
     simSum += w;
@@ -428,16 +455,20 @@ export function analyze(
     if (goals > 3.5) {
       over35Count++;
       over35Weighted += w;
-      }
-      if (goals > 4.5) { over45Count++; }
-      if (goals >= 6) { gol6PlusCount++; }
-      
-      const htxx = parseScore(m.htScore);
-        
-      if (htxx && ft) {
-        if (htxx.home > htxx.away && ft.home < ft.away) iyMs1_2Count++;
-        if (htxx.home < htxx.away && ft.home > ft.away) iyMs2_1Count++;
-      }
+    }
+    if (goals > 4.5) {
+      over45Count++;
+    }
+    if (goals >= 6) {
+      gol6PlusCount++;
+    }
+
+    const htxx = parseScore(m.htScore);
+
+    if (htxx && ft) {
+      if (htxx.home > htxx.away && ft.home < ft.away) iyMs1_2Count++;
+      if (htxx.home < htxx.away && ft.home > ft.away) iyMs2_1Count++;
+    }
 
     // FT score freq
     const ftKey = `${ft.home}:${ft.away}`;
@@ -465,9 +496,7 @@ export function analyze(
     // Cards (only counted if data is present)
     if (m.yellowCardsHome != null || m.yellowCardsAway != null) {
       totalCards +=
-        (m.yellowCardsHome ?? 0) +
-        (m.yellowCardsAway ?? 0) +
-        (m.redCards ?? 0);
+        (m.yellowCardsHome ?? 0) + (m.yellowCardsAway ?? 0) + (m.redCards ?? 0);
       cardCount++;
     }
 
@@ -480,16 +509,17 @@ export function analyze(
     }
   }
 
-  const effectiveSampleSize = sumWSquared > 0
-    ? Math.round(((simSum * simSum) / sumWSquared) * 10) / 10
-    : 0;
+  const effectiveSampleSize =
+    sumWSquared > 0
+      ? Math.round(((simSum * simSum) / sumWSquared) * 10) / 10
+      : 0;
 
   // --- BAYESIAN SHRINKAGE OPTIMIZATION (Bayesyen Büzülme) ---
   // İstatistiki overfitting'i engellemek için küçük örneklem yüzdelerini market/global baz eğrisine çeker
-  
+
   // Madde 2: Shin's Method (Insider Trading Model) Devigging
   let priorHome = 0.35;
-  let priorDraw = 0.30;
+  let priorDraw = 0.3;
   let priorAway = 0.35;
 
   if (targetMatch.oddsHome && targetMatch.oddsDraw && targetMatch.oddsAway) {
@@ -500,14 +530,17 @@ export function analyze(
     const piD = 1.0 / oD;
     const piA = 1.0 / oA;
     const S = piH + piD + piA;
-    
+
     // Shin's insider trading proportion parameter z
     const z = Math.max(0, (S - 1.0) / 2.0);
-    
+
     // Shin's devigged true un-biased probabilities
-    priorHome = (Math.sqrt(z * z + 4 * (1 - z) * (piH * piH / S)) - z) / (2 * (1 - z));
-    priorDraw = (Math.sqrt(z * z + 4 * (1 - z) * (piD * piD / S)) - z) / (2 * (1 - z));
-    priorAway = (Math.sqrt(z * z + 4 * (1 - z) * (piA * piA / S)) - z) / (2 * (1 - z));
+    priorHome =
+      (Math.sqrt(z * z + 4 * (1 - z) * ((piH * piH) / S)) - z) / (2 * (1 - z));
+    priorDraw =
+      (Math.sqrt(z * z + 4 * (1 - z) * ((piD * piD) / S)) - z) / (2 * (1 - z));
+    priorAway =
+      (Math.sqrt(z * z + 4 * (1 - z) * ((piA * piA) / S)) - z) / (2 * (1 - z));
 
     const sumShin = priorHome + priorDraw + priorAway;
     if (sumShin > 0) {
@@ -530,48 +563,78 @@ export function analyze(
   // Alt/Üst 2.5 marj temizleme
   let priorOver = 0.48;
   if (targetMatch.ustOdds && targetMatch.altOdds) {
-    const sumOU = (1.0 / targetMatch.ustOdds) + (1.0 / targetMatch.altOdds);
-    priorOver = (1.0 / targetMatch.ustOdds) / sumOU;
+    const sumOU = 1.0 / targetMatch.ustOdds + 1.0 / targetMatch.altOdds;
+    priorOver = 1.0 / targetMatch.ustOdds / sumOU;
   } else if (targetMatch.ustOdds) {
     // Tek oran varsa ortalama %6.5 pazar marjını düşerek düzelt
-    priorOver = (1.0 / targetMatch.ustOdds) / 1.065;
+    priorOver = 1.0 / targetMatch.ustOdds / 1.065;
   }
 
   // Diğer pazar prior olasılıkları (marj temizlenmiş yaklaşımlarla)
-  const priorBtts = targetMatch.varOdds && targetMatch.yokOdds
-    ? (1.0 / targetMatch.varOdds) / ((1.0 / targetMatch.varOdds) + (1.0 / targetMatch.yokOdds))
-    : (targetMatch.varOdds ? (1.0 / targetMatch.varOdds) / 1.065 : 0.52);
+  const priorBtts =
+    targetMatch.varOdds && targetMatch.yokOdds
+      ? 1.0 /
+        targetMatch.varOdds /
+        (1.0 / targetMatch.varOdds + 1.0 / targetMatch.yokOdds)
+      : targetMatch.varOdds
+        ? 1.0 / targetMatch.varOdds / 1.065
+        : 0.52;
 
-  const priorOver35 = targetMatch.ustOdds35 && targetMatch.altOdds35
-    ? (1.0 / targetMatch.ustOdds35) / ((1.0 / targetMatch.ustOdds35) + (1.0 / targetMatch.altOdds35))
-    : (targetMatch.ustOdds35 ? (1.0 / targetMatch.ustOdds35) / 1.065 : 0.25);
+  const priorOver35 =
+    targetMatch.ustOdds35 && targetMatch.altOdds35
+      ? 1.0 /
+        targetMatch.ustOdds35 /
+        (1.0 / targetMatch.ustOdds35 + 1.0 / targetMatch.altOdds35)
+      : targetMatch.ustOdds35
+        ? 1.0 / targetMatch.ustOdds35 / 1.065
+        : 0.25;
 
-  const priorIyOver15 = targetMatch.iyUstOdds15 && targetMatch.iyAltOdds15
-    ? (1.0 / targetMatch.iyUstOdds15) / ((1.0 / targetMatch.iyUstOdds15) + (1.0 / targetMatch.iyAltOdds15))
-    : (targetMatch.iyUstOdds15 ? (1.0 / targetMatch.iyUstOdds15) / 1.065 : 0.32);
+  const priorIyOver15 =
+    targetMatch.iyUstOdds15 && targetMatch.iyAltOdds15
+      ? 1.0 /
+        targetMatch.iyUstOdds15 /
+        (1.0 / targetMatch.iyUstOdds15 + 1.0 / targetMatch.iyAltOdds15)
+      : targetMatch.iyUstOdds15
+        ? 1.0 / targetMatch.iyUstOdds15 / 1.065
+        : 0.32;
 
-  const priorIyOver05 = targetMatch.iyUstOdds05 && targetMatch.iyAltOdds05
-    ? (1.0 / targetMatch.iyUstOdds05) / ((1.0 / targetMatch.iyUstOdds05) + (1.0 / targetMatch.iyAltOdds05))
-    : (targetMatch.iyUstOdds05 ? (1.0 / targetMatch.iyUstOdds05) / 1.065 : 0.70);
+  const priorIyOver05 =
+    targetMatch.iyUstOdds05 && targetMatch.iyAltOdds05
+      ? 1.0 /
+        targetMatch.iyUstOdds05 /
+        (1.0 / targetMatch.iyUstOdds05 + 1.0 / targetMatch.iyAltOdds05)
+      : targetMatch.iyUstOdds05
+        ? 1.0 / targetMatch.iyUstOdds05 / 1.065
+        : 0.7;
 
-  const priorCorner = 0.50;
+  const priorCorner = 0.5;
 
-  const avgSim = simScores.length > 0 ? (simScores.reduce((a, b) => a + b, 0) / simScores.length) : 0;
+  const avgSim =
+    simScores.length > 0
+      ? simScores.reduce((a, b) => a + b, 0) / simScores.length
+      : 0;
 
   // Adaptive M (Bayesyen büzülme gücü)
-  M = config?.betaBinomialM ?? (effectiveSampleSize > 0 ? (8.0 / Math.sqrt(effectiveSampleSize)) : 4.0);
-  const M_ht = htValidCount > 0 ? (8.0 / Math.sqrt(htValidCount)) : M;
-  const M_corner = kornerCount > 0 ? (8.0 / Math.sqrt(kornerCount)) : M;
+  M =
+    config?.betaBinomialM ??
+    (effectiveSampleSize > 0 ? 8.0 / Math.sqrt(effectiveSampleSize) : 4.0);
+  const M_ht = htValidCount > 0 ? 8.0 / Math.sqrt(htValidCount) : M;
+  const M_corner = kornerCount > 0 ? 8.0 / Math.sqrt(kornerCount) : M;
 
   // Kernel-weighted outcome probabilities (P_ham) and Shrinkage probabilities (P_final)
   // P_final = (N_benzer * P_ham + M * P_piyasa) / (N_benzer + M)
-  const pHamHome = total > 0 && simSum > 0 ? (homeWinsWeighted / simSum) : priorHome;
-  const pHamDraw = total > 0 && simSum > 0 ? (drawsWeighted / simSum) : priorDraw;
-  const pHamAway = total > 0 && simSum > 0 ? (awayWinsWeighted / simSum) : priorAway;
+  const pHamHome =
+    total > 0 && simSum > 0 ? homeWinsWeighted / simSum : priorHome;
+  const pHamDraw = total > 0 && simSum > 0 ? drawsWeighted / simSum : priorDraw;
+  const pHamAway =
+    total > 0 && simSum > 0 ? awayWinsWeighted / simSum : priorAway;
 
-  let pFinalHome = total > 0 ? ((total * pHamHome + M * priorHome) / (total + M)) : priorHome;
-  let pFinalDraw = total > 0 ? ((total * pHamDraw + M * priorDraw) / (total + M)) : priorDraw;
-  let pFinalAway = total > 0 ? ((total * pHamAway + M * priorAway) / (total + M)) : priorAway;
+  let pFinalHome =
+    total > 0 ? (total * pHamHome + M * priorHome) / (total + M) : priorHome;
+  let pFinalDraw =
+    total > 0 ? (total * pHamDraw + M * priorDraw) / (total + M) : priorDraw;
+  let pFinalAway =
+    total > 0 ? (total * pHamAway + M * priorAway) / (total + M) : priorAway;
 
   // Normalize side probabilities to sum to exactly 1.0
   const sumFinalSides = pFinalHome + pFinalDraw + pFinalAway;
@@ -587,30 +650,58 @@ export function analyze(
 
   // Target League Goal Base-Rate Normalization Factor
   const leagueGoalAverages = getLeagueGoalAverages(targetMatch.league || "");
-  const targetLeagueAvgGoals = (leagueGoalAverages.homePrior + leagueGoalAverages.awayPrior);
+  const targetLeagueAvgGoals =
+    leagueGoalAverages.homePrior + leagueGoalAverages.awayPrior;
   const globalRefAvgGoals = 2.75;
-  const leagueGoalFactor = Math.min(1.25, Math.max(0.75, targetLeagueAvgGoals / globalRefAvgGoals));
+  const leagueGoalFactor = Math.min(
+    1.25,
+    Math.max(0.75, targetLeagueAvgGoals / globalRefAvgGoals),
+  );
 
-  const pHamBtts = total > 0 && simSum > 0 ? (bttsWeighted / simSum) : priorBtts;
-  let pFinalBtts = total > 0 ? ((total * pHamBtts + M * priorBtts) / (total + M)) : priorBtts;
+  const pHamBtts = total > 0 && simSum > 0 ? bttsWeighted / simSum : priorBtts;
+  let pFinalBtts =
+    total > 0 ? (total * pHamBtts + M * priorBtts) / (total + M) : priorBtts;
   pFinalBtts = Math.min(0.95, Math.max(0.05, pFinalBtts * leagueGoalFactor));
   const bttsPctWeighted = Math.round(pFinalBtts * 100);
 
-  const pHamOver25 = total > 0 && simSum > 0 ? (over25Weighted / simSum) : priorOver;
-  let pFinalOver25 = total > 0 ? ((total * pHamOver25 + M * priorOver) / (total + M)) : priorOver;
-  pFinalOver25 = Math.min(0.95, Math.max(0.05, pFinalOver25 * leagueGoalFactor));
+  const pHamOver25 =
+    total > 0 && simSum > 0 ? over25Weighted / simSum : priorOver;
+  let pFinalOver25 =
+    total > 0 ? (total * pHamOver25 + M * priorOver) / (total + M) : priorOver;
+  pFinalOver25 = Math.min(
+    0.95,
+    Math.max(0.05, pFinalOver25 * leagueGoalFactor),
+  );
   const over25PctWeighted = Math.round(pFinalOver25 * 100);
 
-  const pHamOver35 = total > 0 && simSum > 0 ? (over35Weighted / simSum) : priorOver35;
-  const pFinalOver35 = total > 0 ? ((total * pHamOver35 + M * priorOver35) / (total + M)) : priorOver35;
+  const pHamOver35 =
+    total > 0 && simSum > 0 ? over35Weighted / simSum : priorOver35;
+  const pFinalOver35 =
+    total > 0
+      ? (total * pHamOver35 + M * priorOver35) / (total + M)
+      : priorOver35;
   const over35PctWeighted = Math.round(pFinalOver35 * 100);
 
-  const pHamIyOver15 = htValidCount > 0 && htSimSum > 0 ? (iyOver15Weighted / htSimSum) : priorIyOver15;
-  const pFinalIyOver15 = htValidCount > 0 ? ((htValidCount * pHamIyOver15 + M_ht * priorIyOver15) / (htValidCount + M_ht)) : priorIyOver15;
+  const pHamIyOver15 =
+    htValidCount > 0 && htSimSum > 0
+      ? iyOver15Weighted / htSimSum
+      : priorIyOver15;
+  const pFinalIyOver15 =
+    htValidCount > 0
+      ? (htValidCount * pHamIyOver15 + M_ht * priorIyOver15) /
+        (htValidCount + M_ht)
+      : priorIyOver15;
   const iyOver15PctWeighted = Math.round(pFinalIyOver15 * 100);
 
-  const pHamIyOver05 = htValidCount > 0 && htSimSum > 0 ? (iyOver05Weighted / htSimSum) : priorIyOver05;
-  const pFinalIyOver05 = htValidCount > 0 ? ((htValidCount * pHamIyOver05 + M_ht * priorIyOver05) / (htValidCount + M_ht)) : priorIyOver05;
+  const pHamIyOver05 =
+    htValidCount > 0 && htSimSum > 0
+      ? iyOver05Weighted / htSimSum
+      : priorIyOver05;
+  const pFinalIyOver05 =
+    htValidCount > 0
+      ? (htValidCount * pHamIyOver05 + M_ht * priorIyOver05) /
+        (htValidCount + M_ht)
+      : priorIyOver05;
   const iyOver05PctWeighted = Math.round(pFinalIyOver05 * 100);
 
   // Corner weight count (w_i = sim_i^2 * decay)
@@ -623,12 +714,14 @@ export function analyze(
       const refD = parseDate(m.matchDate);
       let decay = 1.0;
       if (targetD && refD) {
-        const daysDiff = Math.abs((targetD.getTime() - refD.getTime()) / (1000 * 60 * 60 * 24));
+        const daysDiff = Math.abs(
+          (targetD.getTime() - refD.getTime()) / (1000 * 60 * 60 * 24),
+        );
         decay = Math.exp(-daysDiff / 540.0);
       }
       const sim = m.similarityScore ?? 100;
       const w = Math.pow(sim, 2) * decay;
-      
+
       const mk = (m.kornerHome ?? 0) + (m.kornerAway ?? 0);
       if (mk >= 10) {
         cornerWeighted += w;
@@ -637,12 +730,19 @@ export function analyze(
     }
   }
 
-  const pHamCorner = kornerCount > 0 && cornerSimSum > 0 ? (cornerWeighted / cornerSimSum) : priorCorner;
-  const pFinalCorner = kornerCount > 0 ? ((kornerCount * pHamCorner + M_corner * priorCorner) / (kornerCount + M_corner)) : priorCorner;
+  const pHamCorner =
+    kornerCount > 0 && cornerSimSum > 0
+      ? cornerWeighted / cornerSimSum
+      : priorCorner;
+  const pFinalCorner =
+    kornerCount > 0
+      ? (kornerCount * pHamCorner + M_corner * priorCorner) /
+        (kornerCount + M_corner)
+      : priorCorner;
   const cornerPctWeighted = Math.round(pFinalCorner * 100);
 
   // Güven Skoru = N_benzer * Ortalama_Benzerlik_Skoru / 100
-  const guvenSkoru = Math.round((total * avgSim / 100) * 10) / 10;
+  const guvenSkoru = Math.round(((total * avgSim) / 100) * 10) / 10;
   let guvenSeviyesi = "DUSUK";
   if (guvenSkoru >= 40) {
     guvenSeviyesi = "YUKSEK";
@@ -660,7 +760,7 @@ export function analyze(
   if (validGoalsMatches > 0) {
     const rawLambdaHome = totalHomeGoalsRef / validGoalsMatches;
     const rawLambdaAway = totalAwayGoalsRef / validGoalsMatches;
-    
+
     // Bayesian Shrinkage for Poisson Lambdas (C = 4.0, baseline = league-specific priors)
     const C_GOALS = 4.0;
     const K_GOALS = validGoalsMatches / (validGoalsMatches + C_GOALS);
@@ -681,7 +781,7 @@ export function analyze(
   for (let h = 0; h <= 5; h++) {
     for (let a = 0; a <= 5; a++) {
       let pScore = poissonProb(h, lambdaHome) * poissonProb(a, lambdaAway);
-      
+
       // Dixon-Coles Tau(h, a) factor
       let tau = 1.0;
       if (h === 0 && a === 0) tau = 1.0 - lambdaHome * lambdaAway * rho;
@@ -707,7 +807,8 @@ export function analyze(
   let sumP_HT = 0;
   for (let h_ht = 0; h_ht <= 5; h_ht++) {
     for (let a_ht = 0; a_ht <= 5; a_ht++) {
-      const pScore_HT = poissonProb(h_ht, lambdaHome / 2) * poissonProb(a_ht, lambdaAway / 2);
+      const pScore_HT =
+        poissonProb(h_ht, lambdaHome / 2) * poissonProb(a_ht, lambdaAway / 2);
       sumP_HT += pScore_HT;
       if (h_ht + a_ht >= 2) pIyOver15 += pScore_HT;
       if (h_ht + a_ht >= 1) pIyOver05 += pScore_HT;
@@ -728,36 +829,110 @@ export function analyze(
   }
 
   // Consensus Model: Similarity + Poisson (Weighted)
-  let rawHomePct = total > 0 ? consensusWeightSim * homePctWeighted + consensusWeightPoisson * pHomeWin * 100 : priorHome * 100;
-  let rawDrawPct = total > 0 ? consensusWeightSim * drawPctWeighted + consensusWeightPoisson * pDraw * 100 : priorDraw * 100;
-  let rawAwayPct = total > 0 ? consensusWeightSim * awayPctWeighted + consensusWeightPoisson * pAwayWin * 100 : priorAway * 100;
+  let rawHomePct =
+    total > 0
+      ? consensusWeightSim * homePctWeighted +
+        consensusWeightPoisson * pHomeWin * 100
+      : priorHome * 100;
+  let rawDrawPct =
+    total > 0
+      ? consensusWeightSim * drawPctWeighted +
+        consensusWeightPoisson * pDraw * 100
+      : priorDraw * 100;
+  let rawAwayPct =
+    total > 0
+      ? consensusWeightSim * awayPctWeighted +
+        consensusWeightPoisson * pAwayWin * 100
+      : priorAway * 100;
 
   // Normalize side probabilities to sum to exactly 100%
   const sumSides = rawHomePct + rawDrawPct + rawAwayPct;
-  const finalHomePct = sumSides > 0 ? Math.round((rawHomePct / sumSides) * 100) : Math.round(priorHome * 100);
-  const finalDrawPct = sumSides > 0 ? Math.round((rawDrawPct / sumSides) * 100) : Math.round(priorDraw * 100);
+  const finalHomePct =
+    sumSides > 0
+      ? Math.round((rawHomePct / sumSides) * 100)
+      : Math.round(priorHome * 100);
+  const finalDrawPct =
+    sumSides > 0
+      ? Math.round((rawDrawPct / sumSides) * 100)
+      : Math.round(priorDraw * 100);
   const finalAwayPct = 100 - finalHomePct - finalDrawPct;
 
-  const finalBttsPct = total > 0 ? Math.round(consensusWeightSim * bttsPctWeighted + consensusWeightPoisson * pBtts * 100) : Math.round(priorBtts * 100);
-  const finalOver25Pct = total > 0 ? Math.round(consensusWeightSim * over25PctWeighted + consensusWeightPoisson * pOver25 * 100) : Math.round(priorOver * 100);
-  const finalOver35Pct = total > 0 ? Math.round(consensusWeightSim * over35PctWeighted + consensusWeightPoisson * pOver35 * 100) : Math.round(priorOver35 * 100);
-  const finalIyOver15Pct = total > 0 ? Math.round(consensusWeightSim * iyOver15PctWeighted + consensusWeightPoisson * pIyOver15 * 100) : Math.round(priorIyOver15 * 100);
-  const finalIyOver05Pct = total > 0 ? Math.round(consensusWeightSim * iyOver05PctWeighted + consensusWeightPoisson * pIyOver05 * 100) : Math.round(priorIyOver05 * 100);
+  const finalBttsPct =
+    total > 0
+      ? Math.round(
+          consensusWeightSim * bttsPctWeighted +
+            consensusWeightPoisson * pBtts * 100,
+        )
+      : Math.round(priorBtts * 100);
+  const finalOver25Pct =
+    total > 0
+      ? Math.round(
+          consensusWeightSim * over25PctWeighted +
+            consensusWeightPoisson * pOver25 * 100,
+        )
+      : Math.round(priorOver * 100);
+  const finalOver35Pct =
+    total > 0
+      ? Math.round(
+          consensusWeightSim * over35PctWeighted +
+            consensusWeightPoisson * pOver35 * 100,
+        )
+      : Math.round(priorOver35 * 100);
+  const finalIyOver15Pct =
+    total > 0
+      ? Math.round(
+          consensusWeightSim * iyOver15PctWeighted +
+            consensusWeightPoisson * pIyOver15 * 100,
+        )
+      : Math.round(priorIyOver15 * 100);
+  const finalIyOver05Pct =
+    total > 0
+      ? Math.round(
+          consensusWeightSim * iyOver05PctWeighted +
+            consensusWeightPoisson * pIyOver05 * 100,
+        )
+      : Math.round(priorIyOver05 * 100);
 
   // Kelly Criterion Money Management Calculations (Quarter-Kelly, Max 10%)
-  let kellyHome: KellyOnerisi = { oran: targetMatch.oddsHome ?? 0, kasa_yuzdesi: 0, edge: 0, tavsiye: "Bahis Yapma (Değersiz Oran)" };
-  let kellyDraw: KellyOnerisi = { oran: targetMatch.oddsDraw ?? 0, kasa_yuzdesi: 0, edge: 0, tavsiye: "Bahis Yapma (Değersiz Oran)" };
-  let kellyAway: KellyOnerisi = { oran: targetMatch.oddsAway ?? 0, kasa_yuzdesi: 0, edge: 0, tavsiye: "Bahis Yapma (Değersiz Oran)" };
+  let kellyHome: KellyOnerisi = {
+    oran: targetMatch.oddsHome ?? 0,
+    kasa_yuzdesi: 0,
+    edge: 0,
+    tavsiye: "Bahis Yapma (Değersiz Oran)",
+  };
+  let kellyDraw: KellyOnerisi = {
+    oran: targetMatch.oddsDraw ?? 0,
+    kasa_yuzdesi: 0,
+    edge: 0,
+    tavsiye: "Bahis Yapma (Değersiz Oran)",
+  };
+  let kellyAway: KellyOnerisi = {
+    oran: targetMatch.oddsAway ?? 0,
+    kasa_yuzdesi: 0,
+    edge: 0,
+    tavsiye: "Bahis Yapma (Değersiz Oran)",
+  };
 
-  const calcKelly = (prob: number, odds: number | null | undefined): KellyOnerisi => {
+  const calcKelly = (
+    prob: number,
+    odds: number | null | undefined,
+  ): KellyOnerisi => {
     const o = odds ?? 0;
-    if (o <= 1.0) return { oran: o, kasa_yuzdesi: 0, edge: 0, tavsiye: "D�KKAT: Model edge piyasay� yenememektedir, bahis tavsiye edilmez." };
-    const edge = prob - (1.0 / o);
+    if (o <= 1.0)
+      return {
+        oran: o,
+        kasa_yuzdesi: 0,
+        edge: 0,
+        tavsiye:
+          "D�KKAT: Model edge piyasay� yenememektedir, bahis tavsiye edilmez.",
+      };
+    const edge = prob - 1.0 / o;
     return {
       oran: o,
       kasa_yuzdesi: 0,
       edge: Math.round(edge * 1000) / 10,
-      tavsiye: "D�KKAT: Model edge piyasay� yenememektedir, bahis tavsiye edilmez."
+      tavsiye:
+        "D�KKAT: Model edge piyasay� yenememektedir, bahis tavsiye edilmez.",
     };
   };
 
@@ -785,15 +960,16 @@ export function analyze(
     }
 
     if (o1 < o2) {
-      if (ft.home > ft.away) totalReturn += (o1 - 1.0);
+      if (ft.home > ft.away) totalReturn += o1 - 1.0;
       else totalReturn -= 1.0;
     } else {
-      if (ft.away > ft.home) totalReturn += (o2 - 1.0);
+      if (ft.away > ft.home) totalReturn += o2 - 1.0;
       else totalReturn -= 1.0;
     }
   }
 
-  const modelRoi = betCount > 0 ? Math.round((totalReturn / betCount) * 100 * 10) / 10 : 0;
+  const modelRoi =
+    betCount > 0 ? Math.round((totalReturn / betCount) * 100 * 10) / 10 : 0;
   let predictability = "ORTA";
   if (betCount >= 5) {
     if (modelRoi > 5.0) predictability = "YUKSEK";
@@ -801,16 +977,18 @@ export function analyze(
   }
 
   const analiz_yuzde_str =
-    total > 0
-      ? `${finalHomePct}-${finalDrawPct}-${finalAwayPct}`
-      : '0-0-0';
+    total > 0 ? `${finalHomePct}-${finalDrawPct}-${finalAwayPct}` : "0-0-0";
 
-  const ortKorner  = kornerCount > 0 ? Math.round((totalKorner / kornerCount) * 10) / 10 : null;
-  const bttsPct    = finalBttsPct;
-  const over25Pct  = finalOver25Pct;
-  const avgCards   = cardCount > 0 ? totalCards / cardCount : 0;
+  const ortKorner =
+    kornerCount > 0 ? Math.round((totalKorner / kornerCount) * 10) / 10 : null;
+  const bttsPct = finalBttsPct;
+  const over25Pct = finalOver25Pct;
+  const avgCards = cardCount > 0 ? totalCards / cardCount : 0;
 
-  const getCommonFreqShrinkage = (freq: Record<string, number>, baselineProb: number): string | null => {
+  const getCommonFreqShrinkage = (
+    freq: Record<string, number>,
+    baselineProb: number,
+  ): string | null => {
     const entries = Object.entries(freq);
     if (!entries.length) return null;
     entries.sort((a, b) => {
@@ -821,11 +999,20 @@ export function analyze(
     return entries[0][0];
   };
 
-  const sikMs = getCommonFreqShrinkage(ftFreq, 0.10); // 10% baseline for a specific score
+  const sikMs = getCommonFreqShrinkage(ftFreq, 0.1); // 10% baseline for a specific score
   const sikIy = getCommonFreqShrinkage(htFreq, 0.15); // 15% baseline for a specific HT score
 
-  const statGroupWeighted = (count: number, total: number, weightedPct: number, label: string) => {
-    return { sayi: count, yuzde: weightedPct, label: `${label} ${count}/${total} (${weightedPct}%)` };
+  const statGroupWeighted = (
+    count: number,
+    total: number,
+    weightedPct: number,
+    label: string,
+  ) => {
+    return {
+      sayi: count,
+      yuzde: weightedPct,
+      label: `${label} ${count}/${total} (${weightedPct}%)`,
+    };
   };
 
   // ── 2. Analiz özet ────────────────────────────────────────────────────────
@@ -845,105 +1032,158 @@ export function analyze(
   const sdOver25 = calcSD(finalOver25Pct, total);
 
   // Calibration score based on trust + predictive entropy
-  const kalibrasyon_skoru = Math.min(100, Math.round(Math.max(0, guvenSkoru * 1.2 + 30)));
+  const kalibrasyon_skoru = Math.min(
+    100,
+    Math.round(Math.max(0, guvenSkoru * 1.2 + 30)),
+  );
 
   // League Distribution
   const lig_dagilimi: Record<string, number> = {};
   for (const m of referenceMatches) {
-     const lig = m.league || 'Bilinmiyor';
-     lig_dagilimi[lig] = (lig_dagilimi[lig] || 0) + 1;
+    const lig = m.league || "Bilinmiyor";
+    lig_dagilimi[lig] = (lig_dagilimi[lig] || 0) + 1;
   }
 
   const analiz_ozet: AnalyzeOzet = {
     total_mac: total,
     effective_sample_size: effectiveSampleSize,
-    
-    lig_dagilimi,
-    ev_sahibi: { sayi: homeWins, yuzde: finalHomePct, sapma: sdHome, label: `Ev Sahibi (MS1) %${finalHomePct}` },
-    beraberlik: { sayi: draws, yuzde: finalDrawPct, sapma: sdDraw, label: `Beraberlik (MS0) %${finalDrawPct}` },
-    deplasman: { sayi: awayWins, yuzde: finalAwayPct, sapma: sdAway, label: `Deplasman (MS2) %${finalAwayPct}` },
-    kg_var: { sayi: bttsCount, yuzde: finalBttsPct, sapma: sdBtts, label: `Karşılıklı Gol Var %${finalBttsPct}` },
-    ust_25: { sayi: over25Count, yuzde: finalOver25Pct, sapma: sdOver25, label: `2.5 Üst %${finalOver25Pct}` },
 
-    ust_35:     statGroupWeighted(over35Count, total, finalOver35Pct, '3.5 Üst'),
-      ust_45:     statGroupWeighted(over45Count, total, Math.round((over45Count / Math.max(simSum, 0.001)) * 100), '4.5 Üst'),
-      gol_6_plus: statGroupWeighted(gol6PlusCount, total, Number(((gol6PlusCount / Math.max(simSum, 0.001)) * 100).toFixed(1)), '6+ Gol'),
-      iy_ms_1_2:  statGroupWeighted(iyMs1_2Count, total, Number(((iyMs1_2Count / Math.max(simSum, 0.001)) * 100).toFixed(1)), '1/2'),
-      iy_ms_2_1:  statGroupWeighted(iyMs2_1Count, total, Number(((iyMs2_1Count / Math.max(simSum, 0.001)) * 100).toFixed(1)), '2/1'),
-    iy_ust_15:  statGroupWeighted(iyOver15Count, htValidCount > 0 ? htValidCount : 1, finalIyOver15Pct, 'İY 1.5 Üst'),
-    iy_ust_05:  statGroupWeighted(iyOver05Count, htValidCount > 0 ? htValidCount : 1, finalIyOver05Pct, 'İY 0.5 Üst'),
-    ort_kart:      Math.round(avgCards * 10) / 10,
-    ort_korner:    ortKorner,
-    ust_10_korner: statGroupWeighted(ust10CornerCount, kornerCount > 0 ? kornerCount : 1, cornerPctWeighted, '10+ Korner'),
-    sik_ms:        sikMs,
-    sik_iy:        sikIy,
+    lig_dagilimi,
+    ev_sahibi: {
+      sayi: homeWins,
+      yuzde: finalHomePct,
+      sapma: sdHome,
+      label: `Ev Sahibi (MS1) %${finalHomePct}`,
+    },
+    beraberlik: {
+      sayi: draws,
+      yuzde: finalDrawPct,
+      sapma: sdDraw,
+      label: `Beraberlik (MS0) %${finalDrawPct}`,
+    },
+    deplasman: {
+      sayi: awayWins,
+      yuzde: finalAwayPct,
+      sapma: sdAway,
+      label: `Deplasman (MS2) %${finalAwayPct}`,
+    },
+    kg_var: {
+      sayi: bttsCount,
+      yuzde: finalBttsPct,
+      sapma: sdBtts,
+      label: `Karşılıklı Gol Var %${finalBttsPct}`,
+    },
+    ust_25: {
+      sayi: over25Count,
+      yuzde: finalOver25Pct,
+      sapma: sdOver25,
+      label: `2.5 Üst %${finalOver25Pct}`,
+    },
+
+    ust_35: statGroupWeighted(over35Count, total, finalOver35Pct, "3.5 Üst"),
+    ust_45: statGroupWeighted(
+      over45Count,
+      total,
+      Math.round((over45Count / Math.max(simSum, 0.001)) * 100),
+      "4.5 Üst",
+    ),
+    gol_6_plus: statGroupWeighted(
+      gol6PlusCount,
+      total,
+      Number(((gol6PlusCount / Math.max(simSum, 0.001)) * 100).toFixed(1)),
+      "6+ Gol",
+    ),
+    iy_ms_1_2: statGroupWeighted(
+      iyMs1_2Count,
+      total,
+      Number(((iyMs1_2Count / Math.max(simSum, 0.001)) * 100).toFixed(1)),
+      "1/2",
+    ),
+    iy_ms_2_1: statGroupWeighted(
+      iyMs2_1Count,
+      total,
+      Number(((iyMs2_1Count / Math.max(simSum, 0.001)) * 100).toFixed(1)),
+      "2/1",
+    ),
+    iy_ust_15: statGroupWeighted(
+      iyOver15Count,
+      htValidCount > 0 ? htValidCount : 1,
+      finalIyOver15Pct,
+      "İY 1.5 Üst",
+    ),
+    iy_ust_05: statGroupWeighted(
+      iyOver05Count,
+      htValidCount > 0 ? htValidCount : 1,
+      finalIyOver05Pct,
+      "İY 0.5 Üst",
+    ),
+    ort_kart: Math.round(avgCards * 10) / 10,
+    ort_korner: ortKorner,
+    ust_10_korner: statGroupWeighted(
+      ust10CornerCount,
+      kornerCount > 0 ? kornerCount : 1,
+      cornerPctWeighted,
+      "10+ Korner",
+    ),
+    sik_ms: sikMs,
+    sik_iy: sikIy,
     guvenlik_skoru: avgSim,
-    
-    
+
     kelly_onerileri: {
       ev_sahibi: kellyHome,
       beraberlik: kellyDraw,
-      deplasman: kellyAway
-    }};
+      deplasman: kellyAway,
+    },
+  };
 
   // ── 3. Tahminler ─────────────────────────────────────────────────────────
-              const tahminler: string[] = [];
+  const tahminler: string[] = [];
 
-    if (total < 5 || effectiveSampleSize < 5) {
-      tahminler.push('Zayıf Güven (Yetersiz Referans Maç)');
-    } else {
-      // YÜKSEK GÜVEN (HIGH CONFIDENCE) Filtreleri - %85+ Başarı Hedefi ve EV (Edge) Kontrolü
-      const homePct  = analiz_ozet.ev_sahibi.yuzde;
-      const drawPct  = analiz_ozet.beraberlik.yuzde;
-      const awayPct  = analiz_ozet.deplasman.yuzde;
-      const isHighSim = avgSim >= 85;
+  if (total < 5 || effectiveSampleSize < 5) {
+    tahminler.push("Zayıf Güven (Yetersiz Referans Maç)");
+  } else {
+    // YÜKSEK GÜVEN (HIGH CONFIDENCE) Filtreleri - %85+ Başarı Hedefi ve EV (Edge) Kontrolü
+    const homePct = analiz_ozet.ev_sahibi.yuzde;
+    const drawPct = analiz_ozet.beraberlik.yuzde;
+    const awayPct = analiz_ozet.deplasman.yuzde;
+    const isHighSim = avgSim >= 85;
 
-      const edgeHome = kellyHome.edge;
-      const edgeAway = kellyAway.edge;
-      const hasOdds1 = (targetMatch.oddsHome ?? 0) > 1.0;
-      const hasOdds2 = (targetMatch.oddsAway ?? 0) > 1.0;
+    const edgeHome = kellyHome.edge;
+    const edgeAway = kellyAway.edge;
+    const hasOdds1 = (targetMatch.oddsHome ?? 0) > 1.0;
+    const hasOdds2 = (targetMatch.oddsAway ?? 0) > 1.0;
 
-      let t1 = '';
-      if (homePct >= 75) t1 = 'DA | 1';
-      
-      if (t1) {
-          if (hasOdds1 && edgeHome > 0) t1 += ' (Değerli Oran)';
-          else if (hasOdds1) t1 += ' (Değersiz Oran)';
-          tahminler.push(t1);
+    let t1 = "";
+    if (homePct >= 75) t1 = "DA | 1";
+
+    if (t1) tahminler.push(t1);
+
+    let t2 = "";
+    if (awayPct >= 75) t2 = "DA | 2";
+
+    if (t2) tahminler.push(t2);
+
+    if (drawPct >= 40) tahminler.push("DA | X");
+
+    // KG - 85% / 20% thresholds (Yüksek Güven)
+    if (bttsPct >= 75) tahminler.push("MS | KG VAR");
+    else if (bttsPct <= 25) tahminler.push("MS | KG YOK");
+
+    // 2.5 - 85% / 20% thresholds
+    if (over25Pct >= 75) tahminler.push("MS | 2,5 �ST");
+    else if (over25Pct <= 25) tahminler.push("MS | 2,5 ALT");
+
+    // Sık İY skoru (%60+)
+    if (sikIy) {
+      const freq = htFreq[sikIy] ?? 0;
+      if ((freq / total) * 100 >= 60) {
+        tahminler.push("İY | " + sikIy + " Skor");
       }
-
-      let t2 = '';
-      if (awayPct >= 75) t2 = 'DA | 2';
-
-      if (t2) {
-          if (hasOdds2 && edgeAway > 0) t2 += ' (Değerli Oran)';
-          else if (hasOdds2) t2 += ' (Değersiz Oran)';
-          tahminler.push(t2);
-      }
-
-      if (drawPct >= 40) tahminler.push('DA | X');
-
-      // KG - 85% / 20% thresholds (Yüksek Güven)
-      if (bttsPct >= 75) tahminler.push('MS | KG VAR');
-      else if (bttsPct <= 25) tahminler.push('MS | KG YOK');
-
-      // 2.5 - 85% / 20% thresholds
-      if (over25Pct >= 75) tahminler.push('MS | 2,5 �ST');
-      else if (over25Pct <= 25) tahminler.push('MS | 2,5 ALT');
-
-      // Sık İY skoru (%60+)
-      if (sikIy) {
-        const freq = htFreq[sikIy] ?? 0;
-        if ((freq / total) * 100 >= 60) {
-          tahminler.push('İY | ' + sikIy + ' Skor');
-        }
-      }
-
-
     }
+  }
 
-    // ⚽ 4. Tablo satırları 
-    const tablo_satirlari: TabloSatiri[] = [];
+  // ⚽ 4. Tablo satırları
+  const tablo_satirlari: TabloSatiri[] = [];
 
   // Target match row (no real scores yet)
   const t = targetMatch;
@@ -967,19 +1207,22 @@ export function analyze(
     }
   }
 
-  const getTrend = (acilis: any, kapanis: any): 'up' | 'down' | 'flat' | null => {
+  const getTrend = (
+    acilis: any,
+    kapanis: any,
+  ): "up" | "down" | "flat" | null => {
     const a = parseFloat(acilis);
     const k = parseFloat(kapanis);
     if (isNaN(a) || isNaN(k) || a <= 0 || k <= 0) return null;
-    if (k < a - 0.01) return 'down';
-    if (k > a + 0.01) return 'up';
-    return 'flat';
+    if (k < a - 0.01) return "down";
+    if (k > a + 0.01) return "up";
+    return "flat";
   };
 
   tablo_satirlari.push({
-    id: 'target',
-      is_target: true,
-      analiz_yuzde: analiz_yuzde_str,
+    id: "target",
+    is_target: true,
+    analiz_yuzde: analiz_yuzde_str,
     iy_skor: null,
     iy_skor_renk: null,
     iy_skor_sik_mi: false,
@@ -988,21 +1231,23 @@ export function analyze(
     ms_skor_sik_mi: false,
     iy_tahmini: sikIy ?? null,
     ms_tahmini: sikMs ?? null,
-    row_renk: 'row-target',
+    row_renk: "row-target",
     takimlar: `- ${t.homeTeam} - ${t.awayTeam} -`,
-    tarih_lig: t.league ? `${t.league} - ${t.date ? t.date.slice(-4) : ''}` : '',
+    tarih_lig: t.league
+      ? `${t.league} - ${t.date ? t.date.slice(-4) : ""}`
+      : "",
     is_highlight: true,
-    onceki_skor: '',
+    onceki_skor: "",
     kirmizi_kart_var_mi: false,
-    kart_display: '',
+    kart_display: "",
     kart_yuksek_mi: false,
     lig_sirasi:
       ligSirasiHome != null && ligSirasiAway != null
         ? `${ligSirasiHome}-${ligSirasiAway}/${ligSirasiTotal ?? 20}`
-        : '',
-    korner_display: '',
+        : "",
+    korner_display: "",
     taraf_oranlari: {
-      ev:  fmtOdds(t.oddsHome),
+      ev: fmtOdds(t.oddsHome),
       ber: fmtOdds(t.oddsDraw),
       dep: fmtOdds(t.oddsAway),
       kazanan: null,
@@ -1012,9 +1257,19 @@ export function analyze(
       ev_kapanis: fmtOdds((t as any).oran_1_kapanis ?? t.oddsHome),
       ber_kapanis: fmtOdds((t as any).oran_x_kapanis ?? t.oddsDraw),
       dep_kapanis: fmtOdds((t as any).oran_2_kapanis ?? t.oddsAway),
-      ev_trend: getTrend((t as any).oran_1_acilis, (t as any).oran_1_kapanis ?? t.oddsHome),
-      ber_trend: getTrend((t as any).oran_x_acilis, (t as any).oran_x_kapanis ?? t.oddsDraw),
-      dep_trend: getTrend((t as any).oran_2_acilis, (t as any).oran_2_kapanis ?? t.oddsAway)} as any,
+      ev_trend: getTrend(
+        (t as any).oran_1_acilis,
+        (t as any).oran_1_kapanis ?? t.oddsHome,
+      ),
+      ber_trend: getTrend(
+        (t as any).oran_x_acilis,
+        (t as any).oran_x_kapanis ?? t.oddsDraw,
+      ),
+      dep_trend: getTrend(
+        (t as any).oran_2_acilis,
+        (t as any).oran_2_kapanis ?? t.oddsAway,
+      ),
+    } as any,
     alt_ust: {
       alt: fmtOdds(t.altOdds),
       ust: fmtOdds(t.ustOdds),
@@ -1023,8 +1278,15 @@ export function analyze(
       ust_acilis: fmtOdds((t as any).ust_orani_acilis),
       alt_kapanis: fmtOdds((t as any).alt_orani_kapanis ?? t.altOdds),
       ust_kapanis: fmtOdds((t as any).ust_orani_kapanis ?? t.ustOdds),
-      alt_trend: getTrend((t as any).alt_orani_acilis, (t as any).alt_orani_kapanis ?? t.altOdds),
-      ust_trend: getTrend((t as any).ust_orani_acilis, (t as any).ust_orani_kapanis ?? t.ustOdds)} as any,
+      alt_trend: getTrend(
+        (t as any).alt_orani_acilis,
+        (t as any).alt_orani_kapanis ?? t.altOdds,
+      ),
+      ust_trend: getTrend(
+        (t as any).ust_orani_acilis,
+        (t as any).ust_orani_kapanis ?? t.ustOdds,
+      ),
+    } as any,
     alt_ust_35: {
       alt: fmtOdds(t.altOdds35),
       ust: fmtOdds(t.ustOdds35),
@@ -1033,8 +1295,15 @@ export function analyze(
       ust_acilis: fmtOdds((t as any).ust_orani_35_acilis),
       alt_kapanis: fmtOdds((t as any).alt_orani_35_kapanis ?? t.altOdds35),
       ust_kapanis: fmtOdds((t as any).ust_orani_35_kapanis ?? t.ustOdds35),
-      alt_trend: getTrend((t as any).alt_orani_35_acilis, (t as any).alt_orani_35_kapanis ?? t.altOdds35),
-      ust_trend: getTrend((t as any).ust_orani_35_acilis, (t as any).ust_orani_35_kapanis ?? t.ustOdds35)} as any,
+      alt_trend: getTrend(
+        (t as any).alt_orani_35_acilis,
+        (t as any).alt_orani_35_kapanis ?? t.altOdds35,
+      ),
+      ust_trend: getTrend(
+        (t as any).ust_orani_35_acilis,
+        (t as any).ust_orani_35_kapanis ?? t.ustOdds35,
+      ),
+    } as any,
     iy_alt_ust_15: {
       alt: fmtOdds(t.iyAltOdds15),
       ust: fmtOdds(t.iyUstOdds15),
@@ -1043,8 +1312,15 @@ export function analyze(
       ust_acilis: fmtOdds((t as any).iy_ust_orani_15_acilis),
       alt_kapanis: fmtOdds((t as any).iy_alt_orani_15_kapanis ?? t.iyAltOdds15),
       ust_kapanis: fmtOdds((t as any).iy_ust_orani_15_kapanis ?? t.iyUstOdds15),
-      alt_trend: getTrend((t as any).iy_alt_orani_15_acilis, (t as any).iy_alt_orani_15_kapanis ?? t.iyAltOdds15),
-      ust_trend: getTrend((t as any).iy_ust_orani_15_acilis, (t as any).iy_ust_orani_15_kapanis ?? t.iyUstOdds15)} as any,
+      alt_trend: getTrend(
+        (t as any).iy_alt_orani_15_acilis,
+        (t as any).iy_alt_orani_15_kapanis ?? t.iyAltOdds15,
+      ),
+      ust_trend: getTrend(
+        (t as any).iy_ust_orani_15_acilis,
+        (t as any).iy_ust_orani_15_kapanis ?? t.iyUstOdds15,
+      ),
+    } as any,
     iy_alt_ust_05: {
       alt: fmtOdds(t.iyAltOdds05),
       ust: fmtOdds(t.iyUstOdds05),
@@ -1053,8 +1329,15 @@ export function analyze(
       ust_acilis: fmtOdds((t as any).iy_ust_orani_05_acilis),
       alt_kapanis: fmtOdds((t as any).iy_alt_orani_05_kapanis ?? t.iyAltOdds05),
       ust_kapanis: fmtOdds((t as any).iy_ust_orani_05_kapanis ?? t.iyUstOdds05),
-      alt_trend: getTrend((t as any).iy_alt_orani_05_acilis, (t as any).iy_alt_orani_05_kapanis ?? t.iyAltOdds05),
-      ust_trend: getTrend((t as any).iy_ust_orani_05_acilis, (t as any).iy_ust_orani_05_kapanis ?? t.iyUstOdds05)} as any,
+      alt_trend: getTrend(
+        (t as any).iy_alt_orani_05_acilis,
+        (t as any).iy_alt_orani_05_kapanis ?? t.iyAltOdds05,
+      ),
+      ust_trend: getTrend(
+        (t as any).iy_ust_orani_05_acilis,
+        (t as any).iy_ust_orani_05_kapanis ?? t.iyUstOdds05,
+      ),
+    } as any,
     var_yok: {
       var: fmtOdds(t.varOdds),
       yok: fmtOdds(t.yokOdds),
@@ -1063,38 +1346,56 @@ export function analyze(
       yok_acilis: fmtOdds((t as any).kg_yok_acilis),
       var_kapanis: fmtOdds((t as any).kg_var_kapanis ?? t.varOdds),
       yok_kapanis: fmtOdds((t as any).kg_yok_kapanis ?? t.yokOdds),
-      var_trend: getTrend((t as any).kg_var_acilis, (t as any).kg_var_kapanis ?? t.varOdds),
-      yok_trend: getTrend((t as any).kg_yok_acilis, (t as any).kg_yok_kapanis ?? t.yokOdds)} as any,
+      var_trend: getTrend(
+        (t as any).kg_var_acilis,
+        (t as any).kg_var_kapanis ?? t.varOdds,
+      ),
+      yok_trend: getTrend(
+        (t as any).kg_yok_acilis,
+        (t as any).kg_yok_kapanis ?? t.yokOdds,
+      ),
+    } as any,
     ortalama: calcOrtalamaString(t),
-    im_sonuc: '',
-    im_renk: ''});
+    im_sonuc: "",
+    im_renk: "",
+  });
 
   // Reference match rows
   referenceMatches.forEach((m, idx) => {
     const ft = parseScore(m.ftScore);
     const ht = parseScore(m.htScore);
 
-
-
     // Odds winner derivation from actual result
     const oddsWinner: OddsWinner = resultType(m.ftScore);
 
     const totalGoalsFt = ft ? ft.home + ft.away : 0;
-    const altUstWinner: AltUstWinner =
-      ft ? (totalGoalsFt > 2.5 ? 'ust' : 'alt') : null;
+    const altUstWinner: AltUstWinner = ft
+      ? totalGoalsFt > 2.5
+        ? "ust"
+        : "alt"
+      : null;
 
-    const altUstWinner35: AltUstWinner =
-      ft ? (totalGoalsFt > 3.5 ? 'ust' : 'alt') : null;
+    const altUstWinner35: AltUstWinner = ft
+      ? totalGoalsFt > 3.5
+        ? "ust"
+        : "alt"
+      : null;
 
     const totalGoalsHt = ht ? ht.home + ht.away : 0;
-    const iyAltUstWinner15: AltUstWinner =
-      ht ? (totalGoalsHt > 1.5 ? 'ust' : 'alt') : null;
+    const iyAltUstWinner15: AltUstWinner = ht
+      ? totalGoalsHt > 1.5
+        ? "ust"
+        : "alt"
+      : null;
 
-    const iyAltUstWinner05: AltUstWinner =
-      ht ? (totalGoalsHt > 0.5 ? 'ust' : 'alt') : null;
+    const iyAltUstWinner05: AltUstWinner = ht
+      ? totalGoalsHt > 0.5
+        ? "ust"
+        : "alt"
+      : null;
 
-    const btts = ft ? (ft.home > 0 && ft.away > 0) : false;
-    const varYokWinner: VarYokWinner = ft ? (btts ? 'var' : 'yok') : null;
+    const btts = ft ? ft.home > 0 && ft.away > 0 : false;
+    const varYokWinner: VarYokWinner = ft ? (btts ? "var" : "yok") : null;
 
     const totalMatchCards =
       (m.yellowCardsHome ?? 0) + (m.yellowCardsAway ?? 0) + (m.redCards ?? 0);
@@ -1105,7 +1406,9 @@ export function analyze(
     tablo_satirlari.push({
       id: m.id ?? `ref-${idx + 1}`,
       is_target: false,
-      analiz_yuzde: (m as any).similarityScore ? `%${(m as any).similarityScore}` : analiz_yuzde_str,
+      analiz_yuzde: (m as any).similarityScore
+        ? `%${(m as any).similarityScore}`
+        : analiz_yuzde_str,
       iy_skor: htKey ?? null,
       iy_skor_renk: scoreClass(m.htScore),
       iy_skor_sik_mi: !!htKey && htKey === sikIy,
@@ -1116,21 +1419,23 @@ export function analyze(
       ms_tahmini: null,
       row_renk: rowClass(m.ftScore),
       takimlar: `- ${m.homeTeam} - ${m.awayTeam} -`,
-      tarih_lig: (m as any).league ? `${(m as any).league} - ${((m as any).matchDate || (m as any).tarih || '').slice(-4)}` : '',
+      tarih_lig: (m as any).league
+        ? `${(m as any).league} - ${((m as any).matchDate || (m as any).tarih || "").slice(-4)}`
+        : "",
       is_highlight: false,
-      onceki_skor: m.previousScore ?? '',
+      onceki_skor: m.previousScore ?? "",
       kirmizi_kart_var_mi: (m.redCards ?? 0) > 0,
       kart_display:
-        (m.yellowCardsHome != null || m.yellowCardsAway != null)
+        m.yellowCardsHome != null || m.yellowCardsAway != null
           ? `${fmtCard(m.yellowCardsHome)} - ${fmtCard(m.yellowCardsAway)} - ${m.redCards ?? 0}`
-          : '',
+          : "",
       kart_yuksek_mi: totalMatchCards >= 5,
       lig_sirasi:
         m.ligSirasiHome != null && m.ligSirasiAway != null
           ? `${m.ligSirasiHome}-${m.ligSirasiAway}/${m.ligSirasiTotal ?? 20}`
-          : '',
+          : "",
       taraf_oranlari: {
-        ev:  fmtOdds(m.oddsHome),
+        ev: fmtOdds(m.oddsHome),
         ber: fmtOdds(m.oddsDraw),
         dep: fmtOdds(m.oddsAway),
         kazanan: oddsWinner,
@@ -1140,9 +1445,19 @@ export function analyze(
         ev_kapanis: fmtOdds((m as any).oran_1_kapanis),
         ber_kapanis: fmtOdds((m as any).oran_x_kapanis),
         dep_kapanis: fmtOdds((m as any).oran_2_kapanis),
-        ev_trend: getTrend((m as any).oran_1_acilis, (m as any).oran_1_kapanis ?? m.oddsHome),
-        ber_trend: getTrend((m as any).oran_x_acilis, (m as any).oran_x_kapanis ?? m.oddsDraw),
-        dep_trend: getTrend((m as any).oran_2_acilis, (m as any).oran_2_kapanis ?? m.oddsAway)} as any,
+        ev_trend: getTrend(
+          (m as any).oran_1_acilis,
+          (m as any).oran_1_kapanis ?? m.oddsHome,
+        ),
+        ber_trend: getTrend(
+          (m as any).oran_x_acilis,
+          (m as any).oran_x_kapanis ?? m.oddsDraw,
+        ),
+        dep_trend: getTrend(
+          (m as any).oran_2_acilis,
+          (m as any).oran_2_kapanis ?? m.oddsAway,
+        ),
+      } as any,
       alt_ust: {
         alt: fmtOdds(m.altOdds),
         ust: fmtOdds(m.ustOdds),
@@ -1151,8 +1466,15 @@ export function analyze(
         ust_acilis: fmtOdds((m as any).ust_orani_acilis),
         alt_kapanis: fmtOdds((m as any).alt_orani_kapanis),
         ust_kapanis: fmtOdds((m as any).ust_orani_kapanis),
-        alt_trend: getTrend((m as any).alt_orani_acilis, (m as any).alt_orani_kapanis ?? m.altOdds),
-        ust_trend: getTrend((m as any).ust_orani_acilis, (m as any).ust_orani_kapanis ?? m.ustOdds)} as any,
+        alt_trend: getTrend(
+          (m as any).alt_orani_acilis,
+          (m as any).alt_orani_kapanis ?? m.altOdds,
+        ),
+        ust_trend: getTrend(
+          (m as any).ust_orani_acilis,
+          (m as any).ust_orani_kapanis ?? m.ustOdds,
+        ),
+      } as any,
       alt_ust_35: {
         alt: fmtOdds(m.altOdds35),
         ust: fmtOdds(m.ustOdds35),
@@ -1161,8 +1483,15 @@ export function analyze(
         ust_acilis: fmtOdds((m as any).ust_orani_35_acilis),
         alt_kapanis: fmtOdds((m as any).alt_orani_35_kapanis),
         ust_kapanis: fmtOdds((m as any).ust_orani_35_kapanis),
-        alt_trend: getTrend((m as any).alt_orani_35_acilis, (m as any).alt_orani_35_kapanis ?? m.altOdds35),
-        ust_trend: getTrend((m as any).ust_orani_35_acilis, (m as any).ust_orani_35_kapanis ?? m.ustOdds35)} as any,
+        alt_trend: getTrend(
+          (m as any).alt_orani_35_acilis,
+          (m as any).alt_orani_35_kapanis ?? m.altOdds35,
+        ),
+        ust_trend: getTrend(
+          (m as any).ust_orani_35_acilis,
+          (m as any).ust_orani_35_kapanis ?? m.ustOdds35,
+        ),
+      } as any,
       iy_alt_ust_15: {
         alt: fmtOdds(m.iyAltOdds15),
         ust: fmtOdds(m.iyUstOdds15),
@@ -1171,8 +1500,15 @@ export function analyze(
         ust_acilis: fmtOdds((m as any).iy_ust_orani_15_acilis),
         alt_kapanis: fmtOdds((m as any).iy_alt_orani_15_kapanis),
         ust_kapanis: fmtOdds((m as any).iy_ust_orani_15_kapanis),
-        alt_trend: getTrend((m as any).iy_alt_orani_15_acilis, (m as any).iy_alt_orani_15_kapanis ?? m.iyAltOdds15),
-        ust_trend: getTrend((m as any).iy_ust_orani_15_acilis, (m as any).iy_ust_orani_15_kapanis ?? m.iyUstOdds15)} as any,
+        alt_trend: getTrend(
+          (m as any).iy_alt_orani_15_acilis,
+          (m as any).iy_alt_orani_15_kapanis ?? m.iyAltOdds15,
+        ),
+        ust_trend: getTrend(
+          (m as any).iy_ust_orani_15_acilis,
+          (m as any).iy_ust_orani_15_kapanis ?? m.iyUstOdds15,
+        ),
+      } as any,
       iy_alt_ust_05: {
         alt: fmtOdds(m.iyAltOdds05),
         ust: fmtOdds(m.iyUstOdds05),
@@ -1181,8 +1517,15 @@ export function analyze(
         ust_acilis: fmtOdds((m as any).iy_ust_orani_05_acilis),
         alt_kapanis: fmtOdds((m as any).iy_alt_orani_05_kapanis),
         ust_kapanis: fmtOdds((m as any).iy_ust_orani_05_kapanis),
-        alt_trend: getTrend((m as any).iy_alt_orani_05_acilis, (m as any).iy_alt_orani_05_kapanis ?? m.iyAltOdds05),
-        ust_trend: getTrend((m as any).iy_ust_orani_05_acilis, (m as any).iy_ust_orani_05_kapanis ?? m.iyUstOdds05)} as any,
+        alt_trend: getTrend(
+          (m as any).iy_alt_orani_05_acilis,
+          (m as any).iy_alt_orani_05_kapanis ?? m.iyAltOdds05,
+        ),
+        ust_trend: getTrend(
+          (m as any).iy_ust_orani_05_acilis,
+          (m as any).iy_ust_orani_05_kapanis ?? m.iyUstOdds05,
+        ),
+      } as any,
       var_yok: {
         var: fmtOdds(m.varOdds),
         yok: fmtOdds(m.yokOdds),
@@ -1191,42 +1534,55 @@ export function analyze(
         yok_acilis: fmtOdds((m as any).kg_yok_acilis),
         var_kapanis: fmtOdds((m as any).kg_var_kapanis),
         yok_kapanis: fmtOdds((m as any).kg_yok_kapanis),
-        var_trend: getTrend((m as any).kg_var_acilis, (m as any).kg_var_kapanis ?? m.varOdds),
-        yok_trend: getTrend((m as any).kg_yok_acilis, (m as any).kg_yok_kapanis ?? m.yokOdds)} as any,
+        var_trend: getTrend(
+          (m as any).kg_var_acilis,
+          (m as any).kg_var_kapanis ?? m.varOdds,
+        ),
+        yok_trend: getTrend(
+          (m as any).kg_yok_acilis,
+          (m as any).kg_yok_kapanis ?? m.yokOdds,
+        ),
+      } as any,
       ortalama: calcOrtalamaString(m),
       korner_display:
         m.kornerHome != null || m.kornerAway != null
-          ? `${m.kornerHome ?? '-'}-${m.kornerAway ?? '-'} (${(m.kornerHome ?? 0) + (m.kornerAway ?? 0)})`
-          : '',
-      im_sonuc: m.imResult || (() => {
-        const ht = parseScore(m.htScore);
-        const ft = parseScore(m.ftScore);
-        if (!ht || !ft) return '';
-        const _ht = ht.home > ht.away ? '1' : (ht.home < ht.away ? '2' : 'X');
-        const _ft = ft.home > ft.away ? '1' : (ft.home < ft.away ? '2' : 'X');
-        return `${_ht}/${_ft}`;
-      })(),
-      im_renk: imRenk(m.imResult || (() => {
-        const ht = parseScore(m.htScore);
-        const ft = parseScore(m.ftScore);
-        if (!ht || !ft) return '';
-        const _ht = ht.home > ht.away ? '1' : (ht.home < ht.away ? '2' : 'X');
-        const _ft = ft.home > ft.away ? '1' : (ft.home < ft.away ? '2' : 'X');
-        return `${_ht}/${_ft}`;
-      })())});
+          ? `${m.kornerHome ?? "-"}-${m.kornerAway ?? "-"} (${(m.kornerHome ?? 0) + (m.kornerAway ?? 0)})`
+          : "",
+      im_sonuc:
+        m.imResult ||
+        (() => {
+          const ht = parseScore(m.htScore);
+          const ft = parseScore(m.ftScore);
+          if (!ht || !ft) return "";
+          const _ht = ht.home > ht.away ? "1" : ht.home < ht.away ? "2" : "X";
+          const _ft = ft.home > ft.away ? "1" : ft.home < ft.away ? "2" : "X";
+          return `${_ht}/${_ft}`;
+        })(),
+      im_renk: imRenk(
+        m.imResult ||
+          (() => {
+            const ht = parseScore(m.htScore);
+            const ft = parseScore(m.ftScore);
+            if (!ht || !ft) return "";
+            const _ht = ht.home > ht.away ? "1" : ht.home < ht.away ? "2" : "X";
+            const _ft = ft.home > ft.away ? "1" : ft.home < ft.away ? "2" : "X";
+            return `${_ht}/${_ft}`;
+          })(),
+      ),
+    });
   });
 
-  return { 
-    analiz_ozet, 
-    tahminler, 
+  return {
+    analiz_ozet,
+    tahminler,
     tablo_satirlari,
     poisson_probs: {
       pHome: pHomeWin,
       pDraw: pDraw,
       pAway: pAwayWin,
       pOver25: pOver25,
-      pBtts: pBtts
-    }
+      pBtts: pBtts,
+    },
   };
 }
 
@@ -1259,7 +1615,7 @@ export interface ModelDResult {
 export function calculateModelD(
   targetMatch: AnalyzeTargetMatch,
   referenceMatches: AnalyzeRefMatch[],
-  config?: AnalyzeConfig
+  config?: AnalyzeConfig,
 ): ModelDResult {
   const modelA = analyze(targetMatch, referenceMatches, config);
   const ozet = modelA.analiz_ozet;
@@ -1271,8 +1627,8 @@ export function calculateModelD(
   // Formül 1: Market-Özel Consensus Ağırlıkları
   // Goals (2.5 & BTTS): alpha = 0.60 (60% Sim, 40% Poisson)
   // Sides (1X2): alpha = 0.40 (40% Sim, 60% Poisson)
-  const alpha_goals = 0.60;
-  const alpha_sides = 0.40;
+  const alpha_goals = 0.6;
+  const alpha_sides = 0.4;
 
   const simHome = ozet.ev_sahibi.yuzde / 100.0;
   const simDraw = ozet.beraberlik.yuzde / 100.0;
@@ -1300,7 +1656,8 @@ export function calculateModelD(
   const oOver = targetMatch.ustOdds ?? 0;
   const oBtts = targetMatch.varOdds ?? 0;
 
-  const getEdge = (p: number, o: number) => o > 1.0 ? (p - 1.0 / o) * sample_factor : 0;
+  const getEdge = (p: number, o: number) =>
+    o > 1.0 ? (p - 1.0 / o) * sample_factor : 0;
   const real_edge_home = getEdge(p_home, oH);
   const real_edge_draw = getEdge(p_draw, oD);
   const real_edge_away = getEdge(p_away, oA);
@@ -1323,25 +1680,38 @@ export function calculateModelD(
 
   // Formül 3: Oran Bandına Göre Dinamik Güven Eşiği
   const beta = 0.15;
-  const reqProb = (odds: number) => 0.65 + beta * Math.max(0, 1.40 - odds);
+  const reqProb = (odds: number) => 0.65 + beta * Math.max(0, 1.4 - odds);
 
   const tahminler: string[] = [];
-  if (p_home >= reqProb(oH) && real_edge_home > 0) tahminler.push(`DA | 1 (Edge: +${(real_edge_home * 100).toFixed(1)}%)`);
-  if (p_away >= reqProb(oA) && real_edge_away > 0) tahminler.push(`DA | 2 (Edge: +${(real_edge_away * 100).toFixed(1)}%)`);
-  if (p_over25 >= reqProb(oOver) && real_edge_over25 > 0) tahminler.push(`MS | 2,5 ÜST (Edge: +${(real_edge_over25 * 100).toFixed(1)}%)`);
-  if (p_btts >= reqProb(oBtts) && real_edge_btts > 0) tahminler.push(`MS | KG VAR (Edge: +${(real_edge_btts * 100).toFixed(1)}%)`);
+  if (p_home >= reqProb(oH) && real_edge_home > 0)
+    tahminler.push(`DA | 1 (Edge: +${(real_edge_home * 100).toFixed(1)}%)`);
+  if (p_away >= reqProb(oA) && real_edge_away > 0)
+    tahminler.push(`DA | 2 (Edge: +${(real_edge_away * 100).toFixed(1)}%)`);
+  if (p_over25 >= reqProb(oOver) && real_edge_over25 > 0)
+    tahminler.push(
+      `MS | 2,5 ÜST (Edge: +${(real_edge_over25 * 100).toFixed(1)}%)`,
+    );
+  if (p_btts >= reqProb(oBtts) && real_edge_btts > 0)
+    tahminler.push(
+      `MS | KG VAR (Edge: +${(real_edge_btts * 100).toFixed(1)}%)`,
+    );
 
   return {
-    p_home, p_draw, p_away, p_over25, p_btts,
-    real_edge_home, real_edge_draw, real_edge_away, real_edge_over25, real_edge_btts,
-    stake_home, stake_draw, stake_away, stake_over25, stake_btts,
-    tahminler
+    p_home,
+    p_draw,
+    p_away,
+    p_over25,
+    p_btts,
+    real_edge_home,
+    real_edge_draw,
+    real_edge_away,
+    real_edge_over25,
+    real_edge_btts,
+    stake_home,
+    stake_draw,
+    stake_away,
+    stake_over25,
+    stake_btts,
+    tahminler,
   };
 }
-
-
-
-
-
-
-
