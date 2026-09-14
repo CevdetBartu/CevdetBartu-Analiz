@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { AnalyzeResponse, TabloSatiri } from '@workspace/api-client-react';
+import { Database, Info, ChevronRight, BarChart2 } from 'lucide-react';
 
 interface AnalysisTableProps {
   date: string;
@@ -10,71 +11,40 @@ interface AnalysisTableProps {
   analyzeResponse: AnalyzeResponse;
 }
 
-function StatPill({ label, color, sapma, isZeroMatches }: { label: string; color: string; sapma?: number; isZeroMatches?: boolean }) {
-  const parts = label.split('%');
-  const title = parts[0]?.trim() || label;
-  const val = parts[1] ? `%${parts[1].trim()}` : '';
+function OddsCell({ value, isWinner, isLoser, trend }: { value: string | null | undefined; isWinner: boolean; isLoser: boolean; trend?: 'up' | 'down' | 'none' }) {
+  if (!value) return null;
+  const cls = isWinner ? 'text-green-600 dark:text-green-400 font-bold' : isLoser ? 'text-red-500 dark:text-red-400' : 'text-slate-600 dark:text-slate-400';
+  const arrow = trend === 'up' ? <span className="text-red-500 text-[10px] ml-0.5">↑</span> : trend === 'down' ? <span className="text-emerald-500 text-[10px] ml-0.5">↓</span> : null;
+  return <span className={cls}>{value}{arrow}</span>;
+}
 
+function StatRow({ label, ratio, pct, dev }: { label: string; ratio: string; pct: number; dev: number }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#1e293b', borderTop: `3px solid ${color}`, borderRadius: '6px', padding: '10px 12px', flex: 1, minWidth: '120px', boxShadow: '0 4px 6px rgba(0,0,0,0.2)' }}>
-      <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '4px', fontWeight: 600, textAlign: 'center' }}>{title}</span>
-      <span style={{ fontSize: '1.3rem', color: color, fontWeight: 800 }}>{val || label}</span>
-      {sapma != null && !isZeroMatches && <span style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '4px' }}>±%{sapma} sapma</span>}
+    <div>
+      <div className="flex justify-between text-[13px] mb-1.5">
+        <span className="font-medium text-slate-700 dark:text-slate-200">{label}</span>
+        <span className="text-slate-500 dark:text-slate-400">
+          {ratio} · %{pct} <span className="text-slate-400 dark:text-slate-500">(±{dev})</span>
+        </span>
+      </div>
+      <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${pct}%` }}></div>
+      </div>
     </div>
   );
 }
 
-function pctColor(pct: number) {
-  if (pct >= 70) return '#28c828';
-  if (pct >= 40) return '#e6c62a';
-  return '#e87070';
-}
-
-function OddsCell({ value, isWinner, isLoser, trend }: { value: string | null | undefined; isWinner: boolean; isLoser: boolean; trend?: 'up' | 'down' | 'none' }) {
-  if (!value) return null;
-  const cls = isWinner ? 'odds-win' : isLoser ? 'odds-lose' : '';
-  const arrow = trend === 'up' ? <span style={{color:'#ef4444', fontSize:'0.75em', marginLeft:'2px'}}>↑</span> : trend === 'down' ? <span style={{color:'#10b981', fontSize:'0.75em', marginLeft:'2px'}}>↓</span> : null;
-  return <span className={cls}>{value}{arrow}</span>;
-}
-
 export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeResponse }: AnalysisTableProps) {
   if (!analyzeResponse) return null;
-  const { analiz_ozet: ozet, tahminler, tablo_satirlari } = analyzeResponse;
-  const hasData = true; // Always show data panels, even for 0 matches so the fallback stats are visible
-
-  const [aiCommentary, setAiCommentary] = React.useState<string | null>(null);
-  const [aiLoading, setAiLoading] = React.useState(false);
-  const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-
-  const generateAICommentary = async () => {
-    setAiLoading(true);
-    try {
-      const res = await fetch(`${BASE}/api/ai/generate-commentary`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-           matchData: { homeTeam, awayTeam, league },
-           stats: ozet
-        })
-      });
-      const data = await res.json();
-      if (data.commentary) setAiCommentary(data.commentary);
-      else alert(data.error || "Hata oluştu.");
-    } catch (e: any) {
-       alert(e.message);
-    } finally {
-       setAiLoading(false);
-    }
-  };
-
-  const [activeTab, setActiveTab] = React.useState<'ALL' | 'HIGH_SIM' | 'OVER_25' | 'BTTS'>('ALL');
-
-  // Filter rows based on active quick filter tab
-  const filteredSatirlar = tablo_satirlari.filter((satir) => {
-    if (satir.is_target) return true; // Always show target match
+  const { analiz_ozet: ozet, tablo_satirlari } = analyzeResponse;
+  
+  const [activeTab, setActiveTab] = useState<'ALL' | 'HIGH_SIM' | 'OVER_25' | 'BTTS'>('ALL');
+  
+  const filteredSatirlar = tablo_satirlari.filter((satir, i) => {
+    if (i === 0) return false;
     if (activeTab === 'HIGH_SIM') {
-      const num = parseInt((satir.analiz_yuzde || '').replace(/[^0-9]/g, ''), 10) || 0;
-      return num >= 85;
+      const p = parseInt((satir.analiz_yuzde || '').replace(/[^0-9]/g, ''), 10);
+      return p >= 85;
     }
     if (activeTab === 'OVER_25') {
       const ms = satir.ms_skor || '';
@@ -95,306 +65,155 @@ export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeR
   });
 
   return (
-    <div className="analysis-card">
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="analysis-header">
-        <div className="analysis-header-left">
-          <div className="match-datetime">{date}{time ? ` - ${time}` : ''}</div>
-          <div className="match-league">{league}</div>
-          <div className="match-teams">
-            <span className="team-link">{homeTeam}</span>
-            <span className="team-separator"> - </span>
-            <span className="team-link">{awayTeam}</span>
+    <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
+      {/* ── Left Column: Statistical Summary Card (Mobile 100%, Desktop 1/3) ── */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl p-5 w-full lg:w-[480px] lg:shrink-0 shadow-sm border border-slate-100 dark:border-slate-800">
+        <div className="flex justify-between items-baseline mb-4">
+          <div>
+            <h2 className="text-[15px] font-medium m-0 dark:text-slate-100">{homeTeam} — {awayTeam}</h2>
+            <p className="text-xs text-slate-500 mt-1">{league} · {date}</p>
+          </div>
+          <span className="text-[11px] text-slate-500 flex items-center gap-1 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md">
+            <Database size={14} className="mr-1" /> {ozet.total_mac} benzer maç
+          </span>
+        </div>
+
+        <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-3 mb-5">
+          <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+            <Info size={14} className="text-blue-500 shrink-0" />
+            <span>Etkin referans büyüklüğü: <strong className="dark:text-slate-200">{Math.round((ozet as any).effective_sample_size || ozet.total_mac)} maç</strong></span>
           </div>
         </div>
 
-        <div className="analysis-watermark">Analyzed by KargaTahmin</div>
-
-        <div className="analysis-predictions">
-          {tahminler.map((pred, i) => (
-            <div key={i} className="prediction-item">{pred}</div>
-          ))}
+        <div className="flex flex-col gap-3.5 mb-5">
+          <StatRow 
+            label="Ev sahibi kazanır" 
+            ratio={`${ozet.ev_sahibi.sayi}/${ozet.total_mac}`} 
+            pct={ozet.ev_sahibi.yuzde} 
+            dev={(ozet.ev_sahibi as any).sapma || 0} 
+          />
+          <StatRow 
+            label="Beraberlik" 
+            ratio={`${ozet.beraberlik.sayi}/${ozet.total_mac}`} 
+            pct={ozet.beraberlik.yuzde} 
+            dev={(ozet.beraberlik as any).sapma || 0} 
+          />
+          <StatRow 
+            label="Deplasman kazanır" 
+            ratio={`${ozet.deplasman.sayi}/${ozet.total_mac}`} 
+            pct={ozet.deplasman.yuzde} 
+            dev={(ozet.deplasman as any).sapma || 0} 
+          />
+          <div className="border-t border-slate-100 dark:border-slate-800 pt-3.5 mt-1">
+            <StatRow 
+              label="2.5 üst" 
+              ratio={`${ozet.ust_25.sayi}/${ozet.total_mac}`} 
+              pct={ozet.ust_25.yuzde} 
+              dev={(ozet.ust_25 as any).sapma || 0} 
+            />
+          </div>
+          <StatRow 
+            label="Karşılıklı gol var" 
+            ratio={`${ozet.kg_var.sayi}/${ozet.total_mac}`} 
+            pct={ozet.kg_var.yuzde} 
+            dev={(ozet.kg_var as any).sapma || 0} 
+          />
         </div>
+
+        <a href="/metodoloji" className="flex items-center justify-between text-xs text-blue-600 dark:text-blue-400 hover:underline py-2 border-t border-slate-100 dark:border-slate-800 pt-4">
+          <span className="flex items-center gap-1.5"><BarChart2 size={14} /> Metodoloji ve doğruluk raporu</span>
+          <ChevronRight size={14} />
+        </a>
       </div>
 
-      {/* ── Stats Summary Bar ──────────────────────────────────────────────── */}
-      
-      {ozet.total_mac === 0 && (
-        <div style={{ backgroundColor: '#fff3cd', color: '#856404', padding: '12px', borderRadius: '4px', marginBottom: '12px', border: '1px solid #ffeeba', fontSize: '14px' }}>
-          <strong>⚠️ Yeterli Veri Bulunamadı:</strong> Bu maç için belirlenen bağlamsal ve oransal filtreleri (%80+ benzerlik) geçen geçmiş maç bulunamadı. Aşağıda gösterilen yüzdeler piyasa oranlarının saf matematiksel olasılığını (Implied Probability) yansıtmaktadır.
-        </div>
-      )}
-      
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #1e293b' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <span style={{ fontSize: '0.85rem', color: '#cbd5e1', fontWeight: 600 }}>İSTATİSTİKSEL ÖZET ({ozet.total_mac} referans maç)</span>
-            {ozet.sik_ms && (
-              <span style={{ fontSize: '0.8rem', backgroundColor: '#334155', padding: '4px 10px', borderRadius: '12px', color: '#e2e8f0' }}>
-                En Sık MS: <strong style={{ color: '#fff' }}>{ozet.sik_ms}</strong>
-                {ozet.sik_iy && <span style={{ marginLeft: '8px', paddingLeft: '8px', borderLeft: '1px solid #475569' }}>İY: <strong>{ozet.sik_iy}</strong></span>}
-              </span>
-            )}
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', width: '100%' }}>
-            <StatPill label={ozet.ev_sahibi.label}  color={pctColor(ozet.ev_sahibi.yuzde)} sapma={ozet.ev_sahibi.sapma} isZeroMatches={ozet.total_mac === 0} />
-            <StatPill label={ozet.beraberlik.label} color={pctColor(ozet.beraberlik.yuzde)} sapma={ozet.beraberlik.sapma} isZeroMatches={ozet.total_mac === 0} />
-            <StatPill label={ozet.deplasman.label}  color={pctColor(ozet.deplasman.yuzde)} sapma={ozet.deplasman.sapma} isZeroMatches={ozet.total_mac === 0} />
-            <StatPill label={ozet.kg_var.label}  color={pctColor(ozet.kg_var.yuzde)} sapma={ozet.kg_var.sapma} isZeroMatches={ozet.total_mac === 0} />
-            <StatPill label={ozet.ust_25.label}  color={pctColor(ozet.ust_25.yuzde)} sapma={ozet.ust_25.sapma} isZeroMatches={ozet.total_mac === 0} />
-            {ozet.ust_35 && (
-              <StatPill label={ozet.ust_35.label}  color={pctColor(ozet.ust_35.yuzde)} sapma={ozet.ust_35.sapma} isZeroMatches={ozet.total_mac === 0} />
-            )}
-          </div>
+      {/* ── Right Column: Similar Matches Table (Mobile 100%, Desktop 2/3) ── */}
+      <div className="w-full flex-1 min-w-0 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+        
+        {/* Toolbar */}
+        <div className="flex flex-wrap gap-2 p-3 bg-slate-50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800">
+          <button
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${activeTab === "ALL" ? "bg-blue-500 text-white" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"}`}
+            onClick={() => setActiveTab("ALL")}
+          >
+            TÜM ({tablo_satirlari.length - 1})
+          </button>
+          <button
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${activeTab === "HIGH_SIM" ? "bg-blue-500 text-white" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"}`}
+            onClick={() => setActiveTab("HIGH_SIM")}
+          >
+            ⚽ YÜKSEK BENZERLİK (&gt;%85)
+          </button>
+          <button
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${activeTab === "OVER_25" ? "bg-blue-500 text-white" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"}`}
+            onClick={() => setActiveTab("OVER_25")}
+          >
+            🔥 2.5 ÜST
+          </button>
+          <button
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${activeTab === "BTTS" ? "bg-blue-500 text-white" : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"}`}
+            onClick={() => setActiveTab("BTTS")}
+          >
+            🤝 KG VAR
+          </button>
         </div>
 
-      {/* Model & Calibration Panel */}
-      {hasData && (
-        <div style={{ display: "flex", gap: "16px", padding: "16px 20px", backgroundColor: "#0f172a", borderBottom: "1px solid #1e293b", flexWrap: "wrap" }}>
-           <div style={{ flex: 1, minWidth: "280px", fontSize: "13px", color: "#94a3b8", backgroundColor: '#1e293b', padding: '16px', borderRadius: '8px', border: '1px solid #334155' }}>
-              <strong style={{ color: "#fff", display: "block", marginBottom: "8px", fontSize: "14px" }}>🧪 Algoritma & Ağırlıklar</strong>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Hesaplama:</span> <strong style={{ color: "#e2e8f0" }}>Öklid Mesafesi</strong></div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Marj:</span> <strong style={{ color: "#e2e8f0" }}>True Prob. (Arındırılmış)</strong></div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Ağırlıklar:</span> <strong style={{ color: "#e2e8f0" }}>MS: 1.0 | A/Ü: 0.4 | KG: 0.4</strong></div>
-              </div>
-           </div>
-           
-           {ozet.lig_dagilimi && Object.keys(ozet.lig_dagilimi).length > 0 && (
-             <div style={{ flex: 1, minWidth: "280px", fontSize: "13px", color: "#94a3b8", backgroundColor: '#1e293b', padding: '16px', borderRadius: '8px', border: '1px solid #334155' }}>
-                <strong style={{ color: "#fff", display: "block", marginBottom: "8px", fontSize: "14px" }}>📊 Lig Dağılımı (Top 3)</strong>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {Object.entries(ozet.lig_dagilimi)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 3)
-                    .map(([lig, count]) => (
-                       <div key={lig} style={{ display: "flex", justifyContent: "space-between" }}>
-                         <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }}>{lig}</span>
-                         <strong style={{ color: "#38bdf8" }}>%{Math.round((count / ozet.total_mac) * 100)}</strong>
-                       </div>
-                    ))}
-                </div>
-             </div>
-           )}
-        </div>
-      )}
-
-      {/* AI Commentary Section */}
-      {hasData && (
-        <div style={{ padding: '16px 20px', backgroundColor: '#0f172a', borderBottom: '1px solid #1e293b' }}>
-          {!aiCommentary ? (
-            <button
-              onClick={generateAICommentary}
-              disabled={aiLoading}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '12px 24px',
-                background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 700,
-                cursor: aiLoading ? 'not-allowed' : 'pointer',
-                opacity: aiLoading ? 0.8 : 1,
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                fontSize: '15px',
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)'
-              }}
-              onMouseEnter={(e) => !aiLoading && (e.currentTarget.style.transform = 'translateY(-1px)')}
-              onMouseLeave={(e) => !aiLoading && (e.currentTarget.style.transform = 'none')}
-            >
-              <span style={{ fontSize: '18px' }}>✨</span> 
-              {aiLoading ? "Yapay Zeka Analiz Ediyor..." : "AI Tipster Analizi Oluştur"}
-            </button>
-          ) : (
-             <div style={{ padding: "16px", backgroundColor: "#0f172a", borderRadius: "8px", borderLeft: "4px solid #8b5cf6", position: "relative" }}>
-                <span style={{ position: "absolute", top: "-10px", left: "12px", background: "#8b5cf6", color: "#fff", padding: "2px 8px", borderRadius: "12px", fontSize: "10px", fontWeight: "bold", textTransform: "uppercase" }}>
-                   KargaTahmin AI Tipster
-                </span>
-                <p style={{ margin: 0, color: "#f8fafc", fontSize: "14.5px", lineHeight: 1.6, fontStyle: "italic" }}>
-                   "{aiCommentary}"
-                </p>
-             </div>
+        {/* Legacy Table Structure Reused with Tailwind */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs border-b border-slate-100 dark:border-slate-800">
+              <tr>
+                <th className="p-3 font-medium">Analiz %</th>
+                <th className="p-3 font-medium">MSkor</th>
+                <th className="p-3 font-medium">Benzer Karşılaşmalar</th>
+                <th className="p-3 font-medium text-right">Taraf Oranları</th>
+                <th className="p-3 font-medium text-right">2.5 A/Ü</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {filteredSatirlar.map((satir, idx) => {
+                const t = satir.taraf_oranlari as any;
+                const au = satir.alt_ust as any;
+                const numPct = parseInt((satir.analiz_yuzde || "").replace(/[^0-9]/g, ""), 10) || 0;
+                
+                return (
+                  <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                    <td className="p-3">
+                      <span className={`inline-flex items-center justify-center px-2 py-1 rounded text-xs font-bold ${numPct >= 85 ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"}`}>
+                        {satir.analiz_yuzde}
+                      </span>
+                    </td>
+                    <td className="p-3 font-mono font-medium dark:text-slate-200">{satir.ms_skor}</td>
+                    <td className="p-3">
+                      <div className="flex flex-col">
+                        <span className="text-slate-700 dark:text-slate-300 font-medium whitespace-normal break-words max-w-[200px]">{satir.takimlar}</span>
+                        <span className="text-[11px] text-slate-400">{(satir as any).lig_isim} · {(satir as any).tarih_format}</span>
+                      </div>
+                    </td>
+                    <td className="p-3 text-right">
+                      <div className="flex justify-end gap-1.5 text-[11px] whitespace-nowrap">
+                        <OddsCell value={t?.ev_kapanis} isWinner={satir.ms_skor?.startsWith("1") || false} isLoser={false} trend={t?.ev_trend as any} />
+                        <OddsCell value={t?.ber_kapanis} isWinner={satir.ms_skor === "0:0" || satir.ms_skor === "1:1" || satir.ms_skor === "2:2"} isLoser={false} trend={t?.ber_trend as any} />
+                        <OddsCell value={t?.dep_kapanis} isWinner={satir.ms_skor?.endsWith("2") || false} isLoser={false} trend={t?.dep_trend as any} />
+                      </div>
+                    </td>
+                    <td className="p-3 text-right">
+                      <div className="flex justify-end gap-1.5 text-[11px] whitespace-nowrap">
+                        <OddsCell value={au?.alt_kapanis} isWinner={false} isLoser={false} trend={au?.alt_trend as any} />
+                        <OddsCell value={au?.ust_kapanis} isWinner={false} isLoser={false} trend={au?.ust_trend as any} />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {filteredSatirlar.length === 0 && (
+            <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">
+              Bu filtreye uygun maç bulunamadı.
+            </div>
           )}
         </div>
-      )}
-
-      {/* ── Table Quick Filter Toolbar ────────────────────────────────────── */}
-      <div className="table-filter-bar" style={{ padding: "8px 14px", backgroundColor: "#0b0f17", borderBottom: "1px solid var(--border)" }}>
-        <button
-          className={`filter-btn ${activeTab === 'ALL' ? 'active' : ''}`}
-          onClick={() => setActiveTab('ALL')}
-        >
-          TÜM REFERANS MAÇLAR ({tablo_satirlari.length - 1})
-        </button>
-        <button
-          className={`filter-btn ${activeTab === 'HIGH_SIM' ? 'active' : ''}`}
-          onClick={() => setActiveTab('HIGH_SIM')}
-        >
-          ⚽ YÜKSEK BENZERLİK (&gt;%85)
-        </button>
-        <button
-          className={`filter-btn ${activeTab === 'OVER_25' ? 'active' : ''}`}
-          onClick={() => setActiveTab('OVER_25')}
-        >
-          🔥 2.5 ÜST BİTENLER
-        </button>
-        <button
-          className={`filter-btn ${activeTab === 'BTTS' ? 'active' : ''}`}
-          onClick={() => setActiveTab('BTTS')}
-        >
-          🤝 KG VAR BİTENLER
-        </button>
-      </div>
-
-      {/* ── Table ──────────────────────────────────────────────────────────── */}
-      <div className="table-wrapper">
-        <table className="analysis-table">
-          <thead>
-            <tr>
-              <th className="th-analiz">Analiz %</th>
-              <th className="th-ht col-highlight">Devre</th>
-              <th className="th-ft">MSkor</th>
-              <th className="th-teams">Benzer Karşılaşmalar</th>
-              
-              
-              
-              <th className="th-odds">Taraf Oranları</th>
-              <th className="th-altust col-highlight">2.5 A/Ü</th>
-              
-              
-            </tr>
-          </thead>
-          <tbody>
-            {filteredSatirlar.map((satir: TabloSatiri) => {
-              const { taraf_oranlari: t, alt_ust: au, var_yok: vy } = satir;
-              const numPct = parseInt((satir.analiz_yuzde || '').replace(/[^0-9]/g, ''), 10) || 0;
-
-              return (
-                <tr key={satir.id} className={satir.row_renk}>
-                  {/* Analiz % with Visual Progress Bar */}
-                  <td className="td-analiz">
-                    {!satir.is_target && (
-                      <div className="analiz-progress-wrapper">
-                        <span className="analiz-badge">{satir.analiz_yuzde}</span>
-                        <div className="analiz-progress-bar-bg">
-                          <div
-                            className="analiz-progress-bar-fill"
-                            style={{
-                              width: `${Math.min(100, Math.max(10, numPct))}%`,
-                              background: numPct >= 75
-                                ? 'var(--primary)'
-                                : numPct >= 50
-                                ? 'var(--primary)'
-                                : 'var(--primary)'
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </td>
-
-                  {/* İY Devre */}
-                  <td className={`td-score col-highlight${satir.iy_skor_renk ? ` ${satir.iy_skor_renk}` : ''}${satir.iy_skor_sik_mi ? ' score-mostcommon' : ''}`}>
-                    {satir.is_target
-                      ? (satir.iy_tahmini ? <span className="score-hint">{satir.iy_tahmini}</span> : '')
-                      : (satir.iy_skor ? satir.iy_skor.replace(/\?/g, '') : '')}
-                  </td>
-
-                  {/* MS */}
-                  <td className={`td-score${satir.ms_skor_renk ? ` ${satir.ms_skor_renk}` : ''}${satir.ms_skor_sik_mi ? ' score-mostcommon' : ''}`}>
-                    {satir.is_target
-                      ? (satir.ms_tahmini ? <span className="score-hint">{satir.ms_tahmini}</span> : '')
-                      : (satir.ms_skor ? satir.ms_skor.replace(/\?/g, '') : '')}
-                  </td>
-
-                  {/* Teams */}
-                  <td className="td-teams">
-                    {satir.is_target
-                      ? <div><span className="team-highlight">{satir.takimlar}</span>{satir.tarih_lig && <div style={{fontSize: '0.70rem', color: '#60a5fa', marginTop: '2px'}}>{satir.tarih_lig}</div>}</div>
-                      : <div>
-                          <span className="team-names">{satir.takimlar}</span>
-                          {satir.tarih_lig && <div className="team-league-hint" style={{fontSize: '0.70rem', color: '#94a3b8', marginTop: '2px'}}>{satir.tarih_lig}</div>}
-                        </div>
-                    }
-                  </td>
-
-                  
-
-                  
-
-                  
-
-                  {/* Taraf Oranları */}
-                  <td className="td-odds text-center">
-                    {(t?.ev || t?.ber || t?.dep) && (
-                      <div className="odds-stack">
-                        <div className="odds-main-row">
-                          <OddsCell value={t.ev}  isWinner={t.kazanan === 'ev'}  isLoser={!!t.kazanan && t.kazanan !== 'ev'} trend={(t as any).ev_trend} />
-                          {t.ev && '-'}
-                          <OddsCell value={t.ber} isWinner={t.kazanan === 'ber'} isLoser={!!t.kazanan && t.kazanan !== 'ber'} trend={(t as any).ber_trend} />
-                          {t.ber && '-'}
-                          <OddsCell value={t.dep} isWinner={t.kazanan === 'dep'} isLoser={!!t.kazanan && t.kazanan !== 'dep'} trend={(t as any).dep_trend} />
-                        </div>
-                      </div>
-                    )}
-                  </td>
-
-                  {/* 2.5 Alt / Üst */}
-                  <td className="td-altust col-highlight text-center">
-                    {(au?.alt || au?.ust) && (
-                      <div className="odds-stack">
-                        <div className="odds-main-row">
-                          <OddsCell value={au.alt} isWinner={au.kazanan === 'alt'} isLoser={!!au.kazanan && au.kazanan !== 'alt'} />
-                          {au.alt && '-'}
-                          <OddsCell value={au.ust} isWinner={au.kazanan === 'ust'} isLoser={!!au.kazanan && au.kazanan !== 'ust'} />
-                        </div>
-                      </div>
-                    )}
-                  </td>
-
-                  
-
-                  
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* ── Disclaimer ─────────────────────────────────────────────────────── */}
-      <div className="disclaimer-text">
-        ANALİZ TABLOLARI SADECE İSTATİSTİKSEL VERİLERİ İÇERMEKTEDİR! YATIRIM VEYA BAHİS TAVSİYESİ DEĞİLDİR! SORUMLULUK SİZLERE AİTTİR...
-      </div>
-
-      {/* ── Footer ─────────────────────────────────────────────────────────── */}
-      <div className="analysis-footer">
-        <button className="btn-subscriber">
-          <span className="subscriber-icon">👤</span> Abonelerine Özel
-        </button>
-        <div className="footer-slogan">
-          <em>İnsan şansını kendisi yaratır!</em>
-        </div>
-        <button className="btn-subscribe">
-          <span className="subscribe-icon">⭐</span> Abone ol
-        </button>
       </div>
     </div>
-  );
-}
-
-function CardDisplay({ display }: { display: string }) {
-  const parts = display.split(' - ');
-  if (parts.length < 2) return <>{display}</>;
-  const [yh, ya, red = '0'] = parts;
-  const redNum = parseInt(red, 10) || 0;
-  return (
-    <>
-      <span className="card-yellow">🟨 {yh}</span>
-      {' - '}
-      <span className="card-yellow">{ya}</span>
-      {' - '}
-      <span className={redNum > 0 ? 'card-red' : ''}>{redNum > 0 ? `🟥 ${red}` : red}</span>
-    </>
   );
 }
