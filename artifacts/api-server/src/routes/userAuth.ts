@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const router: IRouter = Router();
 const __dirnameLocal = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.resolve(__dirnameLocal, "../../../scripts/scraper/gecmis_maclar.db");
+const dbPath = require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
 
 // JWT Secret - production'da env'den alinmali, fallback eklendi
 const JWT_SECRET = process.env.JWT_SECRET || "karga_jwt_super_secret_2026_fallback";

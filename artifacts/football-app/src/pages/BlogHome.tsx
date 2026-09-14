@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { SeoHead } from '../components/seo/SeoHead';
-, { useEffect, useState } from "react";
 import { Link } from "wouter";
 
 export default function BlogHome() {
@@ -56,8 +55,8 @@ export default function BlogHome() {
   };
 
   return (
-    <div className="app-container">
-      <SeoHead title="KargaTahmin Admin" description="Gizli alan" url="/" noindex /> style={{ minHeight: '100vh', backgroundColor: '#0f172a' }}>
+    <div className="app-container" style={{ minHeight: "100vh", backgroundColor: "#0f172a" }}>
+      <SeoHead title="KargaTahmin Admin" description="Gizli alan" url="/" noindex />
       <header className="app-header">
         <div className="logo" style={{ cursor: "pointer" }} onClick={() => window.location.href = "/"}>
           <div className="logo-icon">⚽</div>

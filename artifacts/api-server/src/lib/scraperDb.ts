@@ -9,7 +9,7 @@ import type { HistoricalMatch } from "@workspace/db";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Repo kökünden yol: artifacts/api-server/dist -> ../../../scripts/scraper/
-const DB_PATH = path.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
+const DB_PATH = require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
 
 let _db: Database.Database | null = null;
 

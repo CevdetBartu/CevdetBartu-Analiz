@@ -37,7 +37,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirnameLocal = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.resolve(__dirnameLocal, "../../scripts/scraper/gecmis_maclar.db");
+const dbPath = require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
 
 app.use("/api", router);
 app.use("/api", authRouter);

@@ -11,7 +11,7 @@ import { queryScraperMatches } from "./scraperDb";
 import { findSimilarMatches } from "./similarity";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
+const DB_PATH = require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
 
 const FLASK_URL = "http://127.0.0.1:5051";
 

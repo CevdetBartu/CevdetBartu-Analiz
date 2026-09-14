@@ -21,7 +21,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirnameLocal = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.resolve(__dirnameLocal, "../../scripts/scraper/gecmis_maclar.db");
+const isProd = require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db");
+const dbPath = isProd ? "/var/www/futbol_app/gecmis_maclar.db" : path.resolve(__dirnameLocal, "../../scripts/scraper/gecmis_maclar.db");
 
 // Veritabannda users tablosunu olutur (Yoksa)
 try {

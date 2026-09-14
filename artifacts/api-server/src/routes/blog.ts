@@ -11,7 +11,7 @@ import { requireAdmin } from "../lib/auth";
 import { requireUser } from "../lib/userAuthMiddleware";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
+const dbPath = require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
 const db = new Database(dbPath, { readonly: false });
 
 const router: IRouter = Router();
