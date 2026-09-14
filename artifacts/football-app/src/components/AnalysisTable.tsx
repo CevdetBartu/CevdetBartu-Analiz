@@ -183,7 +183,7 @@ export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeR
                         {satir.analiz_yuzde}
                       </span>
                     </td>
-                    <td className="p-3 font-mono font-medium dark:text-slate-200">{satir.ms_skor}</td>
+                    <td className="p-3 font-mono font-bold text-slate-900 dark:text-white">{satir.ms_skor}</td>
                     <td className="p-3">
                       <div className="flex flex-col">
                         <span className="text-slate-700 dark:text-slate-300 font-medium whitespace-normal break-words max-w-[200px]">{satir.takimlar}</span>
