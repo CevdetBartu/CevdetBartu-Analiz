@@ -35,6 +35,7 @@ function StatRow({ label, ratio, pct, dev }: { label: string; ratio: string; pct
 }
 
 export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeResponse }: AnalysisTableProps) {
+  // TODO(TypeFix): Remove s any casts below once @workspace/api-client-react is fully regenerated and synced with backend openapi spec for effective_sample_size and sapma properties.
   if (!analyzeResponse) return null;
   const { analiz_ozet: ozet, tablo_satirlari } = analyzeResponse;
   
