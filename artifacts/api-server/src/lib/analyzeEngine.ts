@@ -110,6 +110,7 @@ export interface KellyOnerisi {
 
 export interface AnalyzeOzet {
   total_mac: number;
+  effective_sample_size?: number;
   kalibrasyon_skoru?: number;
   lig_dagilimi?: Record<string, number>;
   ev_sahibi: StatGroup;
@@ -867,6 +868,7 @@ export function analyze(
 
   const analiz_ozet: AnalyzeOzet = {
     total_mac: total,
+    effective_sample_size: effectiveSampleSize,
     kalibrasyon_skoru,
     lig_dagilimi,
     ev_sahibi: { sayi: homeWins, yuzde: finalHomePct, sapma: sdHome, label: `Ev Sahibi (MS1) %${finalHomePct}` },
@@ -902,7 +904,7 @@ export function analyze(
   // ── 3. Tahminler ─────────────────────────────────────────────────────────
               const tahminler: string[] = [];
 
-    if (total < 5) {
+    if (total < 5 || effectiveSampleSize < 5) {
       tahminler.push('Zayıf Güven (Yetersiz Referans Maç)');
     } else {
       // YÜKSEK GÜVEN (HIGH CONFIDENCE) Filtreleri - %85+ Başarı Hedefi ve EV (Edge) Kontrolü
@@ -1372,3 +1374,5 @@ export function calculateModelD(
     tahminler
   };
 }
+
+
