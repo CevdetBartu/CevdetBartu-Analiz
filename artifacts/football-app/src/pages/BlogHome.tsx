@@ -57,33 +57,7 @@ export default function BlogHome() {
   return (
     <div className="app-container" style={{ minHeight: "100vh", backgroundColor: "#0f172a" }}>
       <SeoHead title="KargaTahmin Admin" description="Gizli alan" url="/" noindex />
-      <header className="app-header">
-        <div className="logo" style={{ cursor: "pointer" }} onClick={() => window.location.href = "/"}>
-          <div className="logo-icon">⚽</div>
-          KargaTahmin Blog
-        </div>
-        <nav className="header-nav">
-          <Link href="/" style={{ color: "#38bdf8", fontSize: "14px", fontWeight: "bold", textDecoration: "none" }}>Anasayfa (Blog)</Link>
-          <Link href="/bugun" style={{ color: "var(--muted-foreground)", fontSize: "14px", fontWeight: "500", textDecoration: "none" }}>Bülten / Analiz</Link>
-          <Link href="/canli" style={{ color: "var(--muted-foreground)", fontSize: "14px", fontWeight: "500", textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
-            <span className="live-dot" style={{ width: 8, height: 8, backgroundColor: "#ef4444", borderRadius: "50%", display: "inline-block", boxShadow: "0 0 8px #ef4444" }}></span>
-            Canlı Maçlar
-          </Link>
-          <button onClick={generateDailyBlog} disabled={generating} style={{ 
-            background: "linear-gradient(135deg, #6366f1, #a855f7)", 
-            border: "none", 
-            color: "white", 
-            padding: "6px 12px", 
-            borderRadius: "6px", 
-            cursor: generating ? "wait" : "pointer",
-            fontWeight: "bold",
-            fontSize: "12px",
-            marginLeft: "12px"
-          }}>
-            {generating ? "✍️ AI Yazıyor..." : "✨ Günün Blogunu Üret"}
-          </button>
-        </nav>
-      </header>
+      
 
       <main className="app-main" style={{ maxWidth: 1000, margin: '0 auto', padding: '40px 20px' }}>
         

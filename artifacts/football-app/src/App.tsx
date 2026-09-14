@@ -10,13 +10,15 @@ import BlogPost from './pages/BlogPost';
 import CategoryPage from './pages/CategoryPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import { Layout } from './components/layout/Layout';
 
 
 const queryClient = new QueryClient();
 
 function Router() {
   return (
-    <Switch>
+    <Layout>
+      <Switch>
       <Route path="/" component={Home} />
       <Route path="/blog" component={BlogHome} />
       <Route path="/login" component={LoginPage} />
@@ -35,6 +37,7 @@ function Router() {
         </div>
       </Route>
     </Switch>
+    </Layout>
   );
 }
 

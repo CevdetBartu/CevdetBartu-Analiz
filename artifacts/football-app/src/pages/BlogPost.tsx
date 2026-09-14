@@ -61,29 +61,12 @@ export default function BlogPost() {
         schema={schema}
       />
       
-      <header className="app-header">
-        <div className="logo" style={{ cursor: "pointer" }} onClick={() => window.location.href = "/"}>
-          <div className="logo-icon">⚽</div>
-          KargaTahmin Blog
-        </div>
-        <nav className="header-nav">
-          <Link href="/" style={{ color: "var(--muted-foreground)", fontSize: "14px", fontWeight: "500", textDecoration: "none" }}>Anasayfa</Link>
-          <Link href="/bugun" style={{ color: "var(--muted-foreground)", fontSize: "14px", fontWeight: "500", textDecoration: "none" }}>Bülten / Analiz</Link>
-        </nav>
-      </header>
+      
 
       <main className="app-main" style={{ maxWidth: 800, margin: '0 auto', padding: '40px 20px' }}>
         
         {/* Breadcrumb */}
-        <nav style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '20px' }}>
-          <Link href="/" style={{ color: '#38bdf8', textDecoration: 'none' }}>Anasayfa</Link> 
-          {' > '}
-          <Link href={`/kategori/${post.category}`} style={{ color: '#38bdf8', textDecoration: 'none', textTransform: 'capitalize' }}>
-            {post.category?.replace(/-/g, ' ')}
-          </Link>
-          {' > '}
-          <span style={{ color: '#94a3b8' }}>{post.title}</span>
-        </nav>
+        
 
         <article>
           <header style={{ marginBottom: "32px" }}>

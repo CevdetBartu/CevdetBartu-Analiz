@@ -33,28 +33,7 @@ export default function Home() {
 
   return (
     <div className="crs-home">
-      <nav>
-        <div className="wrap">
-          <div className="logo">
-            <img src="/logo.jpg" alt="KargaTahmin Logo" style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
-            KargaTahmin
-          </div>
-          <div className="navlinks">
-            <Link href="/bugun">Analiz Ara</Link>
-            <Link href="/blog">Analizler</Link>
-            <Link href="#nasil-calisir">Nasil Calisir</Link>
-            <span className="free-badge">Simdilik tamamen Ucretsiz</span>
-            {isAuthenticated() ? (
-              <Link className="cta-btn" style={{backgroundColor: '#334155'}} href="/hesabim">Hesabim</Link>
-            ) : (
-              <>
-                <Link className="cta-btn" href="/login">Giris Yap</Link>
-                <Link className="cta-btn" style={{backgroundColor: '#2563eb'}} href="/register">Ucretsiz Basla</Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      
 
       <header className="hero">
         <div className="wrap">
@@ -69,7 +48,7 @@ export default function Home() {
             KargaTahmin, bugünün maç oranlarını geçmişte oynanmış binlerce maçla eşleştirir; lig, ülke ve kıta bağlamını da hesaba katarak size şeffaf bir olasılık tablosu sunar.
           </p>
           <div className="hero-ctas">
-            <Link className="btn-primary" href="/bugun">Ücretsiz analiz yap</Link>
+            <Link className="btn-primary" href="/bugun">{isAuthenticated() ? "Analiz Yap (Bültene Git)" : "Ücretsiz analiz yap"}</Link>
             <Link className="btn-secondary" href="#nasil-calisir">Nasıl çalıştığını gör</Link>
           </div>
           <div className="hero-stats">

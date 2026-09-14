@@ -216,26 +216,7 @@ export default function TodayMatchesPage() {
   return (
     <div className="app-container">
       
-      <header style={{ borderBottom: "1px solid var(--border)", backgroundColor: "var(--background)", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div onClick={() => (window.location.href = "/")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{ width: "28px", height: "28px", borderRadius: "6px", backgroundColor: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", color: "#fff", fontSize: "14px" }}>C</div>
-          <span style={{ fontSize: "1.1rem", fontWeight: "700", letterSpacing: "-0.5px", color: "var(--foreground)" }}>KargaTahmin <span style={{ fontWeight: "400", opacity: 0.7 }}>Analytics</span></span>
-        </div>
-        <div style={{ display: "flex", gap: "4px", backgroundColor: "var(--card)", padding: "4px", borderRadius: "8px", border: "1px solid var(--border)" }}>
-          <Link href="/" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Blog</Link>
-          <Link href="/bugun" style={{ backgroundColor: "var(--primary)", color: "#fff", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Bülten / Analiz</Link>
-          <Link href="/canli" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Canlı</Link>
-          <Link href="/manuel" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Manuel Tahmin</Link>
-        </div>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link href="/admin" style={{ color: "var(--muted-foreground)", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Veritabani</Link>
-          {isAuthenticated() ? (
-            <Link href="/hesabim" style={{ color: "var(--foreground)", fontSize: "13px", fontWeight: "600", textDecoration: "none", backgroundColor: "var(--muted)", padding: "4px 10px", borderRadius: "6px" }}>Hesabim</Link>
-          ) : (
-            <Link href="/login" style={{ color: "#fff", fontSize: "13px", fontWeight: "600", textDecoration: "none", backgroundColor: "#2563eb", padding: "4px 12px", borderRadius: "6px" }}>Giris Yap</Link>
-          )}
-        </nav>
-      </header>
+      
 
 
       <main className="app-main">

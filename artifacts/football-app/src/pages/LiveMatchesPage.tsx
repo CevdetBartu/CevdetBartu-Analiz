@@ -153,20 +153,7 @@ export default function LiveMatchesPage() {
   return (
     <div className="app-container">
       
-      <header style={{ borderBottom: "1px solid var(--border)", backgroundColor: "var(--background)", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div onClick={() => (window.location.href = "/")} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{ width: "28px", height: "28px", borderRadius: "6px", backgroundColor: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "700", color: "#fff", fontSize: "14px" }}>C</div>
-          <span style={{ fontSize: "1.1rem", fontWeight: "700", letterSpacing: "-0.5px", color: "var(--foreground)" }}>KargaTahmin <span style={{ fontWeight: "400", opacity: 0.7 }}>Analytics</span></span>
-        </div>
-        <div style={{ display: "flex", gap: "4px", backgroundColor: "var(--card)", padding: "4px", borderRadius: "8px", border: "1px solid var(--border)" }}>
-          <Link href="/bugun" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Bugün</Link>
-          <Link href="/canli" style={{ backgroundColor: "var(--primary)", color: "#fff", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Canlı</Link>
-          <Link href="/" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Manuel</Link>
-        </div>
-        <nav>
-          <Link href="/admin" style={{ color: "var(--muted-foreground)", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Veritabanı</Link>
-        </nav>
-      </header>
+      
 
 
       <main className="app-main">

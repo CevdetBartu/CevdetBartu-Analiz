@@ -35,15 +35,7 @@ export default function CategoryPage() {
         url={`/kategori/${params?.slug}`}
       />
       
-      <header className="app-header">
-        <div className="logo" style={{ cursor: "pointer" }} onClick={() => window.location.href = "/"}>
-          <div className="logo-icon">⚽</div>
-          KargaTahmin
-        </div>
-        <nav className="header-nav">
-          <Link href="/" style={{ color: "var(--muted-foreground)", fontSize: "14px", fontWeight: "500", textDecoration: "none" }}>Anasayfa (Blog)</Link>
-        </nav>
-      </header>
+      
 
       <main className="app-main" style={{ maxWidth: 1000, margin: '0 auto', padding: '40px 20px' }}>
         <h1 style={{ fontSize: "2.5rem", color: "#f8fafc", marginBottom: "32px", textTransform: 'capitalize' }}>
