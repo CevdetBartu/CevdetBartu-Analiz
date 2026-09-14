@@ -62845,18 +62845,19 @@ function requireUser(req, res, next) {
     return;
   }
 }
+function requireAdmin(req, res, next) {
+  requireUser(req, res, () => {
+    if (req.user && req.user.role === "admin") {
+      next();
+    } else {
+      res.status(403).json({ error: "Bu i\u015Flemi yapmak i\xE7in Admin yetkisine sahip olmal\u0131s\u0131n\u0131z." });
+    }
+  });
+}
 
 // src/routes/index.ts
 var router13 = (0, import_express13.Router)();
-var ADMIN_TOKEN = process.env.ADMIN_SECRET_KEY || "karga-secret-admin-key-9988";
-router13.use("/admin", (req, res, next) => {
-  const token = req.headers["x-admin-token"] || req.query.token;
-  if (token !== ADMIN_TOKEN) {
-    res.status(401).json({ error: "Yetkisiz eri\u015Fim. Ge\xE7ersiz Admin Token." });
-    return;
-  }
-  next();
-});
+router13.use("/admin", requireAdmin);
 router13.use(health_default);
 router13.use(matches_default);
 router13.use(today_default);
@@ -62884,7 +62885,7 @@ import path7 from "node:path";
 import { fileURLToPath as fileURLToPath6 } from "node:url";
 
 // src/lib/auth.ts
-function requireAdmin(req, res, next) {
+function requireAdmin2(req, res, next) {
   const authHeader = req.headers.authorization;
   const expectedToken = process.env.ADMIN_TOKEN || "karga_super_secret_token_2026";
   if (!authHeader || authHeader !== `Bearer ${expectedToken}`) {
@@ -62926,7 +62927,7 @@ router14.get("/blog/:slug", requireUser, (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-router14.post("/blog/generate-daily", requireAdmin, async (req, res) => {
+router14.post("/blog/generate-daily", requireAdmin2, async (req, res) => {
   try {
     const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
     const todayData = getTodayMatchesFromDb(today);
@@ -63012,7 +63013,7 @@ router14.post("/blog/generate-daily", requireAdmin, async (req, res) => {
     res.status(500).json({ error: e.message || "Blog \xFCretilirken hata olu\u015Ftu.", stack: e.stack });
   }
 });
-router14.delete("/blog/:id", requireAdmin, (req, res) => {
+router14.delete("/blog/:id", requireAdmin2, (req, res) => {
   try {
     const id = req.params.id;
     db2.prepare("DELETE FROM blog_posts WHERE id = ?").run(id);
@@ -63021,7 +63022,7 @@ router14.delete("/blog/:id", requireAdmin, (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-router14.put("/blog/:id", requireAdmin, (req, res) => {
+router14.put("/blog/:id", requireAdmin2, (req, res) => {
   try {
     const id = req.params.id;
     const { title, content, excerpt, category, prediction } = req.body;
@@ -63041,11 +63042,11 @@ var blog_default = router14;
 // src/routes/auth.ts
 var import_express15 = __toESM(require_express2(), 1);
 var router15 = (0, import_express15.Router)();
-var ADMIN_TOKEN2 = process.env.ADMIN_SECRET_KEY || "karga-secret-admin-key-9988";
+var ADMIN_TOKEN = process.env.ADMIN_SECRET_KEY || "karga-secret-admin-key-9988";
 router15.post("/admin/login", (req, res) => {
   const { password } = req.body;
-  if (password === ADMIN_TOKEN2) {
-    res.json({ success: true, token: ADMIN_TOKEN2 });
+  if (password === ADMIN_TOKEN) {
+    res.json({ success: true, token: ADMIN_TOKEN });
   } else {
     res.status(401).json({ success: false, error: "Hatal\u0131 \u015Fifre!" });
   }
@@ -65835,7 +65836,7 @@ router16.post("/login", authLimiter, (req, res) => {
   }
   try {
     const db3 = new Database5(dbPath2);
-    const user = db3.prepare("SELECT id, email, password_hash FROM users WHERE email = ?").get(email3);
+    const user = db3.prepare("SELECT id, email, password_hash, role FROM users WHERE email = ?").get(email3);
     if (!user) {
       res.status(401).json({ error: "Hatal\u0131 email veya \u015Fifre!" });
       return;
@@ -65846,7 +65847,7 @@ router16.post("/login", authLimiter, (req, res) => {
       return;
     }
     const token = import_jsonwebtoken2.default.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, role: user.role },
       JWT_SECRET2,
       { expiresIn: "7d" }
       // 1 haftalik gecerlilik
@@ -65862,7 +65863,7 @@ router16.post("/logout", (req, res) => {
 router16.get("/me", requireUser, (req, res) => {
   try {
     const db3 = new Database5(dbPath2);
-    const user = db3.prepare("SELECT id, email, membership_status, membership_plan, email_verified, created_at FROM users WHERE id = ?").get(req.user.userId);
+    const user = db3.prepare("SELECT id, email, membership_status, membership_plan, email_verified, created_at, role FROM users WHERE id = ?").get(req.user.userId);
     if (!user) {
       res.status(404).json({ error: "Kullanici bulunamadi." });
       return;
@@ -66069,6 +66070,10 @@ try {
   }
   try {
     db3.exec("ALTER TABLE users ADD COLUMN membership_plan TEXT");
+  } catch (e) {
+  }
+  try {
+    db3.exec("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'");
   } catch (e) {
   }
   try {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SeoHead } from '../components/seo/SeoHead';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
+import { fetchWithAuth, isAuthenticated } from '../lib/auth';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 const API = `${BASE}/api/admin/scraper`;
@@ -39,8 +40,7 @@ export default function AdminPage() {
   const [customStartDate, setCustomStartDate] = useState<string>('15.08.2021');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const ADMIN_TOKEN = "karga-secret-admin-key-9988";
-
+  
   const fetchStats = useCallback(async () => {
     try {
       const r = await fetch(`${API}/stats`, {

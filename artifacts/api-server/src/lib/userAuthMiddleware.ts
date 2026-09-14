@@ -31,3 +31,13 @@ export function requireUser(req: Request, res: Response, next: NextFunction): vo
     return;
   }
 }
+
+export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
+  requireUser(req, res, () => {
+    if (req.user && req.user.role === 'admin') {
+      next();
+    } else {
+      res.status(403).json({ error: "Bu işlemi yapmak için Admin yetkisine sahip olmalısınız." });
+    }
+  });
+}

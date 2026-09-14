@@ -40,6 +40,7 @@ try {
   // Add new columns if they do not exist
   try { db.exec("ALTER TABLE users ADD COLUMN membership_status TEXT DEFAULT 'active'"); } catch (e) {}
   try { db.exec("ALTER TABLE users ADD COLUMN membership_plan TEXT"); } catch (e) {}
+  try { db.exec("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'"); } catch (e) {}
   try { db.exec("ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0"); } catch (e) {}
 
   logger.info("Users table checked/updated.");

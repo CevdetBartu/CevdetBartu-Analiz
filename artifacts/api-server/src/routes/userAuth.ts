@@ -73,7 +73,7 @@ router.post("/login", authLimiter, (req, res) => {
 
   try {
     const db = new Database(dbPath);
-    const user: any = db.prepare("SELECT id, email, password_hash FROM users WHERE email = ?").get(email);
+    const user: any = db.prepare("SELECT id, email, password_hash, role FROM users WHERE email = ?").get(email);
 
     if (!user) {
       res.status(401).json({ error: "Hatalı email veya şifre!" });
@@ -87,7 +87,7 @@ router.post("/login", authLimiter, (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: "7d" } // 1 haftalik gecerlilik
     );
@@ -111,7 +111,7 @@ import { requireUser } from "../lib/userAuthMiddleware";
 router.get("/me", requireUser, (req: any, res) => {
   try {
     const db = new Database(dbPath);
-    const user: any = db.prepare("SELECT id, email, membership_status, membership_plan, email_verified, created_at FROM users WHERE id = ?").get(req.user.userId);
+    const user: any = db.prepare("SELECT id, email, membership_status, membership_plan, email_verified, created_at, role FROM users WHERE id = ?").get(req.user.userId);
     if (!user) {
       res.status(404).json({ error: "Kullanici bulunamadi." });
       return;
