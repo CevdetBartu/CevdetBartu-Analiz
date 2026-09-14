@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SeoHead } from '../components/seo/SeoHead';
-, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'wouter';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -40,7 +39,7 @@ export default function AdminPage() {
   const [customStartDate, setCustomStartDate] = useState<string>('15.08.2021');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  const ADMIN_TOKEN = "crs-secret-admin-key-9988";
+  const ADMIN_TOKEN = "karga-secret-admin-key-9988";
 
   const fetchStats = useCallback(async () => {
     try {
