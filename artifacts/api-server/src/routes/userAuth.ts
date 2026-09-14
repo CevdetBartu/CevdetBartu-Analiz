@@ -11,7 +11,7 @@ const __dirnameLocal = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = path.resolve(__dirnameLocal, "../../../scripts/scraper/gecmis_maclar.db");
 
 // JWT Secret - production'da env'den alinmali, fallback eklendi
-const JWT_SECRET = process.env.JWT_SECRET || "crs_jwt_super_secret_2026_fallback";
+const JWT_SECRET = process.env.JWT_SECRET || "karga_jwt_super_secret_2026_fallback";
 
 // Rate limiting (15 dakikada 10 istek)
 const authLimiter = rateLimit({

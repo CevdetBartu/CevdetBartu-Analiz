@@ -8,6 +8,7 @@ interface SeoHeadProps {
   image?: string;
   type?: 'website' | 'article';
   schema?: any;
+  noindex?: boolean;
 }
 
 export const SeoHead: React.FC<SeoHeadProps> = ({
@@ -17,12 +18,14 @@ export const SeoHead: React.FC<SeoHeadProps> = ({
   image = 'https://kargatahmin.com/default-cover.jpg',
   type = 'website',
   schema,
+  noindex,
 }) => {
   const absoluteUrl = `https://kargatahmin.com${url}`;
 
   return (
     <Helmet>
       <title>{title}</title>
+      {noindex && <meta name="robots" content="noindex, nofollow" />}
       <meta name="description" content={description} />
       <link rel="canonical" href={absoluteUrl} />
 

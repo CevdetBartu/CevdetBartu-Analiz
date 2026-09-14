@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "crs_jwt_super_secret_2026_fallback";
+const JWT_SECRET = process.env.JWT_SECRET || "karga_jwt_super_secret_2026_fallback";
 
 // Request interfacesini genisletmek
 declare global {

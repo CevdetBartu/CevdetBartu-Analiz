@@ -52,17 +52,17 @@ app.get("/sitemap.xml", (req, res) => {
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://crsanalytics.com/</loc>
+    <loc>https://kargatahmin.com/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://crsanalytics.com/bugun</loc>
+    <loc>https://kargatahmin.com/bugun</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://crsanalytics.com/canli</loc>
+    <loc>https://kargatahmin.com/canli</loc>
     <changefreq>always</changefreq>
     <priority>0.8</priority>
   </url>`;
@@ -71,7 +71,7 @@ app.get("/sitemap.xml", (req, res) => {
     categories.forEach(cat => {
       xml += `
   <url>
-    <loc>https://crsanalytics.com/kategori/${cat}</loc>
+    <loc>https://kargatahmin.com/kategori/${cat}</loc>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>`;
@@ -82,7 +82,7 @@ app.get("/sitemap.xml", (req, res) => {
       const date = new Date(post.created_at).toISOString().split('T')[0];
       xml += `
   <url>
-    <loc>https://crsanalytics.com/blog/${post.slug}</loc>
+    <loc>https://kargatahmin.com/blog/${post.slug}</loc>
     <lastmod>${date}</lastmod>
     <changefreq>never</changefreq>
     <priority>0.6</priority>
@@ -104,7 +104,7 @@ Allow: /
 Disallow: /admin
 Disallow: /manuel
 
-Sitemap: https://crsanalytics.com/sitemap.xml`;
+Sitemap: https://kargatahmin.com/sitemap.xml`;
   res.header("Content-Type", "text/plain");
   res.send(robots);
 });

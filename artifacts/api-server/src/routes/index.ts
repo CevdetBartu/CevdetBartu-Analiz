@@ -15,7 +15,7 @@ import couponWizardRouter from "./couponWizard";
 const router: IRouter = Router();
 
 // Admin Authentication Middleware
-const ADMIN_TOKEN = process.env.ADMIN_SECRET_KEY || "crs-secret-admin-key-9988";
+const ADMIN_TOKEN = process.env.ADMIN_SECRET_KEY || "karga-secret-admin-key-9988";
 router.use("/admin", (req, res, next) => {
   const token = req.headers["x-admin-token"] || req.query.token;
   if (token !== ADMIN_TOKEN) {

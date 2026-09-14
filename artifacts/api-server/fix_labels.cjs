@@ -1,0 +1,10 @@
+const fs = require('fs');
+let c = fs.readFileSync('src/lib/analyzeEngine.ts', 'utf8');
+c = c.replace(/if \(drawPct >= 50 && isHighSim\).*?\n\s*else /g, '');
+c = c.replace(/if \(bttsPct >= 85 && isHighSim\).*?\n\s*else /g, '');
+c = c.replace(/else if \(bttsPct <= 15 && isHighSim\).*?\n\s*else /g, 'else ');
+c = c.replace(/if \(over25Pct >= 85 && isHighSim\).*?\n\s*else /g, '');
+c = c.replace(/else if \(over25Pct <= 15 && isHighSim\).*?\n\s*else /g, 'else ');
+c = c.replace(/if \(homePct >= 85 && isHighSim\) t1 = 'DA \| 1 \(Y.*?ksek G.*?ven.*?\)';\n\s*else /g, '');
+c = c.replace(/if \(awayPct >= 85 && isHighSim\) t2 = 'DA \| 2 \(Y.*?ksek G.*?ven.*?\)';\n\s*else /g, '');
+fs.writeFileSync('src/lib/analyzeEngine.ts', c, 'utf8');

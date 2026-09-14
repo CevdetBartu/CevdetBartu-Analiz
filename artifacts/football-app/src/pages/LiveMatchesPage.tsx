@@ -62,7 +62,7 @@ export default function LiveMatchesPage() {
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
   const [favorites, setFavorites] = useState<number[]>(() => {
-    const saved = localStorage.getItem('crs_favorites');
+    const saved = localStorage.getItem('karga_favorites');
     return saved ? JSON.parse(saved) : [];
   });
   const favoritesRef = React.useRef(favorites);
@@ -70,7 +70,7 @@ export default function LiveMatchesPage() {
 
   useEffect(() => {
     favoritesRef.current = favorites;
-    localStorage.setItem('crs_favorites', JSON.stringify(favorites));
+    localStorage.setItem('karga_favorites', JSON.stringify(favorites));
   }, [favorites]);
 
   const toggleFavorite = (id: number) => {

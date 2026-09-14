@@ -286,12 +286,14 @@ export interface AnalyzeRequest {
 }
 
 export interface StatGroup {
+  sapma?: number;
   sayi: number;
   yuzde: number;
   label: string;
 }
 
 export interface AnalizOzet {
+  effective_sample_size?: number;
   total_mac: number;
   ev_sahibi: StatGroup;
   beraberlik: StatGroup;
@@ -312,6 +314,12 @@ export interface AnalizOzet {
 }
 
 export interface TarafOranlari {
+  ev_kapanis?: string;
+  ber_kapanis?: string;
+  dep_kapanis?: string;
+  ev_trend?: string;
+  ber_trend?: string;
+  dep_trend?: string;
   /** @nullable */
   ev?: string | null;
   /** @nullable */
@@ -323,6 +331,10 @@ export interface TarafOranlari {
 }
 
 export interface AltUst {
+  alt_kapanis?: string;
+  ust_kapanis?: string;
+  alt_trend?: string;
+  ust_trend?: string;
   /** @nullable */
   alt?: string | null;
   /** @nullable */
@@ -341,6 +353,8 @@ export interface VarYok {
 }
 
 export interface TabloSatiri {
+  lig_isim?: string;
+  tarih_format?: string;
   id: string;
   is_target: boolean;
   analiz_yuzde: string;

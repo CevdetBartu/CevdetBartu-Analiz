@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
+import { SeoHead } from '../components/seo/SeoHead';
+, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'wouter';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
