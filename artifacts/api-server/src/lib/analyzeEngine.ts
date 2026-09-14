@@ -913,8 +913,7 @@ export function analyze(
       const hasOdds2 = (targetMatch.oddsAway ?? 0) > 1.0;
 
       let t1 = '';
-      if (homePct >= 85 && isHighSim) t1 = 'DA | 1 (Yüksek Güven - %89)';
-      else if (homePct >= 75) t1 = 'DA | 1';
+      if (homePct >= 75) t1 = 'DA | 1';
       
       if (t1) {
           if (hasOdds1 && edgeHome > 0) t1 += ' (Değerli Oran)';
@@ -923,8 +922,7 @@ export function analyze(
       }
 
       let t2 = '';
-      if (awayPct >= 85 && isHighSim) t2 = 'DA | 2 (Yüksek Güven - %89)';
-      else if (awayPct >= 75) t2 = 'DA | 2';
+      if (awayPct >= 75) t2 = 'DA | 2';
 
       if (t2) {
           if (hasOdds2 && edgeAway > 0) t2 += ' (Değerli Oran)';
@@ -932,19 +930,14 @@ export function analyze(
           tahminler.push(t2);
       }
 
-      if (drawPct >= 50 && isHighSim) tahminler.push('DA | X (Yüksek Güven)');
-      else if (drawPct >= 40) tahminler.push('DA | X');
+      if (drawPct >= 40) tahminler.push('DA | X');
 
       // KG - 85% / 20% thresholds (Yüksek Güven)
-      if (bttsPct >= 85 && isHighSim) tahminler.push('MS | KG VAR (Yüksek Güven - %89)');
-      else if (bttsPct >= 75) tahminler.push('MS | KG VAR');
-      else if (bttsPct <= 15 && isHighSim) tahminler.push('MS | KG YOK (Yüksek Güven - %89)');
+      if (bttsPct >= 75) tahminler.push('MS | KG VAR');
       else if (bttsPct <= 25) tahminler.push('MS | KG YOK');
 
       // 2.5 - 85% / 20% thresholds
-      if (over25Pct >= 85 && isHighSim) tahminler.push('MS | 2,5 ÜST (Yüksek Güven - %89)');
-      else if (over25Pct >= 75) tahminler.push('MS | 2,5 ÜST');
-      else if (over25Pct <= 15 && isHighSim) tahminler.push('MS | 2,5 ALT (Yüksek Güven - %89)');
+      if (over25Pct >= 75) tahminler.push('MS | 2,5 �ST');
       else if (over25Pct <= 25) tahminler.push('MS | 2,5 ALT');
 
       // Sık İY skoru (%60+)
