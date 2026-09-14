@@ -56,6 +56,7 @@ router.use("/ai", requireUser);
 // Rotalari bagla
 router.use(analyzeRouter);
 router.use(adminRouter);
+router.use("/admin/dashboard", adminDashboardRouter);
 router.use(couponRouter);
 router.use(basketMatchesRouter);
 router.use(liveRouter);
