@@ -9,6 +9,8 @@ import LiveMatchesPage from './pages/LiveMatchesPage';
 import BlogPost from './pages/BlogPost';
 import CategoryPage from './pages/CategoryPage';
 import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+
 
 const queryClient = new QueryClient();
 

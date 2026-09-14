@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGetTodayMatches, useRefreshTodayMatches } from '@workspace/api-client-react';
 import { Link } from 'wouter';
+import { isAuthenticated } from '../lib/auth';
 import { AnalysisModal } from '../components/AnalysisModal';
 import { CouponWizard } from '../components/CouponWizard';
 
@@ -226,8 +227,13 @@ export default function TodayMatchesPage() {
           <Link href="/canli" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Canlı</Link>
           <Link href="/manuel" style={{ color: "var(--muted-foreground)", padding: "6px 16px", borderRadius: "6px", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Manuel Tahmin</Link>
         </div>
-        <nav>
-          <Link href="/admin" style={{ color: "var(--muted-foreground)", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Veritabanı</Link>
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Link href="/admin" style={{ color: "var(--muted-foreground)", fontSize: "13px", fontWeight: "500", textDecoration: "none" }}>Veritabani</Link>
+          {isAuthenticated() ? (
+            <Link href="/hesabim" style={{ color: "var(--foreground)", fontSize: "13px", fontWeight: "600", textDecoration: "none", backgroundColor: "var(--muted)", padding: "4px 10px", borderRadius: "6px" }}>Hesabim</Link>
+          ) : (
+            <Link href="/login" style={{ color: "#fff", fontSize: "13px", fontWeight: "600", textDecoration: "none", backgroundColor: "#2563eb", padding: "4px 12px", borderRadius: "6px" }}>Giris Yap</Link>
+          )}
         </nav>
       </header>
 

@@ -24,7 +24,8 @@ const __dirnameLocal = path.dirname(fileURLToPath(import.meta.url));
 const isProd = require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db");
 const dbPath = isProd ? "/var/www/futbol_app/gecmis_maclar.db" : path.resolve(__dirnameLocal, "../../scripts/scraper/gecmis_maclar.db");
 
-// Veritabannda users tablosunu olutur (Yoksa)
+
+// Create users table
 try {
   const db = new Database(dbPath, { readonly: false });
   db.exec(`
@@ -35,8 +36,15 @@ try {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
-  logger.info("Users tablosu kontrol edildi/oluşturuldu.");
+  
+  // Add new columns if they do not exist
+  try { db.exec("ALTER TABLE users ADD COLUMN membership_status TEXT DEFAULT 'active'"); } catch (e) {}
+  try { db.exec("ALTER TABLE users ADD COLUMN membership_plan TEXT"); } catch (e) {}
+  try { db.exec("ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0"); } catch (e) {}
+
+  logger.info("Users table checked/updated.");
 } catch (e: any) {
+
   logger.error({ err: e }, "DB users tablo oluturma hatas");
 }
 

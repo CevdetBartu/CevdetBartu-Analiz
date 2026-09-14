@@ -104,4 +104,65 @@ router.post("/logout", (req, res) => {
   res.json({ success: true, message: "Çıkış yapıldı." });
 });
 
+
+import { requireUser } from "../lib/userAuthMiddleware";
+
+// Kendi bilgilerini al (GET /me)
+router.get("/me", requireUser, (req: any, res) => {
+  try {
+    const db = new Database(dbPath);
+    const user: any = db.prepare("SELECT id, email, membership_status, membership_plan, email_verified, created_at FROM users WHERE id = ?").get(req.user.userId);
+    if (!user) {
+      res.status(404).json({ error: "Kullanici bulunamadi." });
+      return;
+    }
+    res.json({ success: true, user });
+  } catch (err: any) {
+    res.status(500).json({ error: "Sunucu hatasi: " + err.message });
+  }
+});
+
+// Sifre degistir (POST /me/password)
+router.post("/me/password", requireUser, (req: any, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    res.status(400).json({ error: "Eski ve yeni sifre zorunludur." });
+    return;
+  }
+  if (newPassword.length < 8) {
+    res.status(400).json({ error: "Yeni sifre en az 8 karakter olmalidir." });
+    return;
+  }
+
+  try {
+    const db = new Database(dbPath);
+    const user: any = db.prepare("SELECT password_hash FROM users WHERE id = ?").get(req.user.userId);
+    
+    if (!bcrypt.compareSync(currentPassword, user.password_hash)) {
+      res.status(400).json({ error: "Eski sifreniz yanlis." });
+      return;
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(newPassword, salt);
+
+    db.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(hash, req.user.userId);
+    res.json({ success: true, message: "Sifreniz basariyla guncellendi." });
+  } catch (err: any) {
+    res.status(500).json({ error: "Sunucu hatasi: " + err.message });
+  }
+});
+
+// Hesabi Sil (DELETE /me)
+router.delete("/me", requireUser, (req: any, res) => {
+  try {
+    const db = new Database(dbPath);
+    db.prepare("DELETE FROM users WHERE id = ?").run(req.user.userId);
+    res.json({ success: true, message: "Hesabiniz basariyla silindi." });
+  } catch (err: any) {
+    res.status(500).json({ error: "Sunucu hatasi: " + err.message });
+  }
+});
+
 export default router;
+

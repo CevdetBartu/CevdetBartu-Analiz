@@ -42,9 +42,16 @@ export default function Home() {
           <div className="navlinks">
             <Link href="/bugun">Analiz Ara</Link>
             <Link href="/blog">Analizler</Link>
-            <Link href="#nasil-calisir">Nasıl Çalışır</Link>
-            <span className="free-badge">Şimdilik tamamen ücretsiz</span>
-            <Link className="cta-btn" href="/bugun">Ücretsiz Başla</Link>
+            <Link href="#nasil-calisir">Nasil Calisir</Link>
+            <span className="free-badge">Simdilik tamamen Ucretsiz</span>
+            {isAuthenticated() ? (
+              <Link className="cta-btn" style={{backgroundColor: '#334155'}} href="/hesabim">Hesabim</Link>
+            ) : (
+              <>
+                <Link className="cta-btn" href="/login">Giris Yap</Link>
+                <Link className="cta-btn" style={{backgroundColor: '#2563eb'}} href="/register">Ucretsiz Basla</Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
