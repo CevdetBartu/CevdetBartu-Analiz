@@ -21,15 +21,14 @@ const WORKSPACE = path.resolve(
 );
 
 // Workspace kökü her zaman artifacts/api-server'ın üst üst dizinidir
-const WORKSPACE_ROOT = path.resolve(process.cwd(), "../..");
+const isProd = existsSync("/var/www/futbol_app/scraper/run.py");
+const WORKSPACE_ROOT = isProd ? "/var/www/futbol_app" : path.resolve(process.cwd(), "../..");
 
 const isWin = process.platform === "win32";
-const VENV_PYTHON = isWin
-  ? path.join(WORKSPACE_ROOT, ".venv/Scripts/python.exe")
-  : path.join(WORKSPACE_ROOT, ".venv/bin/python3");
+const VENV_PYTHON = isProd ? "/var/www/futbol_app/scraper/venv/bin/python3" : (isWin ? path.join(WORKSPACE_ROOT, ".venv/Scripts/python.exe") : path.join(WORKSPACE_ROOT, ".venv/bin/python3"));
 
-const SCRAPER_SCRIPT = path.join(WORKSPACE_ROOT, "scripts/scraper/run.py");
-const SCRAPER_CWD    = path.join(WORKSPACE_ROOT, "scripts/scraper");
+const SCRAPER_SCRIPT = isProd ? "/var/www/futbol_app/scraper/run.py" : path.join(WORKSPACE_ROOT, "scripts/scraper/run.py");
+const SCRAPER_CWD = isProd ? "/var/www/futbol_app/scraper" : path.join(WORKSPACE_ROOT, "scripts/scraper");
 
 logger.info({ WORKSPACE_ROOT, VENV_PYTHON, SCRAPER_SCRIPT }, "Spawn route hazır");
 
