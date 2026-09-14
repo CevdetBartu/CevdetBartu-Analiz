@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { setToken, setUserEmail } from '../lib/auth';
 import './Auth.css';
 
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BASE = import.meta.env.VITE_API_URL || "";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();

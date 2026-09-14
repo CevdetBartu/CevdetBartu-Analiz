@@ -16,7 +16,7 @@ export function AnalysisModal({ isOpen, onClose, match }: AnalysisModalProps) {
   const [error, setError] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'dashboard' | 'table'>('table'); // Default to AI AnalysisTable view as user expects
 
-  const BASE_URL = import.meta.env.VITE_API_URL || "https://kargatahmin.com";
+  const BASE_URL = import.meta.env.VITE_API_URL || "";
 
   useEffect(() => {
     if (!isOpen || !match) return;
