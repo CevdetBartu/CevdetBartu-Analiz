@@ -80,6 +80,30 @@ export default function DashboardPage() {
 
         {userData && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            {/* Yönetim Paneli - Yalnızca Admin */}
+            {userData?.role === 'admin' && (
+              <div className="md:col-span-3 mb-6 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 shadow-sm border border-purple-200 dark:border-purple-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-bold text-purple-900 dark:text-purple-300 flex items-center gap-2">
+                    <Shield size={20} className="text-purple-600 dark:text-purple-400" />
+                    Yönetici Yetkilerine Sahipsiniz
+                  </h2>
+                  <p className="text-purple-700 dark:text-purple-400 mt-1 text-sm">
+                    Kullanıcıları yönetmek, veritabanına erişmek ve sistem ayarlarını yapılandırmak için admin panellerini kullanabilirsiniz.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <Link href="/admin/kullanicilar" className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow-sm transition-colors text-sm">
+                    Kullanıcı Yönetimi
+                  </Link>
+                  <Link href="/admin" className="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-medium rounded-lg shadow-sm transition-colors text-sm">
+                    Veritabanı
+                  </Link>
+                </div>
+              </div>
+            )}
+
             
             {/* Profil Bilgileri */}
             <div className="md:col-span-2 space-y-6">
