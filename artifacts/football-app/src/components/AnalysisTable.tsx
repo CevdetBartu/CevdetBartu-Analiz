@@ -82,7 +82,7 @@ export function AnalysisTable({ date, time, league, homeTeam, awayTeam, analyzeR
         <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-3 mb-5">
           <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
             <Info size={14} className="text-blue-500 shrink-0" />
-            <span>Etkin referans büyüklüğü: <strong className="dark:text-slate-200">{Math.round((ozet as any).effective_sample_size || ozet.total_mac)} maç</strong></span>
+            <span>Etkin referans büyüklüğü: <strong className="text-slate-900 dark:text-slate-200">{Math.round((ozet as any).effective_sample_size || ozet.total_mac)} maç</strong></span>
           </div>
         </div>
 
