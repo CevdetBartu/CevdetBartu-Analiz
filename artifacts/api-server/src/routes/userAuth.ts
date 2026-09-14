@@ -73,7 +73,7 @@ router.post("/login", authLimiter, (req, res) => {
 
   try {
     const db = new Database(dbPath);
-    const user: any = db.prepare("SELECT id, email, password_hash, role FROM users WHERE email = ?").get(email);
+    const user: any = db.prepare("SELECT id, email, password_hash, role, is_banned FROM users WHERE email = ?").get(email);
 
     if (!user) {
       res.status(401).json({ error: "Hatalı email veya şifre!" });

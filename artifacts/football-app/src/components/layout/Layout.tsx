@@ -1,5 +1,6 @@
 import React from 'react';
 import { Header } from './Header';
+import { AnnouncementBanner } from './AnnouncementBanner';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (

@@ -49,7 +49,7 @@ export function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            {getUserRole() === "admin" && (<Link href="/admin" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Veritabanı</Link>)}
+            {getUserRole() === "admin" && (<><Link href="/admin/kullanicilar" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Kullanıcılar</Link><Link href="/admin" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Veritabanı</Link></>)}
             
             <div className="h-4 w-px bg-slate-200 dark:bg-slate-700"></div>
 
@@ -83,7 +83,7 @@ export function Header() {
           <nav className="flex flex-col gap-4 font-medium">
             <NavLinks />
             <div className="my-2 border-t border-slate-100 dark:border-slate-800"></div>
-            {getUserRole() === "admin" && (<Link href="/admin" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Veritabanı</Link>)}
+            {getUserRole() === "admin" && (<><Link href="/admin/kullanicilar" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Kullanıcılar</Link><Link href="/admin" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Veritabanı</Link></>)}
             
             {isAuth ? (
               <>

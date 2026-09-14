@@ -13,6 +13,8 @@ import liveRouter from "./live";
 import streamProxyRouter from "./streamProxy";
 import aiRouter from "./ai";
 import couponWizardRouter from "./couponWizard";
+import adminDashboardRouter from "./adminDashboard";
+import announcementsRouter from "./announcements";
 
 const router: IRouter = Router();
 
@@ -27,6 +29,8 @@ const adminRateLimiter = rateLimit({
     res.status(options.statusCode).send(options.message);
   }
 });
+
+router.use("/announcements", announcementsRouter);
 
 router.use("/admin", requireAdmin, adminRateLimiter, (req, res, next) => {
   logger.info(`[AUDIT] Admin ${req.user?.email} accessed ${req.method} ${req.originalUrl}`);
