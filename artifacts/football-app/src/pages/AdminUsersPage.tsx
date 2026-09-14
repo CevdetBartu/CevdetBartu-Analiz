@@ -181,14 +181,14 @@ export default function AdminUsersPage() {
                           Son: {u.last_login_at ? new Date(u.last_login_at).toLocaleDateString("tr-TR") : 'Bilinmiyor'}
                         </td>
                         <td className="p-4 text-right space-x-2">
-                          <button disabled={isMe} onClick={() => updateUser(u.id, { role: u.role === 'admin' ? 'user' : 'admin' })} className="p-1.5 rounded-lg text-slate-400 hover:text-purple-600 hover:bg-purple-50 disabled:opacity-30" title="Rolü Değiştir">
-                            <Shield size={16} />
+                          <button disabled={isMe} onClick={() => updateUser(u.id, { role: u.role === 'admin' ? 'user' : 'admin' })} className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-slate-500 hover:text-purple-600 hover:bg-purple-50 disabled:opacity-30 text-xs font-medium" title="Rolü Değiştir">
+                            <Shield size={14} /> Yetki
                           </button>
-                          <button disabled={isMe} onClick={() => updateUser(u.id, { is_banned: !u.is_banned })} className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 disabled:opacity-30" title="Banla / Kaldır">
-                            <Ban size={16} />
+                          <button disabled={isMe} onClick={() => updateUser(u.id, { is_banned: !u.is_banned })} className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 disabled:opacity-30 text-xs font-medium" title="Banla / Kaldır">
+                            <Ban size={14} /> Ban
                           </button>
-                          <button disabled={isMe} onClick={() => deleteUser(u.id)} className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-30" title="Sil">
-                            <Trash2 size={16} />
+                          <button disabled={isMe} onClick={() => deleteUser(u.id)} className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 disabled:opacity-30 text-xs font-medium" title="Sil">
+                            <Trash2 size={14} /> Sil
                           </button>
                         </td>
                       </tr>
