@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { fetchWithAuth, getUserEmail, removeToken, removeUserEmail } from '../lib/auth';
 import { User, LogOut, Key, Trash2, Calendar, Crown, Shield } from 'lucide-react';
 
