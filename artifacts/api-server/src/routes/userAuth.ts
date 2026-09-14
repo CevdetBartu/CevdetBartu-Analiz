@@ -86,7 +86,20 @@ router.post("/login", authLimiter, (req, res) => {
       return;
     }
 
+    
+    if (user.is_banned === 1) {
+      res.status(403).json({ error: "Hesabınız askıya alınmıştır." });
+      return;
+    }
+
+    try {
+      db.prepare("UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?").run(user.id);
+    } catch(e) {
+      console.error("Failed to update last_login_at for user", user.id, e);
+    }
+
     const token = jwt.sign(
+
       { userId: user.id, email: user.email, role: user.role },
       JWT_SECRET,
       { expiresIn: "7d" } // 1 haftalik gecerlilik
