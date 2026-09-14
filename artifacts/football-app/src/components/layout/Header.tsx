@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Menu, X, User, LogOut } from 'lucide-react';
-import { isAuthenticated, removeToken, removeUserEmail } from '../../lib/auth';
+import { isAuthenticated, removeToken, removeUserEmail, getUserRole } from '../../lib/auth';
 
 export function Header() {
   const [location, setLocation] = useLocation();
@@ -23,8 +23,8 @@ export function Header() {
 
   const NavLinks = () => (
     <>
-      <Link href="/bugun" onClick={closeMenu} className={`hover:text-primary transition-colors ${location === '/bugun' ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>Bülten / Analiz</Link>
-      <Link href="/canli" onClick={closeMenu} className={`hover:text-primary transition-colors ${location === '/canli' ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>Canlı</Link>
+      <Link href="/bugun" onClick={closeMenu} className={`hover:text-primary transition-colors ${location === '/bugun' ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>BÃ¼lten / Analiz</Link>
+      <Link href="/canli" onClick={closeMenu} className={`hover:text-primary transition-colors ${location === '/canli' ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>CanlÄ±</Link>
       <Link href="/manuel" onClick={closeMenu} className={`hover:text-primary transition-colors ${location === '/manuel' ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>Manuel Tahmin</Link>
       <Link href="/blog" onClick={closeMenu} className={`hover:text-primary transition-colors ${location.startsWith('/blog') ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>Blog</Link>
     </>
@@ -36,7 +36,7 @@ export function Header() {
         <div className="flex justify-between items-center h-16">
           
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setLocation('/')}>
-            <img src="/logo.jpg" alt="�argaTahmin" className="w-8 h-8 rounded-full shadow-sm" onError={(e) => {
+            <img src="/logo.jpg" alt="ØargaTahmin" className="w-8 h-8 rounded-full shadow-sm" onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }} />
             <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -49,22 +49,20 @@ export function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/admin" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
-              Veritabanı
-            </Link>
+            {getUserRole() === "admin" && (<Link href="/admin" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Veritabanı</Link>)}
             
             <div className="h-4 w-px bg-slate-200 dark:bg-slate-700"></div>
 
             {isAuth ? (
               <div className="flex items-center gap-2">
                 <Link href="/hesabim" className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 transition-colors">
-                  <User size={16} /> Hesabım
+                  <User size={16} /> HesabÄ±m
                 </Link>
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-primary dark:text-slate-300 transition-colors">Giriş Yap</Link>
-                <Link href="/register" className="text-sm font-semibold text-white bg-primary hover:bg-primary/90 px-4 py-1.5 rounded-lg transition-colors">Ücretsiz Başla</Link>
+                <Link href="/login" className="text-sm font-semibold text-slate-700 hover:text-primary dark:text-slate-300 transition-colors">GiriÅ Yap</Link>
+                <Link href="/register" className="text-sm font-semibold text-white bg-primary hover:bg-primary/90 px-4 py-1.5 rounded-lg transition-colors">Ãcretsiz BaÅla</Link>
               </div>
             )}
           </div>
@@ -85,21 +83,21 @@ export function Header() {
           <nav className="flex flex-col gap-4 font-medium">
             <NavLinks />
             <div className="my-2 border-t border-slate-100 dark:border-slate-800"></div>
-            <Link href="/admin" onClick={closeMenu} className="text-slate-600 dark:text-slate-300">Veritaban��</Link>
+            {getUserRole() === "admin" && (<Link href="/admin" className="text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">Veritabanı</Link>)}
             
             {isAuth ? (
               <>
-                <Link href="/hesabim" onClick={closeMenu} className="flex items-center gap-2 text-slate-900 daz�:text-white font-semibold">
-                  <User size={18} /> Hesabım
+                <Link href="/hesabim" onClick={closeMenu} className="flex items-center gap-2 text-slate-900 dazä:text-white font-semibold">
+                  <User size={18} /> HesabÄ±m
                 </Link>
                 <button onClick={() => { handleLogout(); closeMenu(); }} className="flex items-center gap-2 text-red-600 font-semibold w-full text-left">
-                  <LogOut size={18} /> Çioış Yap
+                  <LogOut size={18} /> ÃioÄ±Å Yap
                 </button>
               </>
             ) : (
               <div className="flex flex-col gap-3 mt-2">
-                <Link href="/login" onClick={closeMenu} className="text-center py-2 px-4 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold">Giriuş Yap</Link>
-                <Link href="/register" onClick={closeMenu} className="text-center py-2 px-4 rounded-lg bg-primary text-white font-semibold">Ücretsiz Başla</Link>
+                <Link href="/login" onClick={closeMenu} className="text-center py-2 px-4 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-semibold">GiriuÅ Yap</Link>
+                <Link href="/register" onClick={closeMenu} className="text-center py-2 px-4 rounded-lg bg-primary text-white font-semibold">Ãcretsiz BaÅla</Link>
               </div>
             )}
           </nav>

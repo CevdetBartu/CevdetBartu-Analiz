@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SeoHead } from '../components/seo/SeoHead';
 import { Link, useLocation } from 'wouter';
-import { fetchWithAuth, isAuthenticated } from '../lib/auth';
+import { fetchWithAuth, isAuthenticated, getUserRole } from '../lib/auth';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 const API = `${BASE}/api/admin/scraper`;
@@ -43,9 +43,7 @@ export default function AdminPage() {
   
   const fetchStats = useCallback(async () => {
     try {
-      const r = await fetch(`${API}/stats`, {
-        headers: { "x-admin-token": ADMIN_TOKEN }
-      });
+      const r = await fetchWithAuth(`${API}/stats`);
       if (!r.ok) {
         setOffline(true);
         return;
@@ -65,14 +63,7 @@ export default function AdminPage() {
   const handleSaveStartDate = async () => {
     if (!customStartDate) return;
     try {
-      const res = await fetch(`${API}/set-start-date`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "x-admin-token": ADMIN_TOKEN 
-        },
-        body: JSON.stringify({ start_date: customStartDate })
-      });
+      const res = await fetchWithAuth(`${API}/set-start-date`, { method: "POST", body: JSON.stringify({ start_date: customStartDate }) });
       const data = await res.json();
       setMsg(data.message || "Başlangıç tarihi başarıyla güncellendi.");
     } catch (e: any) {
@@ -91,10 +82,7 @@ export default function AdminPage() {
     setSpawning(true);
     setMsg(null);
     try {
-      const r = await fetch(`${BASE}/api/admin/scraper/spawn`, {
-        method: 'POST',
-        headers: { "x-admin-token": ADMIN_TOKEN }
-      });
+      const r = await fetchWithAuth(`${BASE}/api/admin/scraper/spawn`, { method: "POST" });
       const data = await r.json();
       setMsg(data.message);
       if (data.ok) setTimeout(() => fetchStats(), 1500);
@@ -109,10 +97,7 @@ export default function AdminPage() {
     setBackupLoading(true);
     setMsg(null);
     try {
-      const r = await fetch(`${BASE}/api/admin/db/backup`, {
-        method: 'POST',
-        headers: { "x-admin-token": ADMIN_TOKEN }
-      });
+      const r = await fetchWithAuth(`${BASE}/api/admin/db/backup`, { method: "POST" });
       const data = await r.json();
       setMsg(data.message);
     } catch (e: any) {
@@ -126,13 +111,9 @@ export default function AdminPage() {
     setLoading(true);
     setMsg(null);
     try {
-      const r = await fetch(`${API}/${endpoint}`, {
+      const r = await fetchWithAuth(`${API}/${endpoint}`, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-admin-token': ADMIN_TOKEN
-        },
-        body: body ? JSON.stringify(body) : undefined,
+        body: body ? JSON.stringify(body) : undefined
       });
       const data = await r.json();
       setMsg(data.message || JSON.stringify(data));

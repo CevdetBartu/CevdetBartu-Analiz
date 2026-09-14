@@ -1,4 +1,6 @@
 import { Router, type IRouter } from "express";
+import rateLimit from "express-rate-limit";
+import { logger } from "../lib/logger";
 import healthRouter from "./health";
 import matchesRouter from "./matches";
 import analyzeRouter from "./analyze";
@@ -15,7 +17,21 @@ import couponWizardRouter from "./couponWizard";
 const router: IRouter = Router();
 
 // Admin Authentication Middleware
-router.use("/admin", requireAdmin);
+
+const adminRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  message: "Too many admin requests from this IP, please try again later",
+  handler: (req, res, next, options) => {
+    logger.warn(`Admin endpoint rate limit exceeded for IP: ${req.ip}`);
+    res.status(options.statusCode).send(options.message);
+  }
+});
+
+router.use("/admin", requireAdmin, adminRateLimiter, (req, res, next) => {
+  logger.info(`[AUDIT] Admin ${req.user?.email} accessed ${req.method} ${req.originalUrl}`);
+  next();
+});
 
 import { requireUser, requireAdmin } from "../lib/userAuthMiddleware";
 

@@ -9,6 +9,7 @@ import LiveMatchesPage from './pages/LiveMatchesPage';
 import BlogPost from './pages/BlogPost';
 import CategoryPage from './pages/CategoryPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import { Layout } from './components/layout/Layout';
 
@@ -22,6 +23,8 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/blog" component={BlogHome} />
       <Route path="/login" component={LoginPage} />
+      <Route path="/register" component={RegisterPage} />
+      <Route path="/hesabim" component={DashboardPage} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/kategori/:slug" component={CategoryPage} />
       <Route path="/manuel" component={Home} />

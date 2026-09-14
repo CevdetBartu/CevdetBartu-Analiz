@@ -18,9 +18,9 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadUser() {
       try {
-        const res = await fetchWithAuth(${BASE}/api/auth/me);
+        const res = await fetchWithAuth(`${BASE}/api/auth/me`);
         if (!res.ok) {
-          throw new Error('Kullanici bilgileri alinamadi. Lutfen tekrar giris yapin.');
+          throw new Error('Kullanıcı bilgileri alınamadı. Lütfen tekrar giriş yapın.');
         }
         const data = await res.json();
         setUserData(data.user);
@@ -43,12 +43,10 @@ export default function DashboardPage() {
     e.preventDefault();
     setPwdMsg('');
     try {
-      const res = await fetchWithAuth(${BASE}/api/auth/me/password, {
-        method: 'POST',
-        body: JSON.stringify({ currentPassword, newPassword })
+      const res = await fetchWithAuth(`${BASE}/api/auth/me/password`, {
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Sifre degistirilemedi');
+      if (!res.ok) throw new Error(data.error || 'Şifre değiştirilemedi');
       setPwdMsg('Sifreniz basariyla guncellendi.');
       setCurrentPassword('');
       setNewPassword('');
@@ -70,11 +68,11 @@ export default function DashboardPage() {
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Hesabim</h1>
-            <p className="text-slate-500 dark:text-slate-400">Uyelik bilgilerinizi buradan yonetebilirsiniz.</p>
+            <p className="text-slate-500 dark:text-slate-400">Üyelik bilgilerinizi buradan yönetebilirsiniz.</p>
           </div>
           <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors">
             <LogOut size={18} />
-            <span>Cikis Yap</span>
+            <span>Çıkış Yap</span>
           </button>
         </div>
 
@@ -95,7 +93,7 @@ export default function DashboardPage() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-slate-500 dark:text-slate-400">Kayit Tarihi</label>
+                    <label className="block text-sm font-medium text-slate-500 dark:text-slate-400">Kayıt Tarihi</label>
                     <div className="mt-1 flex items-center gap-2 text-slate-700 dark:text-slate-300">
                       <Calendar size={16} />
                       {new Date(userData.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -106,25 +104,25 @@ export default function DashboardPage() {
                     <label className="block text-sm font-medium text-slate-500 dark:text-slate-400">Durum</label>
                     <div className="mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
                       <Shield size={14} />
-                      {userData.membership_status === 'active' ? 'Aktif Uye' : userData.membership_status}
+                      {userData.membership_status === 'active' ? 'Aktif Üye' : userData.membership_status}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Sifre Degistir */}
+              {/* Şifre Değiştir */}
               <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><Key size={20} /> Sifre Degistir</h2>
+                <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><Key size={20} /> Şifre Değiştir</h2>
                 <form onSubmit={handlePasswordChange} className="space-y-4 max-w-sm">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Mevcut Sifre</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Mevcut Şifre</label>
                     <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white" required />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Yeni Sifre</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Yeni Şifre</label>
                     <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white" minLength={8} required />
                   </div>
-                  <button type="submit" className="px-4 py-2 bg-slate-900 text-white dark:bg-indigo-600 rounded-lg hover:opacity-90 transition-opacity">Sifreyi Guncelle</button>
+                  <button type="submit" className="px-4 py-2 bg-slate-900 text-white dark:bg-indigo-600 rounded-lg hover:opacity-90 transition-opacity">Şifreyi Güncelle</button>
                   {pwdMsg && <p className="text-sm font-medium mt-2 text-indigo-600 dark:text-indigo-400">{pwdMsg}</p>}
                 </form>
               </div>
@@ -136,24 +134,24 @@ export default function DashboardPage() {
                 <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-4">
                   <Crown size={24} />
                 </div>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Mevcut Plan: Ucretsiz</h2>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Mevcut Plan: Ücretsiz</h2>
                 <p className="text-slate-600 dark:text-slate-400 text-sm mb-6">
-                  Su anda tum KargaTahmin analiz ozelliklerine ucretsiz erisiyorsunuz. Ilerleyen donemde gelismis ozellikler icin planinizi yukseltebileceksiniz.
+                  Şu anda tüm KargaTahmin analiz özelliklerine ücretsiz erişiyorsunuz. İlerleyen dönemde gelişmiş özellikler için planınızı yükseltebileceksiniz.
                 </p>
                 <button disabled className="w-full py-2.5 px-4 bg-indigo-600/50 text-white rounded-lg font-medium cursor-not-allowed">
-                  Plan Yukselt (Yakinda)
+                  Plan Yükselt (Yakında)
                 </button>
               </div>
 
               <div className="bg-red-50 dark:bg-red-900/10 rounded-xl p-6 border border-red-100 dark:border-red-900/20">
-                <h3 className="text-red-800 dark:text-red-400 font-bold mb-2 flex items-center gap-2"><Trash2 size={18} /> Tehlikeli Bolge</h3>
-                <p className="text-red-600/80 dark:text-red-400/80 text-sm mb-4">Hesabinizi silerseniz bu islem geri alinamaz.</p>
+                <h3 className="text-red-800 dark:text-red-400 font-bold mb-2 flex items-center gap-2"><Trash2 size={18} /> Tehlikeli Bölge</h3>
+                <p className="text-red-600/80 dark:text-red-400/80 text-sm mb-4">Hesabınızı silerseniz bu işlem geri alınamaz.</p>
                 <button onClick={() => {
                   if(window.confirm('Hesabinizi kalici olarak silmek istediginize emin misiniz?')) {
                     fetchWithAuth(BASE + '/api/auth/me', { method: 'DELETE' }).then(() => handleLogout());
                   }
                 }} className="text-sm text-red-600 dark:text-red-400 font-medium hover:underline">
-                  Hesabimi Kalici Olarak Sil
+                  Hesabımı Kalıcı Olarak Sil
                 </button>
               </div>
             </div>

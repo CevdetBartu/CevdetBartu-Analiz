@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import "./Home.css";
+import { isAuthenticated } from "../lib/auth";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
