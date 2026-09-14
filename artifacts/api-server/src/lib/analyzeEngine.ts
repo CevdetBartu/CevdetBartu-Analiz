@@ -111,7 +111,6 @@ export interface KellyOnerisi {
 export interface AnalyzeOzet {
   total_mac: number;
   effective_sample_size?: number;
-  kalibrasyon_skoru?: number;
   lig_dagilimi?: Record<string, number>;
   ev_sahibi: StatGroup;
   beraberlik: StatGroup;
@@ -131,15 +130,11 @@ export interface AnalyzeOzet {
   sik_ms: string | null;
   sik_iy: string | null;
   guvenlik_skoru?: number | null;
-  guven_seviyesi?: string | null;
-  guven_skoru?: number | null;
   kelly_onerileri?: {
     ev_sahibi: KellyOnerisi;
     beraberlik: KellyOnerisi;
     deplasman: KellyOnerisi;
   } | null;
-  model_roi?: number | null;
-  predictability?: string | null;
 }
 
 export type OddsWinner = 'ev' | 'ber' | 'dep' | null;
@@ -765,7 +760,6 @@ export function analyze(
       tavsiye: "D�KKAT: Model edge piyasay� yenememektedir, bahis tavsiye edilmez."
     };
   };
-  };
 
   kellyHome = calcKelly(finalHomePct / 100, targetMatch.oddsHome);
   kellyDraw = calcKelly(finalDrawPct / 100, targetMatch.oddsDraw);
@@ -863,7 +857,7 @@ export function analyze(
   const analiz_ozet: AnalyzeOzet = {
     total_mac: total,
     effective_sample_size: effectiveSampleSize,
-    kalibrasyon_skoru,
+    
     lig_dagilimi,
     ev_sahibi: { sayi: homeWins, yuzde: finalHomePct, sapma: sdHome, label: `Ev Sahibi (MS1) %${finalHomePct}` },
     beraberlik: { sayi: draws, yuzde: finalDrawPct, sapma: sdDraw, label: `Beraberlik (MS0) %${finalDrawPct}` },
@@ -884,16 +878,13 @@ export function analyze(
     sik_ms:        sikMs,
     sik_iy:        sikIy,
     guvenlik_skoru: avgSim,
-    guven_seviyesi: guvenSeviyesi,
-    guven_skoru: guvenSkoru,
+    
+    
     kelly_onerileri: {
       ev_sahibi: kellyHome,
       beraberlik: kellyDraw,
       deplasman: kellyAway
-    },
-    model_roi: modelRoi,
-    predictability: predictability
-  };
+    }};
 
   // ── 3. Tahminler ─────────────────────────────────────────────────────────
               const tahminler: string[] = [];
@@ -1023,8 +1014,7 @@ export function analyze(
       dep_kapanis: fmtOdds((t as any).oran_2_kapanis ?? t.oddsAway),
       ev_trend: getTrend((t as any).oran_1_acilis, (t as any).oran_1_kapanis ?? t.oddsHome),
       ber_trend: getTrend((t as any).oran_x_acilis, (t as any).oran_x_kapanis ?? t.oddsDraw),
-      dep_trend: getTrend((t as any).oran_2_acilis, (t as any).oran_2_kapanis ?? t.oddsAway),
-    } as any,
+      dep_trend: getTrend((t as any).oran_2_acilis, (t as any).oran_2_kapanis ?? t.oddsAway)} as any,
     alt_ust: {
       alt: fmtOdds(t.altOdds),
       ust: fmtOdds(t.ustOdds),
@@ -1034,8 +1024,7 @@ export function analyze(
       alt_kapanis: fmtOdds((t as any).alt_orani_kapanis ?? t.altOdds),
       ust_kapanis: fmtOdds((t as any).ust_orani_kapanis ?? t.ustOdds),
       alt_trend: getTrend((t as any).alt_orani_acilis, (t as any).alt_orani_kapanis ?? t.altOdds),
-      ust_trend: getTrend((t as any).ust_orani_acilis, (t as any).ust_orani_kapanis ?? t.ustOdds),
-    } as any,
+      ust_trend: getTrend((t as any).ust_orani_acilis, (t as any).ust_orani_kapanis ?? t.ustOdds)} as any,
     alt_ust_35: {
       alt: fmtOdds(t.altOdds35),
       ust: fmtOdds(t.ustOdds35),
@@ -1045,8 +1034,7 @@ export function analyze(
       alt_kapanis: fmtOdds((t as any).alt_orani_35_kapanis ?? t.altOdds35),
       ust_kapanis: fmtOdds((t as any).ust_orani_35_kapanis ?? t.ustOdds35),
       alt_trend: getTrend((t as any).alt_orani_35_acilis, (t as any).alt_orani_35_kapanis ?? t.altOdds35),
-      ust_trend: getTrend((t as any).ust_orani_35_acilis, (t as any).ust_orani_35_kapanis ?? t.ustOdds35),
-    } as any,
+      ust_trend: getTrend((t as any).ust_orani_35_acilis, (t as any).ust_orani_35_kapanis ?? t.ustOdds35)} as any,
     iy_alt_ust_15: {
       alt: fmtOdds(t.iyAltOdds15),
       ust: fmtOdds(t.iyUstOdds15),
@@ -1056,8 +1044,7 @@ export function analyze(
       alt_kapanis: fmtOdds((t as any).iy_alt_orani_15_kapanis ?? t.iyAltOdds15),
       ust_kapanis: fmtOdds((t as any).iy_ust_orani_15_kapanis ?? t.iyUstOdds15),
       alt_trend: getTrend((t as any).iy_alt_orani_15_acilis, (t as any).iy_alt_orani_15_kapanis ?? t.iyAltOdds15),
-      ust_trend: getTrend((t as any).iy_ust_orani_15_acilis, (t as any).iy_ust_orani_15_kapanis ?? t.iyUstOdds15),
-    } as any,
+      ust_trend: getTrend((t as any).iy_ust_orani_15_acilis, (t as any).iy_ust_orani_15_kapanis ?? t.iyUstOdds15)} as any,
     iy_alt_ust_05: {
       alt: fmtOdds(t.iyAltOdds05),
       ust: fmtOdds(t.iyUstOdds05),
@@ -1067,8 +1054,7 @@ export function analyze(
       alt_kapanis: fmtOdds((t as any).iy_alt_orani_05_kapanis ?? t.iyAltOdds05),
       ust_kapanis: fmtOdds((t as any).iy_ust_orani_05_kapanis ?? t.iyUstOdds05),
       alt_trend: getTrend((t as any).iy_alt_orani_05_acilis, (t as any).iy_alt_orani_05_kapanis ?? t.iyAltOdds05),
-      ust_trend: getTrend((t as any).iy_ust_orani_05_acilis, (t as any).iy_ust_orani_05_kapanis ?? t.iyUstOdds05),
-    } as any,
+      ust_trend: getTrend((t as any).iy_ust_orani_05_acilis, (t as any).iy_ust_orani_05_kapanis ?? t.iyUstOdds05)} as any,
     var_yok: {
       var: fmtOdds(t.varOdds),
       yok: fmtOdds(t.yokOdds),
@@ -1078,12 +1064,10 @@ export function analyze(
       var_kapanis: fmtOdds((t as any).kg_var_kapanis ?? t.varOdds),
       yok_kapanis: fmtOdds((t as any).kg_yok_kapanis ?? t.yokOdds),
       var_trend: getTrend((t as any).kg_var_acilis, (t as any).kg_var_kapanis ?? t.varOdds),
-      yok_trend: getTrend((t as any).kg_yok_acilis, (t as any).kg_yok_kapanis ?? t.yokOdds),
-    } as any,
+      yok_trend: getTrend((t as any).kg_yok_acilis, (t as any).kg_yok_kapanis ?? t.yokOdds)} as any,
     ortalama: calcOrtalamaString(t),
     im_sonuc: '',
-    im_renk: '',
-  });
+    im_renk: ''});
 
   // Reference match rows
   referenceMatches.forEach((m, idx) => {
@@ -1158,8 +1142,7 @@ export function analyze(
         dep_kapanis: fmtOdds((m as any).oran_2_kapanis),
         ev_trend: getTrend((m as any).oran_1_acilis, (m as any).oran_1_kapanis ?? m.oddsHome),
         ber_trend: getTrend((m as any).oran_x_acilis, (m as any).oran_x_kapanis ?? m.oddsDraw),
-        dep_trend: getTrend((m as any).oran_2_acilis, (m as any).oran_2_kapanis ?? m.oddsAway),
-      } as any,
+        dep_trend: getTrend((m as any).oran_2_acilis, (m as any).oran_2_kapanis ?? m.oddsAway)} as any,
       alt_ust: {
         alt: fmtOdds(m.altOdds),
         ust: fmtOdds(m.ustOdds),
@@ -1169,8 +1152,7 @@ export function analyze(
         alt_kapanis: fmtOdds((m as any).alt_orani_kapanis),
         ust_kapanis: fmtOdds((m as any).ust_orani_kapanis),
         alt_trend: getTrend((m as any).alt_orani_acilis, (m as any).alt_orani_kapanis ?? m.altOdds),
-        ust_trend: getTrend((m as any).ust_orani_acilis, (m as any).ust_orani_kapanis ?? m.ustOdds),
-      } as any,
+        ust_trend: getTrend((m as any).ust_orani_acilis, (m as any).ust_orani_kapanis ?? m.ustOdds)} as any,
       alt_ust_35: {
         alt: fmtOdds(m.altOdds35),
         ust: fmtOdds(m.ustOdds35),
@@ -1180,8 +1162,7 @@ export function analyze(
         alt_kapanis: fmtOdds((m as any).alt_orani_35_kapanis),
         ust_kapanis: fmtOdds((m as any).ust_orani_35_kapanis),
         alt_trend: getTrend((m as any).alt_orani_35_acilis, (m as any).alt_orani_35_kapanis ?? m.altOdds35),
-        ust_trend: getTrend((m as any).ust_orani_35_acilis, (m as any).ust_orani_35_kapanis ?? m.ustOdds35),
-      } as any,
+        ust_trend: getTrend((m as any).ust_orani_35_acilis, (m as any).ust_orani_35_kapanis ?? m.ustOdds35)} as any,
       iy_alt_ust_15: {
         alt: fmtOdds(m.iyAltOdds15),
         ust: fmtOdds(m.iyUstOdds15),
@@ -1191,8 +1172,7 @@ export function analyze(
         alt_kapanis: fmtOdds((m as any).iy_alt_orani_15_kapanis),
         ust_kapanis: fmtOdds((m as any).iy_ust_orani_15_kapanis),
         alt_trend: getTrend((m as any).iy_alt_orani_15_acilis, (m as any).iy_alt_orani_15_kapanis ?? m.iyAltOdds15),
-        ust_trend: getTrend((m as any).iy_ust_orani_15_acilis, (m as any).iy_ust_orani_15_kapanis ?? m.iyUstOdds15),
-      } as any,
+        ust_trend: getTrend((m as any).iy_ust_orani_15_acilis, (m as any).iy_ust_orani_15_kapanis ?? m.iyUstOdds15)} as any,
       iy_alt_ust_05: {
         alt: fmtOdds(m.iyAltOdds05),
         ust: fmtOdds(m.iyUstOdds05),
@@ -1202,8 +1182,7 @@ export function analyze(
         alt_kapanis: fmtOdds((m as any).iy_alt_orani_05_kapanis),
         ust_kapanis: fmtOdds((m as any).iy_ust_orani_05_kapanis),
         alt_trend: getTrend((m as any).iy_alt_orani_05_acilis, (m as any).iy_alt_orani_05_kapanis ?? m.iyAltOdds05),
-        ust_trend: getTrend((m as any).iy_ust_orani_05_acilis, (m as any).iy_ust_orani_05_kapanis ?? m.iyUstOdds05),
-      } as any,
+        ust_trend: getTrend((m as any).iy_ust_orani_05_acilis, (m as any).iy_ust_orani_05_kapanis ?? m.iyUstOdds05)} as any,
       var_yok: {
         var: fmtOdds(m.varOdds),
         yok: fmtOdds(m.yokOdds),
@@ -1213,8 +1192,7 @@ export function analyze(
         var_kapanis: fmtOdds((m as any).kg_var_kapanis),
         yok_kapanis: fmtOdds((m as any).kg_yok_kapanis),
         var_trend: getTrend((m as any).kg_var_acilis, (m as any).kg_var_kapanis ?? m.varOdds),
-        yok_trend: getTrend((m as any).kg_yok_acilis, (m as any).kg_yok_kapanis ?? m.yokOdds),
-      } as any,
+        yok_trend: getTrend((m as any).kg_yok_acilis, (m as any).kg_yok_kapanis ?? m.yokOdds)} as any,
       ortalama: calcOrtalamaString(m),
       korner_display:
         m.kornerHome != null || m.kornerAway != null
@@ -1235,8 +1213,7 @@ export function analyze(
         const _ht = ht.home > ht.away ? '1' : (ht.home < ht.away ? '2' : 'X');
         const _ft = ft.home > ft.away ? '1' : (ft.home < ft.away ? '2' : 'X');
         return `${_ht}/${_ft}`;
-      })()),
-    });
+      })())});
   });
 
   return { 
@@ -1361,6 +1338,8 @@ export function calculateModelD(
     tahminler
   };
 }
+
+
 
 
 
