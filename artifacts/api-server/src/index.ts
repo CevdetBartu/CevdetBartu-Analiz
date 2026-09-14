@@ -43,6 +43,35 @@ try {
   try { db.exec("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'"); } catch (e) {}
   try { db.exec("ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0"); } catch (e) {}
 
+  try { db.exec("ALTER TABLE users ADD COLUMN is_banned INTEGER DEFAULT 0"); } catch (e) {}
+  try { db.exec("ALTER TABLE users ADD COLUMN last_login_at DATETIME DEFAULT NULL"); } catch (e) {}
+  
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS announcements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        is_active INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_by TEXT NOT NULL
+      )
+    `);
+  } catch(e) {}
+
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        admin_email TEXT NOT NULL,
+        action TEXT NOT NULL,
+        target TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  } catch(e) {}
+
+
   logger.info("Users table checked/updated.");
 } catch (e: any) {
 
