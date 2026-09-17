@@ -64496,7 +64496,8 @@ router22.use(requireApiKey);
 router22.get("/matches/today", (req, res) => {
   try {
     const db7 = new Database13(DB_PATH8);
-    const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+    const d = /* @__PURE__ */ new Date();
+    const today = `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}.${d.getFullYear()}`;
     const predictions = db7.prepare(`
       SELECT 
         s.id, s.match_id, s.date, s.league, 

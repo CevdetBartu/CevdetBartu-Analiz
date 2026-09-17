@@ -27,7 +27,7 @@ router.use(requireApiKey);
 router.get("/matches/today", (req, res) => {
   try {
     const db = new Database(DB_PATH);
-    const today = new Date().toISOString().split("T")[0];
+    const d = new Date(); const today = `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth()+1).padStart(2, "0")}.${d.getFullYear()}`;
     
     // Fetch today's predictions joined with match info
     const predictions = db.prepare(`
