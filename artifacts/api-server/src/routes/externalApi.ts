@@ -33,13 +33,13 @@ router.get("/matches/today", (req, res) => {
     const predictions = db.prepare(`
       SELECT 
         s.id, s.match_id, s.date, s.league, 
-        m.home as home_team, m.away as away_team,
+        m.ev_sahibi as home_team, m.deplasman as away_team,
         s.ms_prob, s.ms_prediction, s.ms_status,
         s.ou_prob, s.ou_prediction, s.ou_status,
         s.btts_prob as kg_prob, s.btts_prediction as kg_prediction, s.btts_status as kg_status
       FROM system_predictions s
       JOIN gecmis_maclar m ON s.match_id = m.id
-      WHERE s.date = ? OR m.date LIKE '%' || ? || '%'
+      WHERE s.date = ? OR m.tarih LIKE '%' || ? || '%'
     `).all(today, today);
 
     res.json({
