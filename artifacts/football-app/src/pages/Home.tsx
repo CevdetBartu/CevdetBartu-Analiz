@@ -1,28 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
-import "./Home.css";
+﻿import React, { useEffect, useState } from "react";
+import { Link } from "wouter";
 import { isAuthenticated } from "../lib/auth";
+import { Helmet } from "react-helmet-async";
+import { Target, TrendingUp, Cpu, ShieldCheck, Mail, Database, Search, Percent } from "lucide-react";
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+const BASE = import.meta.env.VITE_API_URL || "";
 
 export default function Home() {
-  const [, setLocation] = useLocation();
-  const [matchCount, setMatchCount] = useState<number>(0);
+  const [matchCount, setMatchCount] = useState(0);
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
 
   useEffect(() => {
-    // Fetch today's matches to get the total count
-    fetch(`${BASE}/api/today-matches`)
+    fetch(`${BASE}/api/today?date=today`)
       .then((res) => res.json())
       .then((data) => {
-        if (data && Array.isArray(data.matches)) {
+        if (data && data.matches) {
           setMatchCount(data.matches.length);
         }
       })
-      .catch((e) => console.error("Error fetching today matches", e));
+      .catch((e) => console.error("Error fetching match count", e));
 
-    // Fetch blog posts (now includes real odds and predicted_pick)
-    fetch(`${BASE}/api/blog`)
+    fetch(`${BASE}/api/blog/posts`)
       .then((res) => res.json())
       .then((data) => {
         if (data && Array.isArray(data)) {
@@ -33,170 +31,147 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="crs-home">
-      
+    <div className="min-h-screen bg-slate-50 font-sans">
+      <Helmet>
+        <title>KargaTahmin - Yapay Zeka Destekli İddaa Tahmin Analizi</title>
+        <meta name="description" content="Bugünün maç oranlarını geçmişteki binlerce maçla karşılaştıran yapay zeka analiz motoru." />
+      </Helmet>
 
-      <header className="hero">
-        <div className="wrap">
-          <div className="eyebrow">
-            Yeni · <b>150 referans maçlık</b> karşılaştırma motoru canlıda
-          </div>
-          <h1>
-            Oranları tahmin etmeyin,<br />
-            geçmişle <span className="accent">karşılaştırın</span>.
-          </h1>
-          <p className="sub">
-            KargaTahmin, bugünün maç oranlarını geçmişte oynanmış binlerce maçla eşleştirir; lig, ülke ve kıta bağlamını da hesaba katarak size şeffaf bir olasılık tablosu sunar.
-          </p>
-          <div className="hero-ctas">
-            <Link className="btn-primary" href="/bugun">{isAuthenticated() ? "Analiz Yap (Bültene Git)" : "Ücretsiz analiz yap"}</Link>
-            <Link className="btn-secondary" href="#nasil-calisir">Nasıl çalıştığını gör</Link>
-          </div>
-          <div className="hero-stats">
-            <div className="hstat">
-              <b>{matchCount > 0 ? `${matchCount}+` : "..."}</b>
-              <span>bugün analiz edilen maç</span>
+      {/* Hero Section */}
+      <div className="relative bg-white overflow-hidden border-b border-slate-200">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-slate-50"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-20 pb-24 lg:pt-32 lg:pb-32">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-semibold mb-6">
+              <Cpu size={16} /> Yeni Nesil AI Analiz Motoru Yayında
             </div>
-            <div className="hstat">
-              <b>150</b>
-              <span>referans maç / analiz</span>
+            <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight mb-6">
+              Oranları tahmin etmeyin, <br/>
+              geçmişle <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">karşılaştırın.</span>
+            </h1>
+            <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+              KargaTahmin, bugünün maç oranlarını geçmişte oynanmış binlerce maçla eşleştirir; lig, ülke ve kıta bağlamını da hesaba katarak size şeffaf bir olasılık tablosu sunar.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+              <Link href="/bugun" className="px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-lg shadow-lg shadow-slate-900/20 transition-all w-full sm:w-auto">
+                {isAuthenticated() ? "Analiz Yap (Bültene Git)" : "Ücretsiz Analiz Yap"}
+              </Link>
+              <Link href="/basari-orani" className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
+                <TrendingUp size={20} /> Başarı Oranımızı Gör
+              </Link>
             </div>
-            <div className="hstat">
-              <b>0 ₺</b>
-              <span>üyelik ücreti</span>
-            </div>
-          </div>
-        </div>
-      </header>
 
-      <section className="section" id="nasil-calisir">
-        <div className="wrap">
-          <div className="section-tag">NASIL ÇALIŞIR</div>
-          <div className="section-title">Tek platformda, dört katmanlı analiz</div>
-          <div className="section-sub">
-            Her özellik, kara kutu olmadan çalışacak şekilde tasarlandı — hangi verinin sonucu nasıl etkilediğini her zaman görebilirsiniz.
-          </div>
-          <div className="feature-grid">
-            <div className="feature">
-              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="1.6"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-              <h3>Geçmiş oran eşleştirme</h3>
-              <p>Bugünün oranları, veritabanındaki binlerce maçla olasılık bazında karşılaştırılır.</p>
-            </div>
-            <div className="feature">
-              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="1.6"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>
-              <h3>Bağlamsal filtreleme</h3>
-              <p>Aynı ülke, aynı kıta ve lig seviyesi otomatik olarak benzerlik skoruna dahil edilir.</p>
-            </div>
-            <div className="feature">
-              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="1.6"><path d="M4 19V5M4 19h16M9 15l3-4 3 3 4-6"/></svg>
-              <h3>Şeffaf algoritma paneli</h3>
-              <p>Ham benzerlik skorunu ve uygulanan bağlamsal bonusu ayrı ayrı görürsünüz.</p>
-            </div>
-            <div className="feature">
-              <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="1.6"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z"/></svg>
-              <h3>Risk göstergesi</h3>
-              <p>Çeyrek Kelly mantığıyla hesaplanan öneri, tahmini değeri ve riski birlikte gösterir.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="wrap">
-          <div className="section-tag">ADIM ADIM</div>
-          <div className="section-title">Bir analiz üç adımda tamamlanır</div>
-          <div className="steps">
-            <div className="step">
-              <div className="num">01</div>
-              <h3>Maçı ara</h3>
-              <p>Takım veya lig adıyla arayın; bugün oynanan {matchCount > 0 ? `${matchCount}+` : ""} maç arasından anında bulun.</p>
-            </div>
-            <div className="step">
-              <div className="num">02</div>
-              <h3>Referansları inceleyin</h3>
-              <p>Sistem 150 geçmiş maçı benzerlik sırasına göre listeler, her birinin bağlamını gösterir.</p>
-            </div>
-            <div className="step">
-              <div className="num">03</div>
-              <h3>Olasılığı değerlendirin</h3>
-              <p>Güven aralığıyla birlikte sunulan olasılıkları kendi değerlendirmenize katın.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="wrap">
-          <div className="stats-band">
-            <div className="grid">
-              <div className="item">
-                <b>150</b>
-                <span>referans maç / analiz</span>
+            {/* Quick Stats */}
+            <div className="mt-16 grid grid-cols-2 md:grid-cols-3 gap-6 pt-8 border-t border-slate-100">
+              <div className="text-center">
+                <div className="text-3xl font-black text-slate-900">{matchCount > 0 ? `${matchCount}+` : "..."}</div>
+                <div className="text-sm font-medium text-slate-500 mt-1">Bugün Analiz Edilen Maç</div>
               </div>
-              <div className="item">
-                <b>%100</b>
-                <span>ücretsiz erişim</span>
+              <div className="text-center">
+                <div className="text-3xl font-black text-blue-600">150</div>
+                <div className="text-sm font-medium text-slate-500 mt-1">Referans Maç / Analiz</div>
               </div>
-              <div className="item">
-                <b>7/24</b>
-                <span>güncellenen oran verisi</span>
+              <div className="text-center col-span-2 md:col-span-1">
+                <div className="text-3xl font-black text-emerald-600">%100</div>
+                <div className="text-sm font-medium text-slate-500 mt-1">Ücretsiz Erişim</div>
               </div>
             </div>
-            <div className="note">
-              Şu an tüm özellikler herkese açık. İleride topluluğumuz büyüdükçe isteğe bağlı üyelik seçenekleri ekleyeceğiz.
+          </div>
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <div className="py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Dört Katmanlı Analiz</h2>
+            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-slate-900 sm:text-4xl">Tek platformda şeffaf veriler</p>
+            <p className="mt-4 max-w-2xl text-xl text-slate-500 mx-auto">Her özellik, kara kutu olmadan çalışacak şekilde tasarlandı; hangi verinin sonucu nasıl etkilediğini her zaman görebilirsiniz.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+                <Database size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Geçmiş Oran Eşleştirme</h3>
+              <p className="text-slate-600 leading-relaxed">Bugünün oranları, veritabanındaki binlerce maçla olasılık bazında karşılaştırılır.</p>
+            </div>
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-6">
+                <Search size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Bağlamsal Filtreleme</h3>
+              <p className="text-slate-600 leading-relaxed">Aynı ülke, aynı kıta ve lig seviyesi otomatik olarak benzerlik skoruna dahil edilir.</p>
+            </div>
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-6">
+                <Percent size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Şeffaf Algoritma Paneli</h3>
+              <p className="text-slate-600 leading-relaxed">Ham benzerlik skorunu ve uygulanan bağlamsal bonusu ayrı ayrı görürsünüz.</p>
+            </div>
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+              <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-6">
+                <ShieldCheck size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Risk Göstergesi</h3>
+              <p className="text-slate-600 leading-relaxed">Çeyrek Kelly mantığıyla hesaplanan öneri, tahmini değeri ve riski birlikte gösterir.</p>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section className="section">
-        <div className="wrap">
-          <div className="section-tag">BLOG</div>
-          <div className="section-title">Son analizler</div>
-          <div className="section-sub">
-            Öne çıkan maçlar için hazırladığımız detaylı yazılar.
+      {/* Blog Section */}
+      <div className="py-24 bg-white border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-end mb-12">
+            <div>
+              <h2 className="text-3xl font-extrabold text-slate-900">Yapay Zeka Destekli Son Analizler</h2>
+              <p className="mt-2 text-lg text-slate-500">Öne çıkan maçlar için hazırlanan detaylı yazılar.</p>
+            </div>
+            <Link href="/blog" className="hidden md:flex text-blue-600 font-semibold hover:text-blue-800 transition-colors">Tüm Blog Yazılarına Git &rarr;</Link>
           </div>
-          <div className="blog-grid">
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {blogPosts.length > 0 ? (
               blogPosts.map((p, i) => (
-                <Link key={i} className="blogcard" href={`/blog/${p.slug || p.id}`}>
-                  <div className="meta">
-                    {p.category || "Genel"} · {new Date(p.created_at).toLocaleDateString("tr-TR", { day: 'numeric', month: 'short', year: 'numeric' })}
+                <Link key={i} href={`/blog/${p.slug || p.id}`} className="group bg-slate-50 rounded-2xl p-6 border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all flex flex-col h-full">
+                  <div className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">
+                    {new Date(p.created_at).toLocaleDateString("tr-TR", { day: 'numeric', month: 'long', year: 'numeric' })}
                   </div>
-                  <div className="title">{p.title}</div>
-                  <div className="oddrow">
-                    <span>{p.oran_1 ? p.oran_1.toFixed(2) : "-"}</span>
-                    <span>{p.oran_x ? p.oran_x.toFixed(2) : "-"}</span>
-                    <span>{p.oran_2 ? p.oran_2.toFixed(2) : "-"}</span>
-                  </div>
-                  <div className="pick">
-                    Sistem tahmini: {p.prediction || "Analiz bekleniyor"}
+                  <h3 className="text-xl font-bold text-slate-900 mb-4 group-hover:text-blue-700 transition-colors line-clamp-2">{p.title}</h3>
+                  <div className="mt-auto">
+                    <span className="inline-flex items-center text-sm font-semibold text-slate-600">Okumaya devam et &rarr;</span>
                   </div>
                 </Link>
               ))
             ) : (
-              <div className="blogcard">
-                <div className="title">Blog yazısı bulunamadı.</div>
+              <div className="col-span-3 text-center py-12 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
+                <p className="text-slate-500 font-medium">Henüz yayınlanmış bir blog yazısı bulunamadı.</p>
               </div>
             )}
           </div>
+          <div className="mt-8 text-center md:hidden">
+            <Link href="/blog" className="text-blue-600 font-semibold hover:text-blue-800 transition-colors">Tüm Blog Yazılarına Git &rarr;</Link>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <section className="free-cta">
-        <div className="wrap">
-          <h2>Şu an tamamen ücretsiz, kayıt bile gerekmiyor</h2>
-          <p>
-            Markamızı büyütmeye odaklandığımız bu dönemde tüm analiz araçlarını herkese açık tutuyoruz. İleride topluluğumuzla birlikte gelişen bir üyelik sistemi de sunacağız.
-          </p>
-          <Link className="btn-primary" href="/bugun">Hemen bir maç analiz et</Link>
-        </div>
-      </section>
+      {/* CTA Section */}
+      <div className="bg-slate-900 py-20 text-center px-4">
+        <h2 className="text-3xl font-black text-white mb-6">Karşılaştırmaya Hazır Mısın?</h2>
+        <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-10">KargaTahmin şu an tamamen ücretsiz. Kayıt bile gerekmiyor. Sadece maçını seç ve analiz butonuna tıkla.</p>
+        <Link href="/bugun" className="inline-block px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-lg shadow-lg shadow-blue-900/50 transition-all">
+          Hemen Analiz Yap
+        </Link>
+      </div>
 
-      <footer>
-        <div className="wrap">
-          KargaTahmin — İddaa oranları geçmiş verilerle karşılaştırılarak sunulur, yatırım tavsiyesi değildir.
-        </div>
+      {/* Footer */}
+      <footer className="bg-white border-t border-slate-200 py-12 px-4 text-center">
+        <p className="text-slate-500 font-medium max-w-3xl mx-auto">
+          KargaTahmin — İddaa oranları geçmiş verilerle karşılaştırılarak sunulur, yatırım tavsiyesi değildir. Olasılık hesaplamaları %100 kesinlik belirtmez.
+        </p>
       </footer>
     </div>
   );

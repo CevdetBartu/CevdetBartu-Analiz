@@ -101,7 +101,7 @@ export default function DashboardPage() {
                     Kullanıcı Yönetimi
                   </Link>
                   <Link href="/admin" className="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-medium rounded-lg shadow-sm transition-colors text-sm">
-                    Veritabanı
+                    Veritabanıı
                   </Link>
                 </div>
               </div>

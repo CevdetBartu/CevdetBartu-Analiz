@@ -64313,7 +64313,7 @@ router18.get("/unsubscribe/:hash", (req, res) => {
     const users = db6.prepare("SELECT id, email FROM users WHERE email_notifications = 1").all();
     let unsubscribedEmail = null;
     for (const u of users) {
-      const expectedHash = crypto2.createHash("md5").update(u.email + "karga_newsletter_secret").digest("hex");
+      const expectedHash = crypto2.createHmac("sha256", "karga_newsletter_secure_hmac_key_2026").update(u.email).digest("hex");
       if (expectedHash === hash2) {
         db6.prepare("UPDATE users SET email_notifications = 0 WHERE id = ?").run(u.id);
         unsubscribedEmail = u.email;
@@ -66669,7 +66669,7 @@ function startNewsletterJob() {
             const userRate = (userStats.correct / userStats.total * 100).toFixed(1);
             personalMessage = `Bu hafta harika i\u015F \xE7\u0131kard\u0131n! Yapt\u0131\u011F\u0131n ${userStats.total} tahminde <strong>%${userRate} isabet</strong> oran\u0131na ula\u015Ft\u0131n.`;
           }
-          const unsubscribeHash = crypto6.createHash("md5").update(user.email + "karga_newsletter_secret").digest("hex");
+          const unsubscribeHash = crypto6.createHmac("sha256", "karga_newsletter_secure_hmac_key_2026").update(user.email).digest("hex");
           const unsubscribeUrl = `https://kargatahmin.com/unsubscribe/${unsubscribeHash}`;
           const emailHtml = `
             <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; color: #333;">

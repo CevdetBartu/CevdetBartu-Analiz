@@ -62,7 +62,7 @@ export function startNewsletterJob() {
             personalMessage = `Bu hafta harika iş çıkardın! Yaptığın ${userStats.total} tahminde <strong>%${userRate} isabet</strong> oranına ulaştın.`;
           }
 
-          const unsubscribeHash = crypto.createHash('md5').update(user.email + "karga_newsletter_secret").digest('hex');
+          const unsubscribeHash = crypto.createHmac('sha256', "karga_newsletter_secure_hmac_key_2026").update(user.email).digest('hex');
           const unsubscribeUrl = `https://kargatahmin.com/unsubscribe/${unsubscribeHash}`;
 
           const emailHtml = `

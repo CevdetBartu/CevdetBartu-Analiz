@@ -43,7 +43,7 @@ router.get("/unsubscribe/:hash", (req, res) => {
     for (const u of users) {
       // Hash mantığı: md5(email + gizli_tuz)
       // Şifre tuzunu çevre değişkeninden veya sabit bir kelimeden alıyoruz
-      const expectedHash = crypto.createHash('md5').update(u.email + "karga_newsletter_secret").digest('hex');
+      const expectedHash = crypto.createHmac('sha256', "karga_newsletter_secure_hmac_key_2026").update(u.email).digest('hex');
       if (expectedHash === hash) {
         db.prepare("UPDATE users SET email_notifications = 0 WHERE id = ?").run(u.id);
         unsubscribedEmail = u.email;
