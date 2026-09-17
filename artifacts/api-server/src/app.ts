@@ -5,6 +5,8 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import blogRouter from "./routes/blog";
 import authRouter from "./routes/auth";
+import adminApiKeysRouter from "./routes/adminApiKeys";
+import externalApiRouter from "./routes/externalApi";
 import userAuthRouter from "./routes/userAuth";
 
 const app: Express = express();

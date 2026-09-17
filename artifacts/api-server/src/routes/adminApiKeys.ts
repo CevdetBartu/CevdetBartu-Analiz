@@ -16,8 +16,11 @@ router.use(requireAdmin);
 router.get("/", (req, res) => {
   try {
     const db = new Database(DB_PATH);
+    // Add key_hint column migration if missing
+    try { db.exec("ALTER TABLE api_keys ADD COLUMN key_hint TEXT"); } catch(e) {}
+    
     const keys = db.prepare(`
-      SELECT a.id, a.key, a.status, a.created_at, u.username, u.email 
+      SELECT a.id, a.key_hint, a.status, a.created_at, u.username, u.email 
       FROM api_keys a 
       JOIN users u ON a.user_id = u.id 
       ORDER BY a.created_at DESC
@@ -38,14 +41,17 @@ router.post("/", (req, res) => {
     const user = db.prepare("SELECT id FROM users WHERE email = ?").get(email) as any;
     if (!user) return res.status(404).json({ error: "User not found." });
 
-    // Check if user already has an active key
     const existing = db.prepare("SELECT id FROM api_keys WHERE user_id = ? AND status = 'active'").get(user.id);
     if (existing) return res.status(400).json({ error: "User already has an active API key." });
 
-    const newKey = "krg_" + crypto.randomBytes(24).toString("hex");
+    const rawKey = "krg_" + crypto.randomBytes(24).toString("hex");
+    const hashedKey = crypto.createHash("sha256").update(rawKey).digest("hex");
+    const hint = rawKey.substring(0, 10) + "...";
 
-    db.prepare("INSERT INTO api_keys (user_id, key) VALUES (?, ?)").run(user.id, newKey);
-    res.json({ success: true, key: newKey });
+    try { db.exec("ALTER TABLE api_keys ADD COLUMN key_hint TEXT"); } catch(e) {}
+    
+    db.prepare("INSERT INTO api_keys (user_id, key, key_hint) VALUES (?, ?, ?)").run(user.id, hashedKey, hint);
+    res.json({ success: true, key: rawKey }); // Return plaintext ONLY once
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }

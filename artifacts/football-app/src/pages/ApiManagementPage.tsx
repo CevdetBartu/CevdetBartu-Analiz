@@ -121,7 +121,7 @@ export default function ApiManagementPage() {
                     <div className="text-slate-500 text-xs">{k.email}</div>
                   </td>
                   <td className="p-4 font-mono text-slate-600 bg-slate-50 rounded px-2">
-                    {k.key.substring(0, 10)}...
+                    {k.key_hint || "Eski Key (Gizli)"}
                   </td>
                   <td className="p-4">
                     {k.status === 'active' ? (
