@@ -94,6 +94,44 @@ export function startPredictionResolver() {
 
       resolveTx(pendingPreds);
       
+      
+      // --- SYSTEM PREDICTIONS RESOLVE ---
+      const sysPending = db.prepare(`
+        SELECT s.id, s.ms_prediction, s.ou_prediction, s.btts_prediction, 
+               m.mac_skoru, m.devre_skoru
+        FROM system_predictions s
+        JOIN gecmis_maclar m ON s.match_id = m.id
+        WHERE s.ms_status = 'pending' OR s.ou_status = 'pending' OR s.btts_status = 'pending'
+      `).all() as any[];
+
+      let sysResolvedCount = 0;
+      const updateSysStmt = db.prepare(`
+        UPDATE system_predictions 
+        SET ms_status = ?, ou_status = ?, btts_status = ?, resolved_at = CURRENT_TIMESTAMP 
+        WHERE id = ?
+      `);
+
+      const resolveSysTx = db.transaction((preds) => {
+        for (const p of preds) {
+          const macSkoru = p.mac_skoru ? p.mac_skoru.trim() : null;
+          if (!macSkoru || macSkoru === '-' || macSkoru === '') continue;
+
+          const ms = evaluatePrediction('MS1X2', p.ms_prediction, macSkoru, p.devre_skoru);
+          const ou = evaluatePrediction('ALT_UST_2_5', p.ou_prediction, macSkoru, p.devre_skoru);
+          const btts = evaluatePrediction('KG_VAR_YOK', p.btts_prediction, macSkoru, p.devre_skoru);
+          
+          if (ms !== 'pending' && ou !== 'pending' && btts !== 'pending') {
+            updateSysStmt.run(ms, ou, btts, p.id);
+            sysResolvedCount++;
+          }
+        }
+      });
+      resolveSysTx(sysPending);
+      
+      if (sysResolvedCount > 0) {
+        logger.info(`[CRON] Resolved ${sysResolvedCount} pending system predictions.`);
+      }
+
       if (resolvedCount > 0) {
         logger.info(`[CRON] Resolved ${resolvedCount} pending user predictions.`);
       }

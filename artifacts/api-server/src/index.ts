@@ -1,6 +1,10 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { startDailyMatchScheduler } from "./lib/scheduler";
+import { startPredictionResolver } from "./cron/resolvePredictions";
+import { startSystemPredictionsJob } from "./cron/systemPredictionsJob";
+import { startBlogDraftJob } from "./cron/blogDraftJob";
+import { startNewsletterJob } from "./cron/newsletterJob";
 
 const rawPort = process.env["PORT"];
 
@@ -90,6 +94,31 @@ try {
       )
     `);
     logger.info("user_predictions table checked/updated.");
+
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS system_predictions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        match_id INTEGER NOT NULL UNIQUE,
+        date TEXT,
+        league TEXT,
+        ms_prediction TEXT,
+        ms_prob REAL,
+        ms_status TEXT DEFAULT 'pending',
+        ou_prediction TEXT,
+        ou_prob REAL,
+        ou_status TEXT DEFAULT 'pending',
+        btts_prediction TEXT,
+        btts_prob REAL,
+        btts_status TEXT DEFAULT 'pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        resolved_at DATETIME DEFAULT NULL,
+        FOREIGN KEY (match_id) REFERENCES gecmis_maclar(id)
+      )
+    `);
+    logger.info("system_predictions table checked/updated.");
+  } catch(e) {}
+
   } catch(e) {}
 
 } catch (e: any) {
@@ -106,4 +135,7 @@ app.listen(port, (err) => {
   logger.info({ port }, "Server listening");
   startDailyMatchScheduler();
   startPredictionResolver();
+  startSystemPredictionsJob();
+  startBlogDraftJob();
+  startNewsletterJob();
 });

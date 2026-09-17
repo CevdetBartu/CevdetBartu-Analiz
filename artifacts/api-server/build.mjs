@@ -17,7 +17,8 @@ async function buildAll() {
   await esbuild({
     entryPoints: [
       path.resolve(artifactDir, "src/index.ts"),
-      path.resolve(artifactDir, "src/check_dogrulama_stats.ts")
+      path.resolve(artifactDir, "src/check_dogrulama_stats.ts"),
+      path.resolve(artifactDir, "src/scripts/backfillPredictions.ts")
     ],
     platform: "node",
     bundle: true,

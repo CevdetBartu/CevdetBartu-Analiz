@@ -88,7 +88,7 @@ export default function PredictionsPage() {
             <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
               <Target className="text-emerald-500" /> Tahmin Geçmişim
             </h1>
-            <p className="text-slate-500 dark:text-slate-400">Yaptığın tahminler ve isabet oranların</p>
+            <p className="text-slate-500 dark:text-slate-400">Yaptığın tahminler ve isabet oranların. <br/><span className="text-xs text-amber-600 dark:text-amber-400 font-semibold">* Maç sonuçları ve tahmin statüleri maç bitiminden sonra birkaç dakika içinde sisteme yansır.</span></p>
           </div>
         </div>
 

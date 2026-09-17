@@ -1,109 +1,94 @@
-import React, { useEffect, useState } from "react";
-import { Link, useRoute } from "wouter";
-import { SeoHead } from "../components/seo/SeoHead";
+﻿import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useRoute } from "wouter";
+import { Calendar, AlertTriangle } from "lucide-react";
+
+const BASE = import.meta.env.VITE_API_URL || "";
 
 export default function BlogPost() {
-  const [match, params] = useRoute("/blog/:slug");
+  const [, params] = useRoute("/blog/:slug");
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (params?.slug) {
-      fetch(`${BASE}/api/blog/${params.slug}`)
-        .then(r => {
-          if (!r.ok) throw new Error("Not found");
-          return r.json();
-        })
-        .then(data => setPost(data))
-        .catch(e => console.error(e))
-        .finally(() => setLoading(false));
+      fetchPost(params.slug);
     }
   }, [params?.slug]);
 
-  if (loading) {
-    return <div style={{ color: "#fff", padding: "40px", textAlign: "center" }}>Yükleniyor...</div>;
-  }
+  const fetchPost = async (slug: string) => {
+    try {
+      const res = await fetch(`${BASE}/api/blog/${slug}`);
+      if (!res.ok) throw new Error("Not found");
+      const data = await res.json();
+      setPost(data);
+    } catch (e) {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (!post) {
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Yükleniyor...</div>;
+  
+  if (error || !post) {
     return (
-      <div style={{ color: "#fff", padding: "40px", textAlign: "center" }}>
-        <h1>Yazı bulunamadı.</h1>
-        <Link href="/">Anasayfaya dön</Link>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+        <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-4">İçerik Bulunamadı</h1>
+        <p className="text-slate-500 mb-6">Bu yazı henüz yayınlanmamış veya silinmiş olabilir.</p>
+        <a href="/blog" className="px-6 py-3 bg-primary text-white rounded-xl font-bold">Blog'a Dön</a>
       </div>
     );
   }
 
-  const dateObj = new Date(post.created_at);
-  const formattedDate = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-
-  // Schema.org Structured Data
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "headline": post.title,
-    "image": post.image_url || "https://kargatahmin.com/default-cover.jpg",
-    "datePublished": post.created_at,
-    "author": {
-      "@type": "Organization",
-      "name": "KargaTahmin Ekibi"
-    },
-    "description": post.excerpt
-  };
-
   return (
-    <div className="app-container" style={{ minHeight: '100vh', backgroundColor: '#0f172a' }}>
-      <SeoHead 
-        title={`${post.title} - KargaTahmin`}
-        description={post.excerpt}
-        url={`/blog/${post.slug}`}
-        type="article"
-        schema={schema}
-      />
-      
-      
+    <div className="min-h-screen bg-white dark:bg-slate-900 pb-20">
+      <Helmet>
+        <title>{post.title} - KargaTahmin Blog</title>
+        <meta name="description" content={post.meta_description} />
+      </Helmet>
 
-      <main className="app-main" style={{ maxWidth: 800, margin: '0 auto', padding: '40px 20px' }}>
-        
-        {/* Breadcrumb */}
-        
-
-        <article>
-          <header style={{ marginBottom: "32px" }}>
-            <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, lineHeight: 1.2, color: "#f8fafc", marginBottom: "16px" }}>
-              {post.title}
-            </h1>
-            <div style={{ display: "flex", gap: "16px", color: "#64748b", fontSize: "0.95rem", alignItems: "center" }}>
-              <span>📅 {formattedDate}</span>
-              <span>⏱️ {post.read_time || "3 dk okuma"}</span>
-              <span style={{ backgroundColor: "rgba(56, 189, 248, 0.1)", color: "#38bdf8", padding: "4px 12px", borderRadius: "20px", fontSize: "0.85rem", fontWeight: "bold", textTransform: 'capitalize' }}>
-                {post.category?.replace(/-/g, ' ')}
-              </span>
-            </div>
-          </header>
-
-          <div 
-            style={{ 
-              color: "#cbd5e1", 
-              fontSize: "1.1rem", 
-              lineHeight: 1.8,
-              marginBottom: "40px"
-            }}
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
-
-          <div style={{ padding: "24px", background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.2)", borderRadius: "16px", marginBottom: "40px" }}>
-            <h3 style={{ margin: "0 0 12px 0", color: "#10b981", fontSize: "1.2rem" }}>🎯 KargaTahmin Tavsiyesi</h3>
-            <p style={{ margin: 0, color: "#f1f5f9", fontWeight: "bold", fontSize: "1.1rem" }}>{post.prediction}</p>
+      {/* Header Section */}
+      <div className="bg-slate-50 dark:bg-slate-800/50 py-16 border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-bold mb-6">
+            Günün Maçları
           </div>
-          
-          <footer style={{ borderTop: "1px solid #334155", paddingTop: "24px", color: "#64748b", fontSize: "0.9rem", lineHeight: 1.6 }}>
-            <strong>Yazar:</strong> KargaTahmin Ekibi<br/><br/>
-            <strong>Sorumluluk Reddi (Yasal Uyarı):</strong> Bu sayfada yer alan analizler ve tahminler tamamen istatistiksel verilere ve yapay zeka algoritmalarına dayanmaktadır. Kesinlik taşımaz ve bahis tavsiyesi niteliğinde değildir. Yasadışı bahis oynamak suçtur. Lütfen sorumlu ve yasal platformlarda hareket ediniz.
-          </footer>
-        </article>
+          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-6 leading-tight">
+            {post.title}
+          </h1>
+          <div className="flex items-center justify-center gap-4 text-slate-500 font-medium">
+            <span className="flex items-center gap-1.5"><Calendar size={18}/> {new Date(post.created_at).toLocaleDateString('tr-TR')}</span>
+            <span>•</span>
+            <span>KargaTahmin AI</span>
+          </div>
+        </div>
+      </div>
 
-      </main>
+      {/* Content Section */}
+      <div className="max-w-3xl mx-auto px-4 py-12">
+        {/* Render HTML content securely (In real prod, use DOMPurify, here we trust our own DB) */}
+        <div 
+          className="prose prose-slate prose-lg dark:prose-invert max-w-none prose-h2:text-2xl prose-h2:font-bold prose-h2:mt-10 prose-h2:mb-4 prose-p:leading-relaxed prose-strong:text-primary"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
+
+        {/* Mandatory Legal Disclaimer */}
+        <div className="mt-16 p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-xl shrink-0">
+              <AlertTriangle size={24} />
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-800 dark:text-slate-200 mb-2">Yasal Uyarı / Sorumluluk Reddi</h4>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Bu sayfada yer alan içerik, tamamen yapay zeka algoritması ve geçmiş istatistiksel veriler kullanılarak üretilmiş <strong>bilgilendirme amaçlı analizlerdir.</strong> KargaTahmin, herhangi bir şekilde bahis veya iddaa oynamaya teşvik etmez, "kesin kazanç" veya "banko" garantisi vermez. Analizler sonucunda alınacak tüm kararların sorumluluğu tamamen kullanıcının kendisine aittir. Bahis oynamak risk içerir ve bağımlılık yapabilir.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

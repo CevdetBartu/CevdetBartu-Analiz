@@ -16,6 +16,10 @@ import couponWizardRouter from "./couponWizard";
 import predictionsRouter from "./predictions";
 import adminDashboardRouter from "./adminDashboard";
 import announcementsRouter from "./announcements";
+import statsRouter from "./stats";
+import blogRouter from "./blog";
+import adminBlogRouter from "./adminBlog";
+import settingsRouter from "./settings";
 
 const router: IRouter = Router();
 
@@ -32,6 +36,8 @@ const adminRateLimiter = rateLimit({
 });
 
 router.use("/announcements", announcementsRouter);
+router.use("/stats", statsRouter);
+router.use("/blog", blogRouter);
 
 router.use("/admin", requireAdmin, adminRateLimiter, (req, res, next) => {
   logger.info(`[AUDIT] Admin ${req.user?.email} accessed ${req.method} ${req.originalUrl}`);
@@ -62,6 +68,8 @@ router.use(couponRouter);
 router.use(basketMatchesRouter);
 router.use(liveRouter);
 router.use("/ai", aiRouter);
+router.use("/settings", settingsRouter);
+router.use(settingsRouter); // For /unsubscribe/:hash
 router.use(couponWizardRouter);
 router.use("/predictions", requireUser, predictionsRouter);
 

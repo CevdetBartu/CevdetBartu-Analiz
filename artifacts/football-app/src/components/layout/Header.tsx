@@ -26,6 +26,8 @@ export function Header() {
       <Link href="/bugun" onClick={closeMenu} className={`hover:text-primary transition-colors ${location === '/bugun' ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>Bülten / Analiz</Link>
       <Link href="/canli" onClick={closeMenu} className={`hover:text-primary transition-colors ${location === '/canli' ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>Canlı</Link>
       <Link href="/manuel" onClick={closeMenu} className={`hover:text-primary transition-colors ${location === '/manuel' ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>Manuel Tahmin</Link>
+      {isAuth && <Link href="/tahminlerim" onClick={closeMenu} className={`hover:text-primary transition-colors ${location.startsWith('/tahminlerim') ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>Tahminlerim</Link>}
+      <Link href="/basari-orani" onClick={closeMenu} className={`hover:text-primary transition-colors flex items-center gap-1 ${location.startsWith('/basari-orani') ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>Başarı Oranı</Link>
       <Link href="/blog" onClick={closeMenu} className={`hover:text-primary transition-colors ${location.startsWith('/blog') ? 'text-primary font-semibold' : 'text-slate-600 dark:text-slate-300'}`}>Blog</Link>
     </>
   );

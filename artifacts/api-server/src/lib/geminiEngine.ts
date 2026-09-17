@@ -139,3 +139,53 @@ Lütfen bu verilerle JSON tipinde blog yazısını üret.
   logger.error({ err: lastError }, 'All Gemini API keys failed.');
   throw new Error('Blog oluşturulurken bir hata meydana geldi.');
 }
+
+
+export async function generateDailyMultiMatchBlog(matches: any[]): Promise<{ title: string, content: string, excerpt: string, slug: string }> {
+  const keys = getAvailableKeys();
+  if (keys.length === 0) throw new Error('Gemini API key is not configured.');
+  
+  let matchesDataStr = "";
+  matches.forEach((m, i) => {
+    matchesDataStr += `\nMAÇ ${i+1}: ${m.ev_sahibi} vs ${m.deplasman}\n`;
+    matchesDataStr += `MS1 Yüzde: ${m.stats.ev_sahibi?.yuzde}\n`;
+    matchesDataStr += `MSX Yüzde: ${m.stats.beraberlik?.yuzde}\n`;
+    matchesDataStr += `MS2 Yüzde: ${m.stats.deplasman?.yuzde}\n`;
+    matchesDataStr += `2.5 ÜST Yüzde: ${m.stats.ust_25?.yuzde}\n`;
+    matchesDataStr += `KG VAR Yüzde: ${m.stats.kg_var?.yuzde}\n`;
+  });
+
+  const systemInstruction = `Sen uzman bir Spor Editörü ve Teknik SEO Uzmanısın.
+Görev: Sana verilen günün öne çıkan maçlarının analiz yüzdelerini kullanarak SEO uyumlu, dikkat çekici bir "Günün Maçları İstatistiksel Analizi" blog yazısı yazmak.
+
+YASAKLI KELİMELER: "Banko", "garanti", "kesin", "%100 kazanç". Bunları ASLA kullanma.
+KULLANILACAK DİL: "İstatistiksel olasılık", "Analizlerimize göre", "Yüzde X ihtimalle", "Algoritma verileri".
+
+İçerikte her maç için H2 başlığı (Takım A - Takım B) kullan ve istatistiklere dayanarak yorumla.
+En yüksek ihtimalli sonucu "Sistemin Öne Çıkardığı Tahmin" olarak belirt.
+
+MUTLAKA JSON FORMATINDA DÖN! JSON yapısı şu şekilde olmalı:
+{
+  "title": "Günün Maçları: SEO Uyumlu Başlık (Örn: 15 Eylül Şampiyonlar Ligi Analizleri ve Yapay Zeka Tahminleri)",
+  "slug": "gunun-maclari-yapay-zeka-analizleri-15-eylul",
+  "excerpt": "Günün öne çıkan maçları için yapay zeka destekli istatistiksel olasılık analizleri...",
+  "content": "HTML formatında, paragraflar, H2 başlıkları, <strong> etiketleri içeren detaylı blog yazısı metni. Footer'a otomatik YASAL UYARI EKLENECEKTİR, senin yasal uyarı eklemene gerek yok."
+}`;
+
+  const genAI = new GoogleGenerativeAI(keys[Math.floor(Math.random() * keys.length)]);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction });
+  const prompt = `Lütfen şu maçlar için JSON formatında SEO uyumlu bir blog yazısı hazırla:
+
+${matchesDataStr}`;
+  
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    let text = response.text();
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+    return JSON.parse(text);
+  } catch (error) {
+    logger.error({ error }, "generateDailyMultiMatchBlog error");
+    throw error;
+  }
+}

@@ -11,9 +11,12 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [pwdMsg, setPwdMsg] = useState('');
+  const [emailNotifications, setEmailNotifications] = useState(true);
+
   
   useEffect(() => {
     async function loadUser() {
@@ -148,6 +151,24 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+
+
+            {/* Bildirim Tercihleri */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 mt-6">
+              <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                <Mail size={20} className="text-blue-500" /> Bildirim Tercihleri
+              </h2>
+              <div className="flex items-center justify-between p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-slate-800 dark:text-slate-200">Haftalık E-Posta Bülteni</h3>
+                  <p className="text-sm text-slate-500">Tahmin başarı oranlarını ve güncel analizleri e-posta ile alın.</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" className="sr-only peer" checked={emailNotifications} onChange={e => handleNotificationToggle(e.target.checked)} />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
 
               {/* Şifre Değiştir */}
               <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">

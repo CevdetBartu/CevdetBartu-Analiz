@@ -15183,7 +15183,7 @@ var require_mimeScore = __commonJS({
 var require_mime_types = __commonJS({
   "../../node_modules/.pnpm/mime-types@3.0.2/node_modules/mime-types/index.js"(exports) {
     "use strict";
-    var db6 = require_mime_db();
+    var db7 = require_mime_db();
     var extname = __require("path").extname;
     var mimeScore = require_mimeScore();
     var EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/;
@@ -15202,7 +15202,7 @@ var require_mime_types = __commonJS({
         return false;
       }
       var match = EXTRACT_TYPE_REGEXP.exec(type);
-      var mime = match && db6[match[1].toLowerCase()];
+      var mime = match && db7[match[1].toLowerCase()];
       if (mime && mime.charset) {
         return mime.charset;
       }
@@ -15236,19 +15236,19 @@ var require_mime_types = __commonJS({
       }
       return exts[0];
     }
-    function lookup(path15) {
-      if (!path15 || typeof path15 !== "string") {
+    function lookup(path21) {
+      if (!path21 || typeof path21 !== "string") {
         return false;
       }
-      var extension2 = extname("x." + path15).toLowerCase().slice(1);
+      var extension2 = extname("x." + path21).toLowerCase().slice(1);
       if (!extension2) {
         return false;
       }
       return exports.types[extension2] || false;
     }
     function populateMaps(extensions, types3) {
-      Object.keys(db6).forEach(function forEachMimeType(type) {
-        var mime = db6[type];
+      Object.keys(db7).forEach(function forEachMimeType(type) {
+        var mime = db7[type];
         var exts = mime.extensions;
         if (!exts || !exts.length) {
           return;
@@ -15269,14 +15269,14 @@ var require_mime_types = __commonJS({
       });
     }
     function _preferredType(ext, type0, type1) {
-      var score0 = type0 ? mimeScore(type0, db6[type0].source) : 0;
-      var score1 = type1 ? mimeScore(type1, db6[type1].source) : 0;
+      var score0 = type0 ? mimeScore(type0, db7[type0].source) : 0;
+      var score1 = type1 ? mimeScore(type1, db7[type1].source) : 0;
       return score0 > score1 ? type0 : type1;
     }
     function _preferredTypeLegacy(ext, type0, type1) {
       var SOURCE_RANK = ["nginx", "apache", void 0, "iana"];
-      var score0 = type0 ? SOURCE_RANK.indexOf(db6[type0].source) : 0;
-      var score1 = type1 ? SOURCE_RANK.indexOf(db6[type1].source) : 0;
+      var score0 = type0 ? SOURCE_RANK.indexOf(db7[type0].source) : 0;
+      var score1 = type1 ? SOURCE_RANK.indexOf(db7[type1].source) : 0;
       if (exports.types[extension] !== "application/octet-stream" && (score0 > score1 || score0 === score1 && exports.types[extension]?.slice(0, 12) === "application/")) {
         return type0;
       }
@@ -18782,13 +18782,13 @@ var require_view = __commonJS({
   "../../node_modules/.pnpm/express@5.2.1/node_modules/express/lib/view.js"(exports, module) {
     "use strict";
     var debug = require_src()("express:view");
-    var path15 = __require("node:path");
+    var path21 = __require("node:path");
     var fs5 = __require("node:fs");
-    var dirname = path15.dirname;
-    var basename = path15.basename;
-    var extname = path15.extname;
-    var join = path15.join;
-    var resolve = path15.resolve;
+    var dirname = path21.dirname;
+    var basename = path21.basename;
+    var extname = path21.extname;
+    var join = path21.join;
+    var resolve = path21.resolve;
     module.exports = View2;
     function View2(name, options) {
       var opts = options || {};
@@ -18817,17 +18817,17 @@ var require_view = __commonJS({
       this.path = this.lookup(fileName);
     }
     View2.prototype.lookup = function lookup(name) {
-      var path16;
+      var path22;
       var roots = [].concat(this.root);
       debug('lookup "%s"', name);
-      for (var i = 0; i < roots.length && !path16; i++) {
+      for (var i = 0; i < roots.length && !path22; i++) {
         var root = roots[i];
         var loc = resolve(root, name);
         var dir = dirname(loc);
         var file2 = basename(loc);
-        path16 = this.resolve(dir, file2);
+        path22 = this.resolve(dir, file2);
       }
-      return path16;
+      return path22;
     };
     View2.prototype.render = function render(options, callback) {
       var sync = true;
@@ -18849,21 +18849,21 @@ var require_view = __commonJS({
     };
     View2.prototype.resolve = function resolve2(dir, file2) {
       var ext = this.ext;
-      var path16 = join(dir, file2);
-      var stat = tryStat(path16);
+      var path22 = join(dir, file2);
+      var stat = tryStat(path22);
       if (stat && stat.isFile()) {
-        return path16;
+        return path22;
       }
-      path16 = join(dir, basename(file2, ext), "index" + ext);
-      stat = tryStat(path16);
+      path22 = join(dir, basename(file2, ext), "index" + ext);
+      stat = tryStat(path22);
       if (stat && stat.isFile()) {
-        return path16;
+        return path22;
       }
     };
-    function tryStat(path16) {
-      debug('stat "%s"', path16);
+    function tryStat(path22) {
+      debug('stat "%s"', path22);
       try {
-        return fs5.statSync(path16);
+        return fs5.statSync(path22);
       } catch (e) {
         return void 0;
       }
@@ -18980,14 +18980,14 @@ var require_etag = __commonJS({
   "../../node_modules/.pnpm/etag@1.8.1/node_modules/etag/index.js"(exports, module) {
     "use strict";
     module.exports = etag;
-    var crypto5 = __require("crypto");
+    var crypto7 = __require("crypto");
     var Stats = __require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash2 = crypto5.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash2 = crypto7.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash2 + '"';
     }
@@ -20103,15 +20103,15 @@ var require_dist2 = __commonJS({
       let index = 0;
       function consumeUntil(end) {
         const output = [];
-        let path15 = "";
+        let path21 = "";
         function writePath() {
-          if (!path15)
+          if (!path21)
             return;
           output.push({
             type: "text",
-            value: encodePath(path15)
+            value: encodePath(path21)
           });
-          path15 = "";
+          path21 = "";
         }
         while (index < chars.length) {
           const value = chars[index++];
@@ -20123,7 +20123,7 @@ var require_dist2 = __commonJS({
             if (index === chars.length) {
               throw new PathError(`Unexpected end after \\ at index ${index}`, str);
             }
-            path15 += chars[index++];
+            path21 += chars[index++];
             continue;
           }
           if (value === ":" || value === "*") {
@@ -20167,7 +20167,7 @@ var require_dist2 = __commonJS({
           if (value === "}" || value === "(" || value === ")" || value === "[" || value === "]" || value === "+" || value === "?" || value === "!") {
             throw new PathError(`Unexpected ${value} at index ${index - 1}`, str);
           }
-          path15 += value;
+          path21 += value;
         }
         if (end) {
           throw new PathError(`Unexpected end at index ${index}, expected ${end}`, str);
@@ -20177,17 +20177,17 @@ var require_dist2 = __commonJS({
       }
       return new TokenData(consumeUntil(""), str);
     }
-    function compile(path15, options = {}) {
+    function compile(path21, options = {}) {
       const { encode = encodeURIComponent, delimiter = DEFAULT_DELIMITER } = options;
-      const data = typeof path15 === "object" ? path15 : parse4(path15, options);
+      const data = typeof path21 === "object" ? path21 : parse4(path21, options);
       const fn = tokensToFunction(data.tokens, delimiter, encode);
-      return function path16(params = {}) {
+      return function path22(params = {}) {
         const missing = [];
-        const path17 = fn(params, missing);
+        const path23 = fn(params, missing);
         if (missing.length) {
           throw new TypeError(`Missing parameters: ${missing.join(", ")}`);
         }
-        return path17;
+        return path23;
       };
     }
     function tokensToFunction(tokens, delimiter, encode) {
@@ -20249,9 +20249,9 @@ var require_dist2 = __commonJS({
         return encodeValue(value);
       };
     }
-    function match(path15, options = {}) {
+    function match(path21, options = {}) {
       const { decode = decodeURIComponent, delimiter = DEFAULT_DELIMITER } = options;
-      const { regexp, keys } = pathToRegexp(path15, options);
+      const { regexp, keys } = pathToRegexp(path21, options);
       const decoders = keys.map((key) => {
         if (decode === false)
           return NOOP_VALUE;
@@ -20263,7 +20263,7 @@ var require_dist2 = __commonJS({
         const m = regexp.exec(input);
         if (!m)
           return false;
-        const path16 = m[0];
+        const path22 = m[0];
         const params = /* @__PURE__ */ Object.create(null);
         for (let i = 1; i < m.length; i++) {
           if (m[i] === void 0)
@@ -20272,21 +20272,21 @@ var require_dist2 = __commonJS({
           const decoder = decoders[i - 1];
           params[key.name] = decoder(m[i]);
         }
-        return { path: path16, params };
+        return { path: path22, params };
       };
     }
-    function pathToRegexp(path15, options = {}) {
+    function pathToRegexp(path21, options = {}) {
       const { delimiter = DEFAULT_DELIMITER, end = true, sensitive = false, trailing = true } = options;
       const keys = [];
       let source = "";
       let combinations = 0;
-      function process2(path16) {
-        if (Array.isArray(path16)) {
-          for (const p of path16)
+      function process2(path22) {
+        if (Array.isArray(path22)) {
+          for (const p of path22)
             process2(p);
           return;
         }
-        const data = typeof path16 === "object" ? path16 : parse4(path16, options);
+        const data = typeof path22 === "object" ? path22 : parse4(path22, options);
         flatten(data.tokens, 0, [], (tokens) => {
           if (combinations >= 256) {
             throw new PathError("Too many path combinations", data.originalPath);
@@ -20297,7 +20297,7 @@ var require_dist2 = __commonJS({
           combinations++;
         });
       }
-      process2(path15);
+      process2(path21);
       let pattern = `^(?:${source})`;
       if (trailing)
         pattern += "(?:" + escape2(delimiter) + "$)?";
@@ -20437,18 +20437,18 @@ var require_layer = __commonJS({
     var TRAILING_SLASH_REGEXP = /\/+$/;
     var MATCHING_GROUP_REGEXP = /\((?:\?<(.*?)>)?(?!\?)/g;
     module.exports = Layer;
-    function Layer(path15, options, fn) {
+    function Layer(path21, options, fn) {
       if (!(this instanceof Layer)) {
-        return new Layer(path15, options, fn);
+        return new Layer(path21, options, fn);
       }
-      debug("new %o", path15);
+      debug("new %o", path21);
       const opts = options || {};
       this.handle = fn;
       this.keys = [];
       this.name = fn.name || "<anonymous>";
       this.params = void 0;
       this.path = void 0;
-      this.slash = path15 === "/" && opts.end === false;
+      this.slash = path21 === "/" && opts.end === false;
       function matcher(_path) {
         if (_path instanceof RegExp) {
           const keys = [];
@@ -20487,7 +20487,7 @@ var require_layer = __commonJS({
           decode: decodeParam
         });
       }
-      this.matchers = Array.isArray(path15) ? path15.map(matcher) : [matcher(path15)];
+      this.matchers = Array.isArray(path21) ? path21.map(matcher) : [matcher(path21)];
     }
     Layer.prototype.handleError = function handleError(error40, req, res, next) {
       const fn = this.handle;
@@ -20527,9 +20527,9 @@ var require_layer = __commonJS({
         next(err);
       }
     };
-    Layer.prototype.match = function match(path15) {
+    Layer.prototype.match = function match(path21) {
       let match2;
-      if (path15 != null) {
+      if (path21 != null) {
         if (this.slash) {
           this.params = {};
           this.path = "";
@@ -20537,7 +20537,7 @@ var require_layer = __commonJS({
         }
         let i = 0;
         while (!match2 && i < this.matchers.length) {
-          match2 = this.matchers[i](path15);
+          match2 = this.matchers[i](path21);
           i++;
         }
       }
@@ -20565,13 +20565,13 @@ var require_layer = __commonJS({
         throw err;
       }
     }
-    function loosen(path15) {
-      if (path15 instanceof RegExp || path15 === "/") {
-        return path15;
+    function loosen(path21) {
+      if (path21 instanceof RegExp || path21 === "/") {
+        return path21;
       }
-      return Array.isArray(path15) ? path15.map(function(p) {
+      return Array.isArray(path21) ? path21.map(function(p) {
         return loosen(p);
-      }) : String(path15).replace(TRAILING_SLASH_REGEXP, "");
+      }) : String(path21).replace(TRAILING_SLASH_REGEXP, "");
     }
   }
 });
@@ -20587,9 +20587,9 @@ var require_route = __commonJS({
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
     module.exports = Route;
-    function Route(path15) {
-      debug("new %o", path15);
-      this.path = path15;
+    function Route(path21) {
+      debug("new %o", path21);
+      this.path = path21;
       this.stack = [];
       this.methods = /* @__PURE__ */ Object.create(null);
     }
@@ -20710,27 +20710,27 @@ var require_router = __commonJS({
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var methods = METHODS.map((method) => method.toLowerCase());
-    module.exports = Router20;
+    module.exports = Router22;
     module.exports.Route = Route;
-    function Router20(options) {
-      if (!(this instanceof Router20)) {
-        return new Router20(options);
+    function Router22(options) {
+      if (!(this instanceof Router22)) {
+        return new Router22(options);
       }
       const opts = options || {};
-      function router20(req, res, next) {
-        router20.handle(req, res, next);
+      function router22(req, res, next) {
+        router22.handle(req, res, next);
       }
-      Object.setPrototypeOf(router20, this);
-      router20.caseSensitive = opts.caseSensitive;
-      router20.mergeParams = opts.mergeParams;
-      router20.params = {};
-      router20.strict = opts.strict;
-      router20.stack = [];
-      return router20;
+      Object.setPrototypeOf(router22, this);
+      router22.caseSensitive = opts.caseSensitive;
+      router22.mergeParams = opts.mergeParams;
+      router22.params = {};
+      router22.strict = opts.strict;
+      router22.stack = [];
+      return router22;
     }
-    Router20.prototype = function() {
+    Router22.prototype = function() {
     };
-    Router20.prototype.param = function param(name, fn) {
+    Router22.prototype.param = function param(name, fn) {
       if (!name) {
         throw new TypeError("argument name is required");
       }
@@ -20750,7 +20750,7 @@ var require_router = __commonJS({
       params.push(fn);
       return this;
     };
-    Router20.prototype.handle = function handle(req, res, callback) {
+    Router22.prototype.handle = function handle(req, res, callback) {
       if (!callback) {
         throw new TypeError("argument callback is required");
       }
@@ -20797,8 +20797,8 @@ var require_router = __commonJS({
         if (++sync > 100) {
           return setImmediate(next, err);
         }
-        const path15 = getPathname(req);
-        if (path15 == null) {
+        const path21 = getPathname(req);
+        if (path21 == null) {
           return done(layerError);
         }
         let layer;
@@ -20806,7 +20806,7 @@ var require_router = __commonJS({
         let route;
         while (match !== true && idx < stack.length) {
           layer = stack[idx++];
-          match = matchLayer(layer, path15);
+          match = matchLayer(layer, path21);
           route = layer.route;
           if (typeof match !== "boolean") {
             layerError = layerError || match;
@@ -20844,18 +20844,18 @@ var require_router = __commonJS({
           } else if (route) {
             layer.handleRequest(req, res, next);
           } else {
-            trimPrefix(layer, layerError, layerPath, path15);
+            trimPrefix(layer, layerError, layerPath, path21);
           }
           sync = 0;
         });
       }
-      function trimPrefix(layer, layerError, layerPath, path15) {
+      function trimPrefix(layer, layerError, layerPath, path21) {
         if (layerPath.length !== 0) {
-          if (layerPath !== path15.substring(0, layerPath.length)) {
+          if (layerPath !== path21.substring(0, layerPath.length)) {
             next(layerError);
             return;
           }
-          const c = path15[layerPath.length];
+          const c = path21[layerPath.length];
           if (c && c !== "/") {
             next(layerError);
             return;
@@ -20877,9 +20877,9 @@ var require_router = __commonJS({
         }
       }
     };
-    Router20.prototype.use = function use(handler) {
+    Router22.prototype.use = function use(handler) {
       let offset = 0;
-      let path15 = "/";
+      let path21 = "/";
       if (typeof handler !== "function") {
         let arg = handler;
         while (Array.isArray(arg) && arg.length !== 0) {
@@ -20887,7 +20887,7 @@ var require_router = __commonJS({
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path15 = handler;
+          path21 = handler;
         }
       }
       const callbacks = flatten.call(slice.call(arguments, offset), Infinity);
@@ -20899,8 +20899,8 @@ var require_router = __commonJS({
         if (typeof fn !== "function") {
           throw new TypeError("argument handler must be a function");
         }
-        debug("use %o %s", path15, fn.name || "<anonymous>");
-        const layer = new Layer(path15, {
+        debug("use %o %s", path21, fn.name || "<anonymous>");
+        const layer = new Layer(path21, {
           sensitive: this.caseSensitive,
           strict: false,
           end: false
@@ -20910,9 +20910,9 @@ var require_router = __commonJS({
       }
       return this;
     };
-    Router20.prototype.route = function route(path15) {
-      const route2 = new Route(path15);
-      const layer = new Layer(path15, {
+    Router22.prototype.route = function route(path21) {
+      const route2 = new Route(path21);
+      const layer = new Layer(path21, {
         sensitive: this.caseSensitive,
         strict: this.strict,
         end: true
@@ -20925,8 +20925,8 @@ var require_router = __commonJS({
       return route2;
     };
     methods.concat("all").forEach(function(method) {
-      Router20.prototype[method] = function(path15) {
-        const route = this.route(path15);
+      Router22.prototype[method] = function(path21) {
+        const route = this.route(path21);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
       };
@@ -20955,9 +20955,9 @@ var require_router = __commonJS({
       const fqdnIndex = url2.substring(0, pathLength).indexOf("://");
       return fqdnIndex !== -1 ? url2.substring(0, url2.indexOf("/", 3 + fqdnIndex)) : void 0;
     }
-    function matchLayer(layer, path15) {
+    function matchLayer(layer, path21) {
       try {
-        return layer.match(path15);
+        return layer.match(path21);
       } catch (err) {
         return err;
       }
@@ -21108,13 +21108,13 @@ var require_application = __commonJS({
     var compileTrust = require_utils3().compileTrust;
     var resolve = __require("node:path").resolve;
     var once = require_once();
-    var Router20 = require_router();
+    var Router22 = require_router();
     var slice = Array.prototype.slice;
     var flatten = Array.prototype.flat;
     var app2 = exports = module.exports = {};
     var trustProxyDefaultSymbol = "@@symbol:trust_proxy_default";
     app2.init = function init() {
-      var router20 = null;
+      var router22 = null;
       this.cache = /* @__PURE__ */ Object.create(null);
       this.engines = /* @__PURE__ */ Object.create(null);
       this.settings = /* @__PURE__ */ Object.create(null);
@@ -21123,13 +21123,13 @@ var require_application = __commonJS({
         configurable: true,
         enumerable: true,
         get: function getrouter() {
-          if (router20 === null) {
-            router20 = new Router20({
+          if (router22 === null) {
+            router22 = new Router22({
               caseSensitive: this.enabled("case sensitive routing"),
               strict: this.enabled("strict routing")
             });
           }
-          return router20;
+          return router22;
         }
       });
     };
@@ -21185,7 +21185,7 @@ var require_application = __commonJS({
     };
     app2.use = function use(fn) {
       var offset = 0;
-      var path15 = "/";
+      var path21 = "/";
       if (typeof fn !== "function") {
         var arg = fn;
         while (Array.isArray(arg) && arg.length !== 0) {
@@ -21193,22 +21193,22 @@ var require_application = __commonJS({
         }
         if (typeof arg !== "function") {
           offset = 1;
-          path15 = fn;
+          path21 = fn;
         }
       }
       var fns = flatten.call(slice.call(arguments, offset), Infinity);
       if (fns.length === 0) {
         throw new TypeError("app.use() requires a middleware function");
       }
-      var router20 = this.router;
+      var router22 = this.router;
       fns.forEach(function(fn2) {
         if (!fn2 || !fn2.handle || !fn2.set) {
-          return router20.use(path15, fn2);
+          return router22.use(path21, fn2);
         }
-        debug(".use app under %s", path15);
-        fn2.mountpath = path15;
+        debug(".use app under %s", path21);
+        fn2.mountpath = path21;
         fn2.parent = this;
-        router20.use(path15, function mounted_app(req, res, next) {
+        router22.use(path21, function mounted_app(req, res, next) {
           var orig = req.app;
           fn2.handle(req, res, function(err) {
             Object.setPrototypeOf(req, orig.request);
@@ -21220,8 +21220,8 @@ var require_application = __commonJS({
       }, this);
       return this;
     };
-    app2.route = function route(path15) {
-      return this.router.route(path15);
+    app2.route = function route(path21) {
+      return this.router.route(path21);
     };
     app2.engine = function engine(ext, fn) {
       if (typeof fn !== "function") {
@@ -21264,7 +21264,7 @@ var require_application = __commonJS({
       }
       return this;
     };
-    app2.path = function path15() {
+    app2.path = function path21() {
       return this.parent ? this.parent.path() + this.mountpath : "";
     };
     app2.enabled = function enabled(setting) {
@@ -21280,17 +21280,17 @@ var require_application = __commonJS({
       return this.set(setting, false);
     };
     methods.forEach(function(method) {
-      app2[method] = function(path15) {
+      app2[method] = function(path21) {
         if (method === "get" && arguments.length === 1) {
-          return this.set(path15);
+          return this.set(path21);
         }
-        var route = this.route(path15);
+        var route = this.route(path21);
         route[method].apply(route, slice.call(arguments, 1));
         return this;
       };
     });
-    app2.all = function all(path15) {
-      var route = this.route(path15);
+    app2.all = function all(path21) {
+      var route = this.route(path21);
       var args = slice.call(arguments, 1);
       for (var i = 0; i < methods.length; i++) {
         route[methods[i]].apply(route, args);
@@ -22212,7 +22212,7 @@ var require_request = __commonJS({
       var subdomains2 = !isIP2(hostname2) ? hostname2.split(".").reverse() : [hostname2];
       return subdomains2.slice(offset);
     });
-    defineGetter(req, "path", function path15() {
+    defineGetter(req, "path", function path21() {
       return parse4(this).pathname;
     });
     defineGetter(req, "host", function host() {
@@ -22423,8 +22423,8 @@ var require_content_disposition = __commonJS({
       this.type = type;
       this.parameters = parameters;
     }
-    function basename(path15) {
-      const normalized = path15.replaceAll("\\", "/");
+    function basename(path21) {
+      const normalized = path21.replaceAll("\\", "/");
       let end = normalized.length;
       while (end > 0 && normalized[end - 1] === "/") {
         end--;
@@ -22474,17 +22474,17 @@ var require_content_disposition = __commonJS({
 // ../../node_modules/.pnpm/cookie-signature@1.2.2/node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "../../node_modules/.pnpm/cookie-signature@1.2.2/node_modules/cookie-signature/index.js"(exports) {
-    var crypto5 = __require("crypto");
+    var crypto7 = __require("crypto");
     exports.sign = function(val, secret) {
       if ("string" != typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
-      return val + "." + crypto5.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto7.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports.unsign = function(input, secret) {
       if ("string" != typeof input) throw new TypeError("Signed cookie string must be provided.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
       var tentativeValue = input.slice(0, input.lastIndexOf(".")), expectedInput = exports.sign(tentativeValue, secret), expectedBuffer = Buffer.from(expectedInput), inputBuffer = Buffer.from(input);
-      return expectedBuffer.length === inputBuffer.length && crypto5.timingSafeEqual(expectedBuffer, inputBuffer) ? tentativeValue : false;
+      return expectedBuffer.length === inputBuffer.length && crypto7.timingSafeEqual(expectedBuffer, inputBuffer) ? tentativeValue : false;
     };
   }
 });
@@ -22670,27 +22670,27 @@ var require_send = __commonJS({
     var ms = require_ms();
     var onFinished = require_on_finished();
     var parseRange = require_range_parser();
-    var path15 = __require("path");
+    var path21 = __require("path");
     var statuses = require_statuses();
     var Stream = __require("stream");
     var util2 = __require("util");
-    var extname = path15.extname;
-    var join = path15.join;
-    var normalize = path15.normalize;
-    var resolve = path15.resolve;
-    var sep = path15.sep;
+    var extname = path21.extname;
+    var join = path21.join;
+    var normalize = path21.normalize;
+    var resolve = path21.resolve;
+    var sep = path21.sep;
     var BYTES_RANGE_REGEXP = /^ *bytes=/;
     var MAX_MAXAGE = 60 * 60 * 24 * 365 * 1e3;
     var UP_PATH_REGEXP = /(?:^|[\\/])\.\.(?:[\\/]|$)/;
     module.exports = send;
-    function send(req, path16, options) {
-      return new SendStream(req, path16, options);
+    function send(req, path22, options) {
+      return new SendStream(req, path22, options);
     }
-    function SendStream(req, path16, options) {
+    function SendStream(req, path22, options) {
       Stream.call(this);
       var opts = options || {};
       this.options = opts;
-      this.path = path16;
+      this.path = path22;
       this.req = req;
       this._acceptRanges = opts.acceptRanges !== void 0 ? Boolean(opts.acceptRanges) : true;
       this._cacheControl = opts.cacheControl !== void 0 ? Boolean(opts.cacheControl) : true;
@@ -22804,10 +22804,10 @@ var require_send = __commonJS({
       var lastModified = this.res.getHeader("Last-Modified");
       return parseHttpDate(lastModified) <= parseHttpDate(ifRange);
     };
-    SendStream.prototype.redirect = function redirect(path16) {
+    SendStream.prototype.redirect = function redirect(path22) {
       var res = this.res;
       if (hasListeners(this, "directory")) {
-        this.emit("directory", res, path16);
+        this.emit("directory", res, path22);
         return;
       }
       if (this.hasTrailingSlash()) {
@@ -22827,38 +22827,38 @@ var require_send = __commonJS({
     SendStream.prototype.pipe = function pipe2(res) {
       var root = this._root;
       this.res = res;
-      var path16 = decode(this.path);
-      if (path16 === -1) {
+      var path22 = decode(this.path);
+      if (path22 === -1) {
         this.error(400);
         return res;
       }
-      if (~path16.indexOf("\0")) {
+      if (~path22.indexOf("\0")) {
         this.error(400);
         return res;
       }
       var parts;
       if (root !== null) {
-        if (path16) {
-          path16 = normalize("." + sep + path16);
+        if (path22) {
+          path22 = normalize("." + sep + path22);
         }
-        if (UP_PATH_REGEXP.test(path16)) {
-          debug('malicious path "%s"', path16);
+        if (UP_PATH_REGEXP.test(path22)) {
+          debug('malicious path "%s"', path22);
           this.error(403);
           return res;
         }
-        parts = path16.split(sep);
-        path16 = normalize(join(root, path16));
+        parts = path22.split(sep);
+        path22 = normalize(join(root, path22));
       } else {
-        if (UP_PATH_REGEXP.test(path16)) {
-          debug('malicious path "%s"', path16);
+        if (UP_PATH_REGEXP.test(path22)) {
+          debug('malicious path "%s"', path22);
           this.error(403);
           return res;
         }
-        parts = normalize(path16).split(sep);
-        path16 = resolve(path16);
+        parts = normalize(path22).split(sep);
+        path22 = resolve(path22);
       }
       if (containsDotFile(parts)) {
-        debug('%s dotfile "%s"', this._dotfiles, path16);
+        debug('%s dotfile "%s"', this._dotfiles, path22);
         switch (this._dotfiles) {
           case "allow":
             break;
@@ -22872,13 +22872,13 @@ var require_send = __commonJS({
         }
       }
       if (this._index.length && this.hasTrailingSlash()) {
-        this.sendIndex(path16);
+        this.sendIndex(path22);
         return res;
       }
-      this.sendFile(path16);
+      this.sendFile(path22);
       return res;
     };
-    SendStream.prototype.send = function send2(path16, stat) {
+    SendStream.prototype.send = function send2(path22, stat) {
       var len = stat.size;
       var options = this.options;
       var opts = {};
@@ -22890,9 +22890,9 @@ var require_send = __commonJS({
         this.headersAlreadySent();
         return;
       }
-      debug('pipe "%s"', path16);
-      this.setHeader(path16, stat);
-      this.type(path16);
+      debug('pipe "%s"', path22);
+      this.setHeader(path22, stat);
+      this.type(path22);
       if (this.isConditionalGET()) {
         if (this.isPreconditionFailure()) {
           this.error(412);
@@ -22941,28 +22941,28 @@ var require_send = __commonJS({
         res.end();
         return;
       }
-      this.stream(path16, opts);
+      this.stream(path22, opts);
     };
-    SendStream.prototype.sendFile = function sendFile(path16) {
+    SendStream.prototype.sendFile = function sendFile(path22) {
       var i = 0;
       var self = this;
-      debug('stat "%s"', path16);
-      fs5.stat(path16, function onstat(err, stat) {
-        var pathEndsWithSep = path16[path16.length - 1] === sep;
-        if (err && err.code === "ENOENT" && !extname(path16) && !pathEndsWithSep) {
+      debug('stat "%s"', path22);
+      fs5.stat(path22, function onstat(err, stat) {
+        var pathEndsWithSep = path22[path22.length - 1] === sep;
+        if (err && err.code === "ENOENT" && !extname(path22) && !pathEndsWithSep) {
           return next(err);
         }
         if (err) return self.onStatError(err);
-        if (stat.isDirectory()) return self.redirect(path16);
+        if (stat.isDirectory()) return self.redirect(path22);
         if (pathEndsWithSep) return self.error(404);
-        self.emit("file", path16, stat);
-        self.send(path16, stat);
+        self.emit("file", path22, stat);
+        self.send(path22, stat);
       });
       function next(err) {
         if (self._extensions.length <= i) {
           return err ? self.onStatError(err) : self.error(404);
         }
-        var p = path16 + "." + self._extensions[i++];
+        var p = path22 + "." + self._extensions[i++];
         debug('stat "%s"', p);
         fs5.stat(p, function(err2, stat) {
           if (err2) return next(err2);
@@ -22972,7 +22972,7 @@ var require_send = __commonJS({
         });
       }
     };
-    SendStream.prototype.sendIndex = function sendIndex(path16) {
+    SendStream.prototype.sendIndex = function sendIndex(path22) {
       var i = -1;
       var self = this;
       function next(err) {
@@ -22980,7 +22980,7 @@ var require_send = __commonJS({
           if (err) return self.onStatError(err);
           return self.error(404);
         }
-        var p = join(path16, self._index[i]);
+        var p = join(path22, self._index[i]);
         debug('stat "%s"', p);
         fs5.stat(p, function(err2, stat) {
           if (err2) return next(err2);
@@ -22991,10 +22991,10 @@ var require_send = __commonJS({
       }
       next();
     };
-    SendStream.prototype.stream = function stream(path16, options) {
+    SendStream.prototype.stream = function stream(path22, options) {
       var self = this;
       var res = this.res;
-      var stream2 = fs5.createReadStream(path16, options);
+      var stream2 = fs5.createReadStream(path22, options);
       this.emit("stream", stream2);
       stream2.pipe(res);
       function cleanup() {
@@ -23009,17 +23009,17 @@ var require_send = __commonJS({
         self.emit("end");
       });
     };
-    SendStream.prototype.type = function type(path16) {
+    SendStream.prototype.type = function type(path22) {
       var res = this.res;
       if (res.getHeader("Content-Type")) return;
-      var ext = extname(path16);
+      var ext = extname(path22);
       var type2 = mime.contentType(ext) || "application/octet-stream";
       debug("content-type %s", type2);
       res.setHeader("Content-Type", type2);
     };
-    SendStream.prototype.setHeader = function setHeader(path16, stat) {
+    SendStream.prototype.setHeader = function setHeader(path22, stat) {
       var res = this.res;
-      this.emit("headers", res, path16, stat);
+      this.emit("headers", res, path22, stat);
       if (this._acceptRanges && !res.getHeader("Accept-Ranges")) {
         debug("accept ranges");
         res.setHeader("Accept-Ranges", "bytes");
@@ -23077,9 +23077,9 @@ var require_send = __commonJS({
       }
       return err instanceof Error ? createError(status, err, { expose: false }) : createError(status, err);
     }
-    function decode(path16) {
+    function decode(path22) {
       try {
-        return decodeURIComponent(path16);
+        return decodeURIComponent(path22);
       } catch (err) {
         return -1;
       }
@@ -23223,7 +23223,7 @@ var require_response = __commonJS({
     var http2 = __require("node:http");
     var onFinished = require_on_finished();
     var mime = require_mime_types();
-    var path15 = __require("node:path");
+    var path21 = __require("node:path");
     var pathIsAbsolute = __require("node:path").isAbsolute;
     var statuses = require_statuses();
     var sign = require_cookie_signature().sign;
@@ -23232,8 +23232,8 @@ var require_response = __commonJS({
     var setCharset = require_utils3().setCharset;
     var cookie = require_cookie();
     var send = require_send();
-    var extname = path15.extname;
-    var resolve = path15.resolve;
+    var extname = path21.extname;
+    var resolve = path21.resolve;
     var vary = require_vary();
     var { Buffer: Buffer3 } = __require("node:buffer");
     var res = Object.create(http2.ServerResponse.prototype);
@@ -23379,26 +23379,26 @@ var require_response = __commonJS({
       this.type("txt");
       return this.send(body);
     };
-    res.sendFile = function sendFile(path16, options, callback) {
+    res.sendFile = function sendFile(path22, options, callback) {
       var done = callback;
       var req = this.req;
       var res2 = this;
       var next = req.next;
       var opts = options || {};
-      if (!path16) {
+      if (!path22) {
         throw new TypeError("path argument is required to res.sendFile");
       }
-      if (typeof path16 !== "string") {
+      if (typeof path22 !== "string") {
         throw new TypeError("path must be a string to res.sendFile");
       }
       if (typeof options === "function") {
         done = options;
         opts = {};
       }
-      if (!opts.root && !pathIsAbsolute(path16)) {
+      if (!opts.root && !pathIsAbsolute(path22)) {
         throw new TypeError("path must be absolute or specify root to res.sendFile");
       }
-      var pathname = encodeURI(path16);
+      var pathname = encodeURI(path22);
       opts.etag = this.app.enabled("etag");
       var file2 = send(req, pathname, opts);
       sendfile(res2, file2, opts, function(err) {
@@ -23409,7 +23409,7 @@ var require_response = __commonJS({
         }
       });
     };
-    res.download = function download(path16, filename, options, callback) {
+    res.download = function download(path22, filename, options, callback) {
       var done = callback;
       var name = filename;
       var opts = options || null;
@@ -23426,7 +23426,7 @@ var require_response = __commonJS({
         opts = filename;
       }
       var headers = {
-        "Content-Disposition": contentDisposition(name || path16)
+        "Content-Disposition": contentDisposition(name || path22)
       };
       if (opts && opts.headers) {
         var keys = Object.keys(opts.headers);
@@ -23439,7 +23439,7 @@ var require_response = __commonJS({
       }
       opts = Object.create(opts);
       opts.headers = headers;
-      var fullPath = !opts.root ? resolve(path16) : path16;
+      var fullPath = !opts.root ? resolve(path22) : path22;
       return this.sendFile(fullPath, opts, done);
     };
     res.contentType = res.type = function contentType(type) {
@@ -23722,11 +23722,11 @@ var require_serve_static = __commonJS({
         }
         var forwardError = !fallthrough;
         var originalUrl = parseUrl.original(req);
-        var path15 = parseUrl(req).pathname;
-        if (path15 === "/" && originalUrl.pathname.substr(-1) !== "/") {
-          path15 = "";
+        var path21 = parseUrl(req).pathname;
+        if (path21 === "/" && originalUrl.pathname.substr(-1) !== "/") {
+          path21 = "";
         }
-        var stream = send(req, path15, opts);
+        var stream = send(req, path21, opts);
         stream.on("directory", onDirectory);
         if (setHeaders) {
           stream.on("headers", setHeaders);
@@ -23793,7 +23793,7 @@ var require_express = __commonJS({
     var EventEmitter = __require("node:events").EventEmitter;
     var mixin = require_merge_descriptors();
     var proto = require_application();
-    var Router20 = require_router();
+    var Router22 = require_router();
     var req = require_request();
     var res = require_response();
     exports = module.exports = createApplication;
@@ -23815,8 +23815,8 @@ var require_express = __commonJS({
     exports.application = proto;
     exports.request = req;
     exports.response = res;
-    exports.Route = Router20.Route;
-    exports.Router = Router20;
+    exports.Route = Router22.Route;
+    exports.Router = Router22;
     exports.json = bodyParser.json;
     exports.raw = bodyParser.raw;
     exports.static = require_serve_static();
@@ -24374,8 +24374,8 @@ var require_req = __commonJS({
       if (req.originalUrl) {
         _req.url = req.originalUrl;
       } else {
-        const path15 = req.path;
-        _req.url = typeof path15 === "string" ? path15 : req.url ? req.url.path || req.url : void 0;
+        const path21 = req.path;
+        _req.url = typeof path21 === "string" ? path21 : req.url ? req.url.path || req.url : void 0;
       }
       if (req.query) {
         _req.query = req.query;
@@ -28364,7 +28364,7 @@ var require_cert_signatures = __commonJS({
 var require_sasl = __commonJS({
   "../../node_modules/.pnpm/pg@8.22.0/node_modules/pg/lib/crypto/sasl.js"(exports, module) {
     "use strict";
-    var crypto5 = require_utils5();
+    var crypto7 = require_utils5();
     var { signatureAlgorithmHashFromCertificate } = require_cert_signatures();
     function saslprep(password) {
       const nonAsciiSpace = /[\u00A0\u1680\u2000-\u200B\u202F\u205F\u3000]/g;
@@ -28382,7 +28382,7 @@ var require_sasl = __commonJS({
       if (mechanism === "SCRAM-SHA-256-PLUS" && typeof stream.getPeerCertificate !== "function") {
         throw new Error("SASL: Mechanism SCRAM-SHA-256-PLUS requires a certificate");
       }
-      const clientNonce = crypto5.randomBytes(18).toString("base64");
+      const clientNonce = crypto7.randomBytes(18).toString("base64");
       const gs2Header = mechanism === "SCRAM-SHA-256-PLUS" ? "p=tls-server-end-point" : stream ? "y" : "n";
       return {
         mechanism,
@@ -28424,20 +28424,20 @@ var require_sasl = __commonJS({
         const peerCert = stream.getPeerCertificate().raw;
         let hashName = signatureAlgorithmHashFromCertificate(peerCert);
         if (hashName === "MD5" || hashName === "SHA-1") hashName = "SHA-256";
-        const certHash = await crypto5.hashByName(hashName, peerCert);
+        const certHash = await crypto7.hashByName(hashName, peerCert);
         const bindingData = Buffer.concat([Buffer.from("p=tls-server-end-point,,"), Buffer.from(certHash)]);
         channelBinding = bindingData.toString("base64");
       }
       const clientFinalMessageWithoutProof = "c=" + channelBinding + ",r=" + sv.nonce;
       const authMessage = clientFirstMessageBare + "," + serverFirstMessage + "," + clientFinalMessageWithoutProof;
       const saltBytes = Buffer.from(sv.salt, "base64");
-      const saltedPassword = await crypto5.deriveKey(saslprep(password), saltBytes, sv.iteration);
-      const clientKey = await crypto5.hmacSha256(saltedPassword, "Client Key");
-      const storedKey = await crypto5.sha256(clientKey);
-      const clientSignature = await crypto5.hmacSha256(storedKey, authMessage);
+      const saltedPassword = await crypto7.deriveKey(saslprep(password), saltBytes, sv.iteration);
+      const clientKey = await crypto7.hmacSha256(saltedPassword, "Client Key");
+      const storedKey = await crypto7.sha256(clientKey);
+      const clientSignature = await crypto7.hmacSha256(storedKey, authMessage);
       const clientProof = xorBuffers(Buffer.from(clientKey), Buffer.from(clientSignature)).toString("base64");
-      const serverKey = await crypto5.hmacSha256(saltedPassword, "Server Key");
-      const serverSignatureBytes = await crypto5.hmacSha256(serverKey, authMessage);
+      const serverKey = await crypto7.hmacSha256(saltedPassword, "Server Key");
+      const serverSignatureBytes = await crypto7.hmacSha256(serverKey, authMessage);
       session.message = "SASLResponse";
       session.serverSignature = Buffer.from(serverSignatureBytes).toString("base64");
       session.response = clientFinalMessageWithoutProof + ",p=" + clientProof;
@@ -30467,7 +30467,7 @@ var require_split2 = __commonJS({
 var require_helper = __commonJS({
   "../../node_modules/.pnpm/pgpass@1.0.5/node_modules/pgpass/lib/helper.js"(exports, module) {
     "use strict";
-    var path15 = __require("path");
+    var path21 = __require("path");
     var Stream = __require("stream").Stream;
     var split = require_split2();
     var util2 = __require("util");
@@ -30506,7 +30506,7 @@ var require_helper = __commonJS({
     };
     module.exports.getFileName = function(rawEnv) {
       var env = rawEnv || process.env;
-      var file2 = env.PGPASSFILE || (isWin2 ? path15.join(env.APPDATA || "./", "postgresql", "pgpass.conf") : path15.join(env.HOME || "./", ".pgpass"));
+      var file2 = env.PGPASSFILE || (isWin2 ? path21.join(env.APPDATA || "./", "postgresql", "pgpass.conf") : path21.join(env.HOME || "./", ".pgpass"));
       return file2;
     };
     module.exports.usePgPass = function(stats, fname) {
@@ -30638,7 +30638,7 @@ var require_helper = __commonJS({
 var require_lib4 = __commonJS({
   "../../node_modules/.pnpm/pgpass@1.0.5/node_modules/pgpass/lib/index.js"(exports, module) {
     "use strict";
-    var path15 = __require("path");
+    var path21 = __require("path");
     var fs5 = __require("fs");
     var helper = require_helper();
     module.exports = function(connInfo, cb) {
@@ -30667,7 +30667,7 @@ var require_client = __commonJS({
     var Query2 = require_query();
     var defaults2 = require_defaults();
     var Connection2 = require_connection();
-    var crypto5 = require_utils5();
+    var crypto7 = require_utils5();
     var activeQueryDeprecationNotice = nodeUtils.deprecate(
       () => {
       },
@@ -30918,7 +30918,7 @@ var require_client = __commonJS({
       _handleAuthMD5Password(msg) {
         this._getPassword(async () => {
           try {
-            const hashedPassword = await crypto5.postgresMd5PasswordHash(this.user, this.password, msg.salt);
+            const hashedPassword = await crypto7.postgresMd5PasswordHash(this.user, this.password, msg.salt);
             this.connection.password(hashedPassword);
           } catch (e) {
             this.emit("error", e);
@@ -32304,9 +32304,9 @@ function toHistoricalMatch(row, oddsType = "CLOSING") {
   return match;
 }
 function queryScraperMatches(oddsHome, oddsDraw, oddsAway, oddsType = "CLOSING", targetLeague, maxLimit = 15e3) {
-  const db6 = getDb();
+  const db7 = getDb();
   if (!oddsHome || !oddsDraw || !oddsAway || oddsHome <= 1.01 || oddsDraw <= 1.01 || oddsAway <= 1.01) {
-    const stmt2 = db6.prepare(`
+    const stmt2 = db7.prepare(`
       SELECT *
       FROM gecmis_maclar
       WHERE mac_skoru IS NOT NULL
@@ -32333,7 +32333,7 @@ function queryScraperMatches(oddsHome, oddsDraw, oddsAway, oddsType = "CLOSING",
   const hCol = oddsType === "OPENING" ? "oran_1_acilis" : "oran_1";
   const xCol = oddsType === "OPENING" ? "oran_x_acilis" : "oran_x";
   const aCol = oddsType === "OPENING" ? "oran_2_acilis" : "oran_2";
-  const stmt = db6.prepare(`
+  const stmt = db7.prepare(`
     SELECT *
     FROM gecmis_maclar
     WHERE ${hCol} > 1.01
@@ -32371,8 +32371,8 @@ function queryScraperMatches(oddsHome, oddsDraw, oddsAway, oddsType = "CLOSING",
 }
 function getScraperMatchCount() {
   try {
-    const db6 = getDb();
-    const row = db6.prepare(`
+    const db7 = getDb();
+    const row = db7.prepare(`
       SELECT COUNT(*) as cnt 
       FROM gecmis_maclar 
       WHERE (
@@ -32392,11 +32392,11 @@ function getScraperMatchCount() {
 }
 function getLeagueGoalAverages(leagueName) {
   try {
-    const db6 = getDb();
+    const db7 = getDb();
     const raw = (leagueName || "").trim();
     const cleanLeague = raw.replace(/-/g, " ").replace(/South Korea/gi, "G\xFCney Kore").replace(/Japan/gi, "Japonya").replace(/Brazil/gi, "Brezilya").replace(/Germany/gi, "Almanya").replace(/France/gi, "Fransa").replace(/Italy/gi, "\u0130talya").replace(/Spain/gi, "\u0130spanya").replace(/England/gi, "\u0130ngiltere").replace(/League/gi, "Lig").replace(/\s+/g, " ").trim();
     const likeLeague = `%${cleanLeague}%`;
-    let row = db6.prepare(`
+    let row = db7.prepare(`
       SELECT 
         AVG(CAST(SUBSTR(mac_skoru, 1, INSTR(mac_skoru, ':') - 1) AS REAL)) as avg_home,
         AVG(CAST(SUBSTR(mac_skoru, INSTR(mac_skoru, ':') + 1) AS REAL)) as avg_away
@@ -32418,8 +32418,8 @@ function getLeagueGoalAverages(leagueName) {
 }
 function getTeamStandingsFallback(league, team) {
   try {
-    const db6 = getDb();
-    const stmt1 = db6.prepare(`
+    const db7 = getDb();
+    const stmt1 = db7.prepare(`
       SELECT pos, total FROM (
         SELECT id, lig_sira_ev AS pos, toplam_takim AS total
         FROM gecmis_maclar
@@ -32449,7 +32449,7 @@ function getTeamStandingsFallback(league, team) {
       team
     );
     if (!row) {
-      const stmt2 = db6.prepare(`
+      const stmt2 = db7.prepare(`
         SELECT pos, total FROM (
           SELECT id, lig_sira_ev AS pos, toplam_takim AS total
           FROM gecmis_maclar
@@ -32478,10 +32478,10 @@ function normalizeTr(str) {
 }
 function queryH2HMatches(t1, t2) {
   try {
-    const db6 = getDb();
+    const db7 = getDb();
     const t1Norm = normalizeTr(t1);
     const t2Norm = normalizeTr(t2);
-    const stmt = db6.prepare(`SELECT * FROM gecmis_maclar ORDER BY id DESC`);
+    const stmt = db7.prepare(`SELECT * FROM gecmis_maclar ORDER BY id DESC`);
     const allRows = stmt.all();
     const matched = allRows.filter((r) => {
       const homeNorm = normalizeTr(r.ev_sahibi);
@@ -32813,14 +32813,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "../../node_modules/.pnpm/jwa@2.0.1/node_modules/jwa/index.js"(exports, module) {
     var Buffer3 = require_safe_buffer().Buffer;
-    var crypto5 = __require("crypto");
+    var crypto7 = __require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util2 = __require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto5.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto7.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -32910,17 +32910,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto5.createHmac("sha" + bits, secret);
+        var hmac = crypto7.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto5 ? function timingSafeEqual2(a, b) {
+    var timingSafeEqual = "timingSafeEqual" in crypto7 ? function timingSafeEqual2(a, b) {
       if (a.byteLength !== b.byteLength) {
         return false;
       }
-      return crypto5.timingSafeEqual(a, b);
+      return crypto7.timingSafeEqual(a, b);
     } : function timingSafeEqual2(a, b) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -32937,7 +32937,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto5.createSign("RSA-SHA" + bits);
+        var signer = crypto7.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -32947,7 +32947,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto5.createVerify("RSA-SHA" + bits);
+        var verifier = crypto7.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -32956,11 +32956,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto5.createSign("RSA-SHA" + bits);
+        var signer = crypto7.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto5.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto5.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto7.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto7.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -32970,12 +32970,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto5.createVerify("RSA-SHA" + bits);
+        var verifier = crypto7.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto5.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto5.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto7.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto7.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -36731,10 +36731,10 @@ var require_scheduler = __commonJS({
 });
 
 // ../../node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/dist/esm-node/rng.js
-import crypto2 from "crypto";
+import crypto3 from "crypto";
 function rng() {
   if (poolPtr > rnds8Pool.length - 16) {
-    crypto2.randomFillSync(rnds8Pool);
+    crypto3.randomFillSync(rnds8Pool);
     poolPtr = 0;
   }
   return rnds8Pool.slice(poolPtr, poolPtr += 16);
@@ -36934,14 +36934,14 @@ var init_v35 = __esm({
 });
 
 // ../../node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/dist/esm-node/md5.js
-import crypto3 from "crypto";
+import crypto4 from "crypto";
 function md5(bytes) {
   if (Array.isArray(bytes)) {
     bytes = Buffer.from(bytes);
   } else if (typeof bytes === "string") {
     bytes = Buffer.from(bytes, "utf8");
   }
-  return crypto3.createHash("md5").update(bytes).digest();
+  return crypto4.createHash("md5").update(bytes).digest();
 }
 var md5_default;
 var init_md5 = __esm({
@@ -36986,14 +36986,14 @@ var init_v4 = __esm({
 });
 
 // ../../node_modules/.pnpm/uuid@8.3.2/node_modules/uuid/dist/esm-node/sha1.js
-import crypto4 from "crypto";
+import crypto5 from "crypto";
 function sha1(bytes) {
   if (Array.isArray(bytes)) {
     bytes = Buffer.from(bytes);
   } else if (typeof bytes === "string") {
     bytes = Buffer.from(bytes, "utf8");
   }
-  return crypto4.createHash("sha1").update(bytes).digest();
+  return crypto5.createHash("sha1").update(bytes).digest();
 }
 var sha1_default;
 var init_sha1 = __esm({
@@ -37113,7 +37113,7 @@ var require_scheduled_task = __commonJS({
 var require_background_scheduled_task = __commonJS({
   "../../node_modules/.pnpm/node-cron@3.0.3/node_modules/node-cron/src/background-scheduled-task/index.js"(exports, module) {
     var EventEmitter = __require("events");
-    var path15 = __require("path");
+    var path21 = __require("path");
     var { fork } = __require("child_process");
     var uuid5 = (init_esm_node(), __toCommonJS(esm_node_exports));
     var daemonPath = `${__dirname}/daemon.js`;
@@ -37148,7 +37148,7 @@ var require_background_scheduled_task = __commonJS({
         options.scheduled = true;
         this.forkProcess.send({
           type: "register",
-          path: path15.resolve(this.taskPath),
+          path: path21.resolve(this.taskPath),
           cron: this.cronExpression,
           options
         });
@@ -37229,12 +37229,12 @@ var require_node_cron = __commonJS({
 });
 
 // src/app.ts
-var import_express20 = __toESM(require_express2(), 1);
+var import_express22 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 
 // src/routes/index.ts
-var import_express16 = __toESM(require_express2(), 1);
+var import_express19 = __toESM(require_express2(), 1);
 
 // ../../node_modules/.pnpm/express-rate-limit@8.7.0_express@5.2.1/node_modules/express-rate-limit/dist/index.mjs
 var import_ip_address = __toESM(require_ip_address(), 1);
@@ -38621,8 +38621,8 @@ function getErrorMap() {
 
 // ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path15, errorMaps, issueData } = params;
-  const fullPath = [...path15, ...issueData.path || []];
+  const { data, path: path21, errorMaps, issueData } = params;
+  const fullPath = [...path21, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -38737,11 +38737,11 @@ var errorUtil;
 
 // ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path15, key) {
+  constructor(parent, value, path21, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path15;
+    this._path = path21;
     this._key = key;
   }
   get path() {
@@ -43790,7 +43790,7 @@ function mapColumnsInSQLToAlias(query, alias) {
 function mapResultRow(columns, row, joinsNotNullableMap) {
   const nullifyMap = {};
   const result = columns.reduce(
-    (result2, { path: path15, field }, columnIndex) => {
+    (result2, { path: path21, field }, columnIndex) => {
       let decoder;
       if (is(field, Column)) {
         decoder = field;
@@ -43802,8 +43802,8 @@ function mapResultRow(columns, row, joinsNotNullableMap) {
         decoder = field.sql.decoder;
       }
       let node = result2;
-      for (const [pathChunkIndex, pathChunk] of path15.entries()) {
-        if (pathChunkIndex < path15.length - 1) {
+      for (const [pathChunkIndex, pathChunk] of path21.entries()) {
+        if (pathChunkIndex < path21.length - 1) {
           if (!(pathChunk in node)) {
             node[pathChunk] = {};
           }
@@ -43811,8 +43811,8 @@ function mapResultRow(columns, row, joinsNotNullableMap) {
         } else {
           const rawValue = row[columnIndex];
           const value = node[pathChunk] = rawValue === null ? null : decoder.mapFromDriverValue(rawValue);
-          if (joinsNotNullableMap && is(field, Column) && path15.length === 2) {
-            const objectName = path15[0];
+          if (joinsNotNullableMap && is(field, Column) && path21.length === 2) {
+            const objectName = path21[0];
             if (!(objectName in nullifyMap)) {
               nullifyMap[objectName] = value === null ? getTableName(field.table) : false;
             } else if (typeof nullifyMap[objectName] === "string" && nullifyMap[objectName] !== getTableName(field.table)) {
@@ -49839,10 +49839,10 @@ function assignProp(target, prop, value) {
     configurable: true
   });
 }
-function getElementAtPath(obj, path15) {
-  if (!path15)
+function getElementAtPath(obj, path21) {
+  if (!path21)
     return obj;
-  return path15.reduce((acc, key) => acc?.[key], obj);
+  return path21.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -50162,11 +50162,11 @@ function aborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path15, issues) {
+function prefixIssues(path21, issues) {
   return issues.map((iss) => {
     var _a;
     (_a = iss).path ?? (_a.path = []);
-    iss.path.unshift(path15);
+    iss.path.unshift(path21);
     return iss;
   });
 }
@@ -50303,7 +50303,7 @@ function treeifyError(error40, _mapper) {
     return issue2.message;
   };
   const result = { errors: [] };
-  const processError = (error41, path15 = []) => {
+  const processError = (error41, path21 = []) => {
     var _a, _b;
     for (const issue2 of error41.issues) {
       if (issue2.code === "invalid_union" && issue2.errors.length) {
@@ -50313,7 +50313,7 @@ function treeifyError(error40, _mapper) {
       } else if (issue2.code === "invalid_element") {
         processError({ issues: issue2.issues }, issue2.path);
       } else {
-        const fullpath = [...path15, ...issue2.path];
+        const fullpath = [...path21, ...issue2.path];
         if (fullpath.length === 0) {
           result.errors.push(mapper(issue2));
           continue;
@@ -50343,9 +50343,9 @@ function treeifyError(error40, _mapper) {
   processError(error40);
   return result;
 }
-function toDotPath(path15) {
+function toDotPath(path21) {
   const segs = [];
-  for (const seg of path15) {
+  for (const seg of path21) {
     if (typeof seg === "number")
       segs.push(`[${seg}]`);
     else if (typeof seg === "symbol")
@@ -60922,13 +60922,13 @@ function construct(client, config2 = {}) {
   }
   const driver = new NodePgDriver(client, dialect, { logger: logger2, cache: config2.cache });
   const session = driver.createSession(schema);
-  const db6 = new NodePgDatabase(dialect, session, schema);
-  db6.$client = client;
-  db6.$cache = config2.cache;
-  if (db6.$cache) {
-    db6.$cache["invalidate"] = config2.cache?.onMutate;
+  const db7 = new NodePgDatabase(dialect, session, schema);
+  db7.$client = client;
+  db7.$cache = config2.cache;
+  if (db7.$cache) {
+    db7.$cache["invalidate"] = config2.cache?.onMutate;
   }
-  return db6;
+  return db7;
 }
 function drizzle(...params) {
   if (typeof params[0] === "string") {
@@ -62514,13 +62514,13 @@ var __dirname3 = path2.dirname(fileURLToPath2(import.meta.url));
 var DB_PATH2 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path2.resolve(__dirname3, "../../../scripts/scraper/gecmis_maclar.db");
 var FLASK = "http://127.0.0.1:5051";
 var TIMEOUT = 6e3;
-async function proxyGet(path15) {
-  return fetch(`${FLASK}${path15}`, {
+async function proxyGet(path21) {
+  return fetch(`${FLASK}${path21}`, {
     signal: AbortSignal.timeout(TIMEOUT)
   });
 }
-async function proxyPost(path15, body) {
-  return fetch(`${FLASK}${path15}`, {
+async function proxyPost(path21, body) {
+  return fetch(`${FLASK}${path21}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: body ? JSON.stringify(body) : void 0,
@@ -62615,8 +62615,8 @@ function getDb2() {
   }
 }
 function getTodayMatchesFromDb(dateStr) {
-  const db6 = getDb2();
-  if (!db6) {
+  const db7 = getDb2();
+  if (!db7) {
     return { date: dateStr, matches: [], total: 0, last_updated: null };
   }
   let dotDate = dateStr;
@@ -62636,7 +62636,7 @@ function getTodayMatchesFromDb(dateStr) {
   const [ty, tm, td] = tomorrowIso.split("-");
   const tomorrowDot = `${td}.${tm}.${ty}`;
   try {
-    const stmt = db6.prepare(`
+    const stmt = db7.prepare(`
       SELECT id, tarih, saat, lig, ev_sahibi, deplasman,
              oran_1, oran_x, oran_2, alt_orani, ust_orani, kg_var, kg_yok,
              lig_sira_ev, lig_sira_dep, toplam_takim,
@@ -62709,7 +62709,7 @@ function getTodayMatchesFromDb(dateStr) {
       m.iy_ms_tahmini = imResult;
       m.frekans_count = clusterCount;
     });
-    const lastStmt = db6.prepare(`
+    const lastStmt = db7.prepare(`
       SELECT MAX(olusturma_tarihi) as max_tarih FROM gecmis_maclar WHERE tarih = ? OR tarih = ?
     `);
     const lastRow = lastStmt.get(dotDate, isoDate);
@@ -63033,9 +63033,9 @@ function toBasketHistoricalMatch(row) {
 }
 function queryBasketScraperMatches(oran_1, oran_2) {
   try {
-    const db6 = getDb3();
+    const db7 = getDb3();
     const TOL = 0.35;
-    const stmt = db6.prepare(`
+    const stmt = db7.prepare(`
       SELECT *
       FROM basketbol_maclar
       WHERE oran_1 IS NOT NULL
@@ -63060,8 +63060,8 @@ function queryBasketScraperMatches(oran_1, oran_2) {
 }
 function queryTodayBasketMatches(dateStr) {
   try {
-    const db6 = getDb3();
-    const stmt = db6.prepare(`
+    const db7 = getDb3();
+    const stmt = db7.prepare(`
       SELECT *
       FROM basketbol_maclar
       WHERE tarih = ?
@@ -63075,8 +63075,8 @@ function queryTodayBasketMatches(dateStr) {
 }
 function getBasketScraperMatchCount() {
   try {
-    const db6 = getDb3();
-    const row = db6.prepare("SELECT COUNT(*) as cnt FROM basketbol_maclar").get();
+    const db7 = getDb3();
+    const row = db7.prepare("SELECT COUNT(*) as cnt FROM basketbol_maclar").get();
     return row?.cnt ?? 0;
   } catch {
     return 0;
@@ -63613,63 +63613,56 @@ L\xFCtfen bu verilere bakarak yukar\u0131da belirtilen profesyonel tipster tarz\
   logger.error({ err: lastError }, "All Gemini API keys failed.");
   throw new Error("Yorum olu\u015Fturulurken bir hata meydana geldi (T\xFCm API kotalar\u0131 dolu olabilir).");
 }
-async function generateSEOBlogPost(matchData, stats) {
+async function generateDailyMultiMatchBlog(matches) {
   const keys = getAvailableKeys();
   if (keys.length === 0) throw new Error("Gemini API key is not configured.");
-  const oranlar = [
-    { isim: "Ev Sahibi (MS1)", deger: parseFloat(stats.ev_sahibi?.yuzde || 0) },
-    { isim: "Beraberlik (MSX)", deger: parseFloat(stats.beraberlik?.yuzde || 0) },
-    { isim: "Deplasman (MS2)", deger: parseFloat(stats.deplasman?.yuzde || 0) },
-    { isim: "2.5 \xDCst", deger: parseFloat(stats.ust_25?.yuzde || 0) },
-    { isim: "Kar\u015F\u0131l\u0131kl\u0131 Gol Var (KG Var)", deger: parseFloat(stats.kg_var?.yuzde || 0) }
-  ];
-  oranlar.sort((a, b) => b.deger - a.deger);
-  const enIyiTahmin = oranlar[0];
-  const systemInstruction = `Sen uzman bir Spor Edit\xF6r\xFC, Teknik SEO Uzman\u0131 ve Profesyonel \u0130ddaa Analistisin. 
-Senden beklenen, verilen ma\xE7 ve istatistik bilgilerine g\xF6re Google'da \xFCst s\u0131ralara \xE7\u0131kacak bir blog post i\xE7eri\u011Fi \xFCretmen.
-MUTLAKA JSON FORMATINDA (sadece JSON) GER\u0130 D\xD6N\xDC\u015E YAP.
-Format:
-{
-  "title": "SEO uyumlu, 50-60 karakter, t\u0131klama te\u015Fvik edici bir ba\u015Fl\u0131k (\xD6rn: Galatasaray - Fenerbah\xE7e Dev Derbi Analizi ve \u0130ddaa Tahmini)",
-  "slug": "seo-uyumlu-turkce-karaktersiz-ve-kucuk-harfli-url-slugu",
-  "category": "Lig ad\u0131n\u0131n SEO uyumlu url format\u0131 (\xF6rn: turkiye-super-lig, ingiltere-premier-lig)",
-  "excerpt": "140-160 karakterlik meta description ve \xF6zet. Anahtar kelimeleri i\xE7ermeli.",
-  "read_time": "Tahmini okuma s\xFCresi, (\xD6rn: '3 dk okuma')",
-  "content": "Makalenin tamam\u0131. HTML (p, h2, ul, li vb.) kullanarak zengin bir SEO blog i\xE7eri\u011Fi olu\u015Ftur. En az 2-3 paragraf olsun. Analizde banko vs deme profesyonel kelimeler kullan. \xD6nerilen tahmini (${enIyiTahmin.isim}) makale sonunda vurgulayarak belirt."
-}`;
-  const prompt = `
-Ma\xE7: ${matchData.homeTeam} vs ${matchData.awayTeam}
-Lig: ${matchData.league}
-Benzer Ge\xE7mi\u015F Ma\xE7 Say\u0131s\u0131: ${stats.total_mac}
-
-En Y\xFCksek G\xFCvenli \xC7\u0131kt\u0131lar:
-- Ev Sahibi (MS1): %${stats.ev_sahibi?.yuzde}
-- Beraberlik (MSX): %${stats.beraberlik?.yuzde}
-- Deplasman (MS2): %${stats.deplasman?.yuzde}
-- 2.5 Gol \xDCst\xFC: %${stats.ust_25?.yuzde}
-- Kar\u015F\u0131l\u0131kl\u0131 Gol Var: %${stats.kg_var?.yuzde}
-
-L\xFCtfen bu verilerle JSON tipinde blog yaz\u0131s\u0131n\u0131 \xFCret.
+  let matchesDataStr = "";
+  matches.forEach((m, i) => {
+    matchesDataStr += `
+MA\xC7 ${i + 1}: ${m.ev_sahibi} vs ${m.deplasman}
 `;
-  let lastError = null;
-  for (let i = 0; i < keys.length; i++) {
-    try {
-      const genAI = new GoogleGenerativeAI(keys[i]);
-      const model = genAI.getGenerativeModel({
-        model: "gemini-3.6-flash",
-        systemInstruction,
-        generationConfig: { responseMimeType: "application/json" }
-      });
-      const result = await model.generateContent(prompt);
-      const text2 = (await result.response).text();
-      return JSON.parse(text2);
-    } catch (error40) {
-      logger.warn({ err: error40, keyIndex: i }, "Gemini API key failed.");
-      lastError = error40;
-    }
+    matchesDataStr += `MS1 Y\xFCzde: ${m.stats.ev_sahibi?.yuzde}
+`;
+    matchesDataStr += `MSX Y\xFCzde: ${m.stats.beraberlik?.yuzde}
+`;
+    matchesDataStr += `MS2 Y\xFCzde: ${m.stats.deplasman?.yuzde}
+`;
+    matchesDataStr += `2.5 \xDCST Y\xFCzde: ${m.stats.ust_25?.yuzde}
+`;
+    matchesDataStr += `KG VAR Y\xFCzde: ${m.stats.kg_var?.yuzde}
+`;
+  });
+  const systemInstruction = `Sen uzman bir Spor Edit\xF6r\xFC ve Teknik SEO Uzman\u0131s\u0131n.
+G\xF6rev: Sana verilen g\xFCn\xFCn \xF6ne \xE7\u0131kan ma\xE7lar\u0131n\u0131n analiz y\xFCzdelerini kullanarak SEO uyumlu, dikkat \xE7ekici bir "G\xFCn\xFCn Ma\xE7lar\u0131 \u0130statistiksel Analizi" blog yaz\u0131s\u0131 yazmak.
+
+YASAKLI KEL\u0130MELER: "Banko", "garanti", "kesin", "%100 kazan\xE7". Bunlar\u0131 ASLA kullanma.
+KULLANILACAK D\u0130L: "\u0130statistiksel olas\u0131l\u0131k", "Analizlerimize g\xF6re", "Y\xFCzde X ihtimalle", "Algoritma verileri".
+
+\u0130\xE7erikte her ma\xE7 i\xE7in H2 ba\u015Fl\u0131\u011F\u0131 (Tak\u0131m A - Tak\u0131m B) kullan ve istatistiklere dayanarak yorumla.
+En y\xFCksek ihtimalli sonucu "Sistemin \xD6ne \xC7\u0131kard\u0131\u011F\u0131 Tahmin" olarak belirt.
+
+MUTLAKA JSON FORMATINDA D\xD6N! JSON yap\u0131s\u0131 \u015Fu \u015Fekilde olmal\u0131:
+{
+  "title": "G\xFCn\xFCn Ma\xE7lar\u0131: SEO Uyumlu Ba\u015Fl\u0131k (\xD6rn: 15 Eyl\xFCl \u015Eampiyonlar Ligi Analizleri ve Yapay Zeka Tahminleri)",
+  "slug": "gunun-maclari-yapay-zeka-analizleri-15-eylul",
+  "excerpt": "G\xFCn\xFCn \xF6ne \xE7\u0131kan ma\xE7lar\u0131 i\xE7in yapay zeka destekli istatistiksel olas\u0131l\u0131k analizleri...",
+  "content": "HTML format\u0131nda, paragraflar, H2 ba\u015Fl\u0131klar\u0131, <strong> etiketleri i\xE7eren detayl\u0131 blog yaz\u0131s\u0131 metni. Footer'a otomatik YASAL UYARI EKLENECEKT\u0130R, senin yasal uyar\u0131 eklemene gerek yok."
+}`;
+  const genAI = new GoogleGenerativeAI(keys[Math.floor(Math.random() * keys.length)]);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", systemInstruction });
+  const prompt = `L\xFCtfen \u015Fu ma\xE7lar i\xE7in JSON format\u0131nda SEO uyumlu bir blog yaz\u0131s\u0131 haz\u0131rla:
+
+${matchesDataStr}`;
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    let text2 = response.text();
+    text2 = text2.replace(/```json/g, "").replace(/```/g, "").trim();
+    return JSON.parse(text2);
+  } catch (error40) {
+    logger.error({ error: error40 }, "generateDailyMultiMatchBlog error");
+    throw error40;
   }
-  logger.error({ err: lastError }, "All Gemini API keys failed.");
-  throw new Error("Blog olu\u015Fturulurken bir hata meydana geldi.");
 }
 
 // src/routes/ai.ts
@@ -63844,8 +63837,8 @@ var predictLimiter = rate_limit_default({
 });
 function hasMatchStarted(matchId) {
   try {
-    const db6 = new Database4(dbPath);
-    const m = db6.prepare("SELECT tarih, saat FROM gecmis_maclar WHERE id = ?").get(matchId);
+    const db7 = new Database4(dbPath);
+    const m = db7.prepare("SELECT tarih, saat FROM gecmis_maclar WHERE id = ?").get(matchId);
     if (!m) return true;
     let isoDate = m.tarih;
     if (isoDate && isoDate.includes(".")) {
@@ -63870,8 +63863,8 @@ router13.post("/", predictLimiter, (req, res) => {
     return res.status(403).json({ error: "Bu ma\xE7 ba\u015Flam\u0131\u015F, tahmin yapamazs\u0131n\u0131z." });
   }
   try {
-    const db6 = new Database4(dbPath);
-    db6.prepare(`
+    const db7 = new Database4(dbPath);
+    db7.prepare(`
       INSERT INTO user_predictions (user_id, match_id, prediction_type, predicted_value)
       VALUES (?, ?, ?, ?)
       ON CONFLICT(user_id, match_id, prediction_type) DO UPDATE SET
@@ -63891,7 +63884,7 @@ router13.get("/me", (req, res) => {
   const limit = 20;
   const offset = (page - 1) * limit;
   try {
-    const db6 = new Database4(dbPath);
+    const db7 = new Database4(dbPath);
     let whereClause = "WHERE p.user_id = ?";
     const params = [user_id];
     if (status === "pending") {
@@ -63909,9 +63902,9 @@ router13.get("/me", (req, res) => {
       LIMIT ? OFFSET ?
     `;
     params.push(limit, offset);
-    const predictions = db6.prepare(query).all(...params);
+    const predictions = db7.prepare(query).all(...params);
     const countQuery = `SELECT COUNT(*) as count FROM user_predictions p ${whereClause}`;
-    const totalCount = db6.prepare(countQuery).get(...params.slice(0, -2));
+    const totalCount = db7.prepare(countQuery).get(...params.slice(0, -2));
     res.json({
       success: true,
       data: predictions,
@@ -63929,8 +63922,8 @@ router13.get("/me", (req, res) => {
 router13.get("/me/stats", (req, res) => {
   const user_id = req.user.userId;
   try {
-    const db6 = new Database4(dbPath);
-    const stats = db6.prepare(`
+    const db7 = new Database4(dbPath);
+    const stats = db7.prepare(`
       SELECT 
         COUNT(id) as total_predictions,
         SUM(CASE WHEN status = 'correct' THEN 1 ELSE 0 END) as correct_predictions,
@@ -63943,7 +63936,7 @@ router13.get("/me/stats", (req, res) => {
     const incorrect = stats.incorrect_predictions || 0;
     const resolvedTotal = correct + incorrect;
     const winRate = resolvedTotal > 0 ? (correct / resolvedTotal * 100).toFixed(1) : "0.0";
-    const favLeague = db6.prepare(`
+    const favLeague = db7.prepare(`
       SELECT m.lig, COUNT(p.id) as cnt
       FROM user_predictions p
       JOIN gecmis_maclar m ON p.match_id = m.id
@@ -64161,6 +64154,107 @@ router15.get("/active", (req, res) => {
 });
 var announcements_default = router15;
 
+// src/routes/stats.ts
+var import_express16 = __toESM(require_express2(), 1);
+import Database8 from "better-sqlite3";
+import path11 from "node:path";
+import { fileURLToPath as fileURLToPath10 } from "node:url";
+var router16 = (0, import_express16.Router)();
+var __dirnameLocal5 = path11.dirname(fileURLToPath10(import.meta.url));
+var DB_PATH5 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path11.resolve(__dirnameLocal5, "../../../scripts/scraper/gecmis_maclar.db");
+router16.get("/success-rate", (req, res) => {
+  try {
+    const db7 = new Database8(DB_PATH5);
+    const filter = req.query.filter || "30";
+    let dateCondition = "";
+    if (filter === "7") dateCondition = "WHERE date >= date('now', '-7 days')";
+    else if (filter === "30") dateCondition = "WHERE date >= date('now', '-30 days')";
+    const query = `
+      SELECT 
+        COUNT(*) as total_analyzed,
+        SUM(CASE WHEN ms_status = 'correct' THEN 1 ELSE 0 END) as ms_correct,
+        SUM(CASE WHEN ms_status = 'incorrect' THEN 1 ELSE 0 END) as ms_incorrect,
+        SUM(CASE WHEN ou_status = 'correct' THEN 1 ELSE 0 END) as ou_correct,
+        SUM(CASE WHEN ou_status = 'incorrect' THEN 1 ELSE 0 END) as ou_incorrect,
+        SUM(CASE WHEN btts_status = 'correct' THEN 1 ELSE 0 END) as btts_correct,
+        SUM(CASE WHEN btts_status = 'incorrect' THEN 1 ELSE 0 END) as btts_incorrect
+      FROM system_predictions
+      ${dateCondition}
+    `;
+    const row = db7.prepare(query).get();
+    const calcRate = (c, i) => c + i > 0 ? (c / (c + i) * 100).toFixed(1) : 0;
+    const trendQuery = `
+      SELECT date, 
+             COUNT(*) as count,
+             SUM(CASE WHEN ms_status = 'correct' THEN 1 ELSE 0 END) as correct
+      FROM system_predictions
+      ${dateCondition}
+      GROUP BY date
+      ORDER BY date ASC
+    `;
+    const trendRows = db7.prepare(trendQuery).all();
+    const chartData = trendRows.map((r) => ({
+      date: r.date,
+      rate: r.count > 0 ? (r.correct / r.count * 100).toFixed(1) : 0
+    }));
+    res.json({
+      success: true,
+      stats: {
+        total: row.total_analyzed,
+        msRate: calcRate(row.ms_correct, row.ms_incorrect),
+        ouRate: calcRate(row.ou_correct, row.ou_incorrect),
+        bttsRate: calcRate(row.btts_correct, row.btts_incorrect)
+      },
+      trend: chartData
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Sunucu hatas\u0131: " + err.message });
+  }
+});
+var stats_default = router16;
+
+// src/routes/blog.ts
+var import_express17 = __toESM(require_express2(), 1);
+import Database9 from "better-sqlite3";
+import path12 from "node:path";
+import { fileURLToPath as fileURLToPath11 } from "node:url";
+var __dirname7 = path12.dirname(fileURLToPath11(import.meta.url));
+var dbPath5 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path12.resolve(__dirname7, "../../../scripts/scraper/gecmis_maclar.db");
+var db5 = new Database9(dbPath5, { readonly: false });
+var router17 = (0, import_express17.Router)();
+router17.get("/", (req, res) => {
+  try {
+    const posts = db5.prepare(`
+      SELECT id, title, slug, meta_description, created_at, updated_at 
+      FROM blog_posts 
+      WHERE status = 'published'
+      ORDER BY created_at DESC LIMIT 20
+    `).all();
+    res.json(posts);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+router17.get("/:slug", (req, res) => {
+  try {
+    const post = db5.prepare("SELECT * FROM blog_posts WHERE slug = ? AND status = 'published'").get(req.params.slug);
+    if (!post) {
+      res.status(404).json({ error: "Yaz\u0131 bulunamad\u0131 veya hen\xFCz yay\u0131nlanmad\u0131" });
+      return;
+    }
+    res.json(post);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+var blog_default = router17;
+
+// src/routes/settings.ts
+var import_express18 = __toESM(require_express2(), 1);
+import Database10 from "better-sqlite3";
+import path13 from "node:path";
+import { fileURLToPath as fileURLToPath12 } from "node:url";
+
 // src/lib/userAuthMiddleware.ts
 var import_jsonwebtoken = __toESM(require_jsonwebtoken(), 1);
 var JWT_SECRET = process.env.JWT_SECRET || "karga_jwt_super_secret_2026_fallback";
@@ -64190,8 +64284,55 @@ function requireAdmin(req, res, next) {
   });
 }
 
+// src/routes/settings.ts
+import crypto2 from "node:crypto";
+var __dirname8 = path13.dirname(fileURLToPath12(import.meta.url));
+var dbPath6 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path13.resolve(__dirname8, "../../../scripts/scraper/gecmis_maclar.db");
+var db6 = new Database10(dbPath6);
+var router18 = (0, import_express18.Router)();
+router18.get("/me", requireUser, (req, res) => {
+  try {
+    const user = db6.prepare("SELECT email_notifications FROM users WHERE id = ?").get(req.user?.id);
+    res.json({ email_notifications: !!user?.email_notifications });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+router18.put("/notifications", requireUser, (req, res) => {
+  try {
+    const { email_notifications } = req.body;
+    db6.prepare("UPDATE users SET email_notifications = ? WHERE id = ?").run(email_notifications ? 1 : 0, req.user?.id);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+router18.get("/unsubscribe/:hash", (req, res) => {
+  try {
+    const hash2 = req.params.hash;
+    const users = db6.prepare("SELECT id, email FROM users WHERE email_notifications = 1").all();
+    let unsubscribedEmail = null;
+    for (const u of users) {
+      const expectedHash = crypto2.createHash("md5").update(u.email + "karga_newsletter_secret").digest("hex");
+      if (expectedHash === hash2) {
+        db6.prepare("UPDATE users SET email_notifications = 0 WHERE id = ?").run(u.id);
+        unsubscribedEmail = u.email;
+        break;
+      }
+    }
+    if (unsubscribedEmail) {
+      res.json({ success: true, message: "Abonelik ba\u015Far\u0131yla iptal edildi." });
+    } else {
+      res.status(400).json({ error: "Ge\xE7ersiz link veya zaten abonelikten \xE7\u0131k\u0131lm\u0131\u015F." });
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+var settings_default = router18;
+
 // src/routes/index.ts
-var router16 = (0, import_express16.Router)();
+var router19 = (0, import_express19.Router)();
 var adminRateLimiter = rate_limit_default({
   windowMs: 15 * 60 * 1e3,
   max: 50,
@@ -64201,199 +64342,42 @@ var adminRateLimiter = rate_limit_default({
     res.status(options.statusCode).send(options.message);
   }
 });
-router16.use("/announcements", announcements_default);
-router16.use("/admin", requireAdmin, adminRateLimiter, (req, res, next) => {
+router19.use("/announcements", announcements_default);
+router19.use("/stats", stats_default);
+router19.use("/blog", blog_default);
+router19.use("/admin", requireAdmin, adminRateLimiter, (req, res, next) => {
   logger.info(`[AUDIT] Admin ${req.user?.email} accessed ${req.method} ${req.originalUrl}`);
   next();
 });
-router16.use(health_default);
-router16.use(matches_default);
-router16.use(today_default);
-router16.use(spawn_default);
-router16.use(streamProxy_default);
-router16.use("/analyze", requireUser);
-router16.use("/coupon", requireUser);
-router16.use("/coupon-of-the-day", requireUser);
-router16.use("/basket", requireUser);
-router16.use("/live-matches", requireUser);
-router16.use("/ai", requireUser);
-router16.use(analyze_default);
-router16.use(admin_default);
-router16.use("/admin/dashboard", adminDashboard_default);
-router16.use(coupon_default);
-router16.use(basketMatches_default);
-router16.use(live_default);
-router16.use("/ai", ai_default);
-router16.use(couponWizard_default);
-router16.use("/predictions", requireUser, predictions_default);
-var routes_default = router16;
-
-// src/routes/blog.ts
-var import_express17 = __toESM(require_express2(), 1);
-import Database8 from "better-sqlite3";
-import path11 from "node:path";
-import { fileURLToPath as fileURLToPath10 } from "node:url";
-
-// src/lib/auth.ts
-function requireAdmin2(req, res, next) {
-  const authHeader = req.headers.authorization;
-  const expectedToken = process.env.ADMIN_TOKEN || "karga_super_secret_token_2026";
-  if (!authHeader || authHeader !== `Bearer ${expectedToken}`) {
-    res.status(401).json({ error: "Yetkisiz eri\u015Fim. Admin giri\u015Fi yapman\u0131z gerekmektedir." });
-    return;
-  }
-  next();
-}
-
-// src/routes/blog.ts
-var __dirname7 = path11.dirname(fileURLToPath10(import.meta.url));
-var dbPath5 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path11.resolve(__dirname7, "../../../scripts/scraper/gecmis_maclar.db");
-var db5 = new Database8(dbPath5, { readonly: false });
-var router17 = (0, import_express17.Router)();
-router17.get("/blog", (req, res) => {
-  try {
-    const posts = db5.prepare(`
-      SELECT b.*, t.oran_1, t.oran_x, t.oran_2 
-      FROM blog_posts b 
-      LEFT JOIN gecmis_maclar t ON b.match_id = t.id 
-      ORDER BY b.created_at DESC LIMIT 20
-    `).all();
-    res.json(posts);
-  } catch (e) {
-    logger.error({ err: e }, "GET /blog error");
-    res.status(500).json({ error: e.message });
-  }
-});
-router17.get("/blog/:slug", requireUser, (req, res) => {
-  try {
-    const post = db5.prepare("SELECT * FROM blog_posts WHERE slug = ?").get(req.params.slug);
-    if (!post) {
-      res.status(404).json({ error: "Post bulunamad\u0131" });
-      return;
-    }
-    res.json(post);
-  } catch (e) {
-    logger.error({ err: e }, "GET /blog/:slug error");
-    res.status(500).json({ error: e.message });
-  }
-});
-router17.post("/blog/generate-daily", requireAdmin2, async (req, res) => {
-  try {
-    const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
-    const todayData = getTodayMatchesFromDb(today);
-    let matches = todayData.matches || [];
-    matches = matches.filter((m) => m.oran_1 && m.oran_2 && m.oran_x);
-    matches.sort((a, b) => (b.frekans_count || 0) - (a.frekans_count || 0));
-    const topMatches = matches.slice(0, 3);
-    const generatedPosts = [];
-    const { queryScraperMatches: queryScraperMatches2 } = await Promise.resolve().then(() => (init_scraperDb(), scraperDb_exports));
-    for (const targetMatch of topMatches) {
-      const existingPost = db5.prepare("SELECT id FROM blog_posts WHERE match_id = ?").get(targetMatch.id);
-      if (existingPost) {
-        continue;
-      }
-      const candidates = queryScraperMatches2(
-        targetMatch.oran_1,
-        targetMatch.oran_x,
-        targetMatch.oran_2,
-        "CLOSING"
-      );
-      const refMatches = findSimilarMatches({
-        oddsHome: targetMatch.oran_1,
-        oddsDraw: targetMatch.oran_x,
-        oddsAway: targetMatch.oran_2,
-        altOdds: targetMatch.alt_orani,
-        ustOdds: targetMatch.ust_orani,
-        varOdds: targetMatch.kg_var,
-        yokOdds: targetMatch.kg_yok,
-        altOdds35: targetMatch.alt_orani_35,
-        ustOdds35: targetMatch.ust_orani_35,
-        iyAltOdds15: targetMatch.iy_alt_orani_15,
-        iyUstOdds15: targetMatch.iy_ust_orani_15,
-        iyAltOdds05: targetMatch.iy_alt_orani_05,
-        iyUstOdds05: targetMatch.iy_ust_orani_05
-      }, candidates);
-      const analyzeData = analyze({
-        homeTeam: targetMatch.ev_sahibi,
-        awayTeam: targetMatch.deplasman,
-        league: targetMatch.lig,
-        oddsHome: targetMatch.oran_1,
-        oddsDraw: targetMatch.oran_x,
-        oddsAway: targetMatch.oran_2
-      }, refMatches);
-      const blogData = await generateSEOBlogPost(
-        { homeTeam: targetMatch.ev_sahibi, awayTeam: targetMatch.deplasman, league: targetMatch.lig },
-        analyzeData.analiz_ozet
-      );
-      const stats = analyzeData.analiz_ozet;
-      const edges = [
-        { isim: "Ev Sahibi (MS1)", deger: analyzeData.real_edge_home || -99 },
-        { isim: "Beraberlik (MSX)", deger: analyzeData.real_edge_draw || -99 },
-        { isim: "Deplasman (MS2)", deger: analyzeData.real_edge_away || -99 },
-        { isim: "2.5 \xDCst", deger: analyzeData.real_edge_over25 || -99 },
-        { isim: "Kar\u015F\u0131l\u0131kl\u0131 Gol Var (KG Var)", deger: analyzeData.real_edge_btts || -99 }
-      ];
-      edges.sort((a, b) => b.deger - a.deger);
-      const prediction = edges[0].isim;
-      const insertStmt = db5.prepare(`
-        INSERT INTO blog_posts (match_id, title, content, prediction, slug, category, excerpt, read_time) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-      const result = insertStmt.run(
-        targetMatch.id,
-        blogData.title,
-        blogData.content,
-        prediction,
-        blogData.slug,
-        targetMatch.lig,
-        blogData.excerpt,
-        blogData.read_time
-      );
-      generatedPosts.push({
-        id: result.lastInsertRowid,
-        ...blogData,
-        prediction,
-        match_id: targetMatch.id,
-        created_at: (/* @__PURE__ */ new Date()).toISOString()
-      });
-    }
-    res.json({ success: true, posts: generatedPosts });
-  } catch (e) {
-    logger.error({ err: e }, "generate-daily route error");
-    res.status(500).json({ error: e.message || "Blog \xFCretilirken hata olu\u015Ftu.", stack: e.stack });
-  }
-});
-router17.delete("/blog/:id", requireAdmin2, (req, res) => {
-  try {
-    const id = req.params.id;
-    db5.prepare("DELETE FROM blog_posts WHERE id = ?").run(id);
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-router17.put("/blog/:id", requireAdmin2, (req, res) => {
-  try {
-    const id = req.params.id;
-    const { title, content, excerpt, category, prediction } = req.body;
-    db5.prepare(`
-      UPDATE blog_posts 
-      SET title = ?, content = ?, excerpt = ?, category = ?, prediction = ?
-      WHERE id = ?
-    `).run(title, content, excerpt, category, prediction, id);
-    res.json({ success: true });
-  } catch (e) {
-    logger.error({ err: e }, "PUT /blog/:id error");
-    res.status(500).json({ error: e.message });
-  }
-});
-var blog_default = router17;
+router19.use(health_default);
+router19.use(matches_default);
+router19.use(today_default);
+router19.use(spawn_default);
+router19.use(streamProxy_default);
+router19.use("/analyze", requireUser);
+router19.use("/coupon", requireUser);
+router19.use("/coupon-of-the-day", requireUser);
+router19.use("/basket", requireUser);
+router19.use("/live-matches", requireUser);
+router19.use("/ai", requireUser);
+router19.use(analyze_default);
+router19.use(admin_default);
+router19.use("/admin/dashboard", adminDashboard_default);
+router19.use(coupon_default);
+router19.use(basketMatches_default);
+router19.use(live_default);
+router19.use("/ai", ai_default);
+router19.use("/settings", settings_default);
+router19.use(settings_default);
+router19.use(couponWizard_default);
+router19.use("/predictions", requireUser, predictions_default);
+var routes_default = router19;
 
 // src/routes/auth.ts
-var import_express18 = __toESM(require_express2(), 1);
-var router18 = (0, import_express18.Router)();
+var import_express20 = __toESM(require_express2(), 1);
+var router20 = (0, import_express20.Router)();
 var ADMIN_TOKEN = process.env.ADMIN_SECRET_KEY || "karga-secret-admin-key-9988";
-router18.post("/admin/login", (req, res) => {
+router20.post("/admin/login", (req, res) => {
   const { password } = req.body;
   if (password === ADMIN_TOKEN) {
     res.json({ success: true, token: ADMIN_TOKEN });
@@ -64401,10 +64385,10 @@ router18.post("/admin/login", (req, res) => {
     res.status(401).json({ success: false, error: "Hatal\u0131 \u015Fifre!" });
   }
 });
-var auth_default = router18;
+var auth_default = router20;
 
 // src/routes/userAuth.ts
-var import_express19 = __toESM(require_express2(), 1);
+var import_express21 = __toESM(require_express2(), 1);
 
 // ../../node_modules/.pnpm/bcryptjs@3.0.3/node_modules/bcryptjs/index.js
 import nodeCrypto from "crypto";
@@ -66131,19 +66115,19 @@ var bcryptjs_default = {
 
 // src/routes/userAuth.ts
 var import_jsonwebtoken2 = __toESM(require_jsonwebtoken(), 1);
-import Database9 from "better-sqlite3";
-import path12 from "node:path";
-import { fileURLToPath as fileURLToPath11 } from "node:url";
-var router19 = (0, import_express19.Router)();
-var __dirnameLocal5 = path12.dirname(fileURLToPath11(import.meta.url));
-var dbPath6 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path12.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
+import Database11 from "better-sqlite3";
+import path14 from "node:path";
+import { fileURLToPath as fileURLToPath13 } from "node:url";
+var router21 = (0, import_express21.Router)();
+var __dirnameLocal6 = path14.dirname(fileURLToPath13(import.meta.url));
+var dbPath7 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path14.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
 var JWT_SECRET2 = process.env.JWT_SECRET || "karga_jwt_super_secret_2026_fallback";
 var authLimiter = rate_limit_default({
   windowMs: 15 * 60 * 1e3,
   max: 10,
   message: { error: "\xC7ok fazla deneme yapt\u0131n\u0131z, l\xFCtfen 15 dakika sonra tekrar deneyin." }
 });
-router19.post("/register", authLimiter, (req, res) => {
+router21.post("/register", authLimiter, (req, res) => {
   const { email: email3, password, kvkk } = req.body;
   if (!email3 || !password) {
     res.status(400).json({ error: "Email ve \u015Fifre zorunludur." });
@@ -66158,30 +66142,30 @@ router19.post("/register", authLimiter, (req, res) => {
     return;
   }
   try {
-    const db6 = new Database9(dbPath6);
-    const existing = db6.prepare("SELECT id FROM users WHERE email = ?").get(email3);
+    const db7 = new Database11(dbPath7);
+    const existing = db7.prepare("SELECT id FROM users WHERE email = ?").get(email3);
     if (existing) {
       res.status(400).json({ error: "Bu email adresi zaten kullan\u0131l\u0131yor." });
       return;
     }
     const salt = bcryptjs_default.genSaltSync(10);
     const hash2 = bcryptjs_default.hashSync(password, salt);
-    const insertStmt = db6.prepare("INSERT INTO users (email, password_hash) VALUES (?, ?)");
+    const insertStmt = db7.prepare("INSERT INTO users (email, password_hash) VALUES (?, ?)");
     insertStmt.run(email3, hash2);
     res.json({ success: true, message: "Kay\u0131t ba\u015Far\u0131l\u0131! L\xFCtfen giri\u015F yap\u0131n." });
   } catch (err) {
     res.status(500).json({ error: "Sunucu hatas\u0131: " + err.message });
   }
 });
-router19.post("/login", authLimiter, (req, res) => {
+router21.post("/login", authLimiter, (req, res) => {
   const { email: email3, password } = req.body;
   if (!email3 || !password) {
     res.status(400).json({ error: "Email ve \u015Fifre zorunludur." });
     return;
   }
   try {
-    const db6 = new Database9(dbPath6);
-    const user = db6.prepare("SELECT id, email, password_hash, role, is_banned FROM users WHERE email = ?").get(email3);
+    const db7 = new Database11(dbPath7);
+    const user = db7.prepare("SELECT id, email, password_hash, role, is_banned FROM users WHERE email = ?").get(email3);
     if (!user) {
       res.status(401).json({ error: "Hatal\u0131 email veya \u015Fifre!" });
       return;
@@ -66196,7 +66180,7 @@ router19.post("/login", authLimiter, (req, res) => {
       return;
     }
     try {
-      db6.prepare("UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?").run(user.id);
+      db7.prepare("UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?").run(user.id);
     } catch (e) {
       console.error("Failed to update last_login_at for user", user.id, e);
     }
@@ -66211,13 +66195,13 @@ router19.post("/login", authLimiter, (req, res) => {
     res.status(500).json({ error: "Sunucu hatas\u0131: " + err.message });
   }
 });
-router19.post("/logout", (req, res) => {
+router21.post("/logout", (req, res) => {
   res.json({ success: true, message: "\xC7\u0131k\u0131\u015F yap\u0131ld\u0131." });
 });
-router19.get("/me", requireUser, (req, res) => {
+router21.get("/me", requireUser, (req, res) => {
   try {
-    const db6 = new Database9(dbPath6);
-    const user = db6.prepare("SELECT id, email, membership_status, membership_plan, email_verified, created_at, role FROM users WHERE id = ?").get(req.user.userId);
+    const db7 = new Database11(dbPath7);
+    const user = db7.prepare("SELECT id, email, membership_status, membership_plan, email_verified, created_at, role FROM users WHERE id = ?").get(req.user.userId);
     if (!user) {
       res.status(404).json({ error: "Kullanici bulunamadi." });
       return;
@@ -66227,7 +66211,7 @@ router19.get("/me", requireUser, (req, res) => {
     res.status(500).json({ error: "Sunucu hatasi: " + err.message });
   }
 });
-router19.post("/me/password", requireUser, (req, res) => {
+router21.post("/me/password", requireUser, (req, res) => {
   const { currentPassword, newPassword } = req.body;
   if (!currentPassword || !newPassword) {
     res.status(400).json({ error: "Eski ve yeni sifre zorunludur." });
@@ -66238,36 +66222,36 @@ router19.post("/me/password", requireUser, (req, res) => {
     return;
   }
   try {
-    const db6 = new Database9(dbPath6);
-    const user = db6.prepare("SELECT password_hash FROM users WHERE id = ?").get(req.user.userId);
+    const db7 = new Database11(dbPath7);
+    const user = db7.prepare("SELECT password_hash FROM users WHERE id = ?").get(req.user.userId);
     if (!bcryptjs_default.compareSync(currentPassword, user.password_hash)) {
       res.status(400).json({ error: "Eski sifreniz yanlis." });
       return;
     }
     const salt = bcryptjs_default.genSaltSync(10);
     const hash2 = bcryptjs_default.hashSync(newPassword, salt);
-    db6.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(hash2, req.user.userId);
+    db7.prepare("UPDATE users SET password_hash = ? WHERE id = ?").run(hash2, req.user.userId);
     res.json({ success: true, message: "Sifreniz basariyla guncellendi." });
   } catch (err) {
     res.status(500).json({ error: "Sunucu hatasi: " + err.message });
   }
 });
-router19.delete("/me", requireUser, (req, res) => {
+router21.delete("/me", requireUser, (req, res) => {
   try {
-    const db6 = new Database9(dbPath6);
-    db6.prepare("DELETE FROM users WHERE id = ?").run(req.user.userId);
+    const db7 = new Database11(dbPath7);
+    db7.prepare("DELETE FROM users WHERE id = ?").run(req.user.userId);
     res.json({ success: true, message: "Hesabiniz basariyla silindi." });
   } catch (err) {
     res.status(500).json({ error: "Sunucu hatasi: " + err.message });
   }
 });
-var userAuth_default = router19;
+var userAuth_default = router21;
 
 // src/app.ts
-import Database10 from "better-sqlite3";
-import path13 from "node:path";
-import { fileURLToPath as fileURLToPath12 } from "node:url";
-var app = (0, import_express20.default)();
+import Database12 from "better-sqlite3";
+import path15 from "node:path";
+import { fileURLToPath as fileURLToPath14 } from "node:url";
+var app = (0, import_express22.default)();
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -66288,18 +66272,18 @@ app.use(
   })
 );
 app.use((0, import_cors.default)());
-app.use(import_express20.default.json({ limit: "10mb" }));
-app.use(import_express20.default.urlencoded({ limit: "10mb", extended: true }));
-var __dirnameLocal6 = path13.dirname(fileURLToPath12(import.meta.url));
-var dbPath7 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path13.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
+app.use(import_express22.default.json({ limit: "10mb" }));
+app.use(import_express22.default.urlencoded({ limit: "10mb", extended: true }));
+var __dirnameLocal7 = path15.dirname(fileURLToPath14(import.meta.url));
+var dbPath8 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path15.resolve(__dirname, "../../../scripts/scraper/gecmis_maclar.db");
 app.use("/api", routes_default);
 app.use("/api", auth_default);
 app.use("/api/auth", userAuth_default);
 app.use("/api", blog_default);
 app.get("/sitemap.xml", (req, res) => {
   try {
-    const db6 = new Database10(dbPath7, { readonly: true });
-    const posts = db6.prepare("SELECT slug, category, created_at FROM blog_posts ORDER BY created_at DESC").all();
+    const db7 = new Database12(dbPath8, { readonly: true });
+    const posts = db7.prepare("SELECT slug, category, created_at FROM blog_posts ORDER BY created_at DESC").all();
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -66391,10 +66375,353 @@ function startDailyMatchScheduler() {
   logger.info("G\xFCnl\xFCk ma\xE7 scheduler ba\u015Flat\u0131ld\u0131 (00:00 TR / 21:00 UTC)");
 }
 
+// src/cron/resolvePredictions.ts
+var import_node_cron2 = __toESM(require_node_cron(), 1);
+import Database13 from "better-sqlite3";
+import path16 from "node:path";
+import { fileURLToPath as fileURLToPath15 } from "node:url";
+var __dirnameLocal8 = path16.dirname(fileURLToPath15(import.meta.url));
+var dbPath9 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path16.resolve(__dirnameLocal8, "../../../../scripts/scraper/gecmis_maclar.db");
+function parseScore2(scoreStr) {
+  if (!scoreStr) return null;
+  const match = scoreStr.match(/(\d+)\s*[-:]\s*(\d+)/);
+  if (!match) return null;
+  return { h: parseInt(match[1]), a: parseInt(match[2]) };
+}
+function evaluatePrediction(predType, predValue, ftScore, htScore) {
+  if (ftScore && /[a-zA-Z]/.test(ftScore)) {
+    return "void";
+  }
+  const ft = parseScore2(ftScore || "");
+  const ht = parseScore2(htScore || "");
+  if (!ft) return "pending";
+  const homeFt = ft.h, awayFt = ft.a, totalGoals = ft.h + ft.a;
+  try {
+    switch (predType) {
+      case "MS1X2":
+        if (predValue === "1" && homeFt > awayFt) return "correct";
+        if (predValue === "X" && homeFt === awayFt) return "correct";
+        if (predValue === "2" && homeFt < awayFt) return "correct";
+        return "incorrect";
+      case "ALT_UST_2_5":
+        if (predValue === "UST" && totalGoals >= 3) return "correct";
+        if (predValue === "ALT" && totalGoals <= 2) return "correct";
+        return "incorrect";
+      case "KG_VAR_YOK":
+        const kg = homeFt > 0 && awayFt > 0;
+        if (predValue === "VAR" && kg) return "correct";
+        if (predValue === "YOK" && !kg) return "correct";
+        return "incorrect";
+      default:
+        return "void";
+    }
+  } catch (e) {
+    return "pending";
+  }
+}
+function startPredictionResolver() {
+  import_node_cron2.default.schedule("*/5 * * * *", () => {
+    try {
+      const db7 = new Database13(dbPath9);
+      const pendingPreds = db7.prepare(`
+        SELECT p.id, p.prediction_type, p.predicted_value, 
+               m.mac_skoru, m.devre_skoru, m.saat, m.tarih
+        FROM user_predictions p
+        JOIN gecmis_maclar m ON p.match_id = m.id
+        WHERE p.status = 'pending'
+      `).all();
+      if (pendingPreds.length === 0) return;
+      let resolvedCount = 0;
+      const updateStmt = db7.prepare("UPDATE user_predictions SET status = ?, resolved_at = CURRENT_TIMESTAMP WHERE id = ?");
+      const resolveTx = db7.transaction((preds) => {
+        for (const p of preds) {
+          const macSkoru = p.mac_skoru ? p.mac_skoru.trim() : null;
+          if (!macSkoru || macSkoru === "-" || macSkoru === "") continue;
+          const newStatus = evaluatePrediction(p.prediction_type, p.predicted_value, macSkoru, p.devre_skoru);
+          if (newStatus !== "pending") {
+            updateStmt.run(newStatus, p.id);
+            resolvedCount++;
+          }
+        }
+      });
+      resolveTx(pendingPreds);
+      const sysPending = db7.prepare(`
+        SELECT s.id, s.ms_prediction, s.ou_prediction, s.btts_prediction, 
+               m.mac_skoru, m.devre_skoru
+        FROM system_predictions s
+        JOIN gecmis_maclar m ON s.match_id = m.id
+        WHERE s.ms_status = 'pending' OR s.ou_status = 'pending' OR s.btts_status = 'pending'
+      `).all();
+      let sysResolvedCount = 0;
+      const updateSysStmt = db7.prepare(`
+        UPDATE system_predictions 
+        SET ms_status = ?, ou_status = ?, btts_status = ?, resolved_at = CURRENT_TIMESTAMP 
+        WHERE id = ?
+      `);
+      const resolveSysTx = db7.transaction((preds) => {
+        for (const p of preds) {
+          const macSkoru = p.mac_skoru ? p.mac_skoru.trim() : null;
+          if (!macSkoru || macSkoru === "-" || macSkoru === "") continue;
+          const ms = evaluatePrediction("MS1X2", p.ms_prediction, macSkoru, p.devre_skoru);
+          const ou = evaluatePrediction("ALT_UST_2_5", p.ou_prediction, macSkoru, p.devre_skoru);
+          const btts = evaluatePrediction("KG_VAR_YOK", p.btts_prediction, macSkoru, p.devre_skoru);
+          if (ms !== "pending" && ou !== "pending" && btts !== "pending") {
+            updateSysStmt.run(ms, ou, btts, p.id);
+            sysResolvedCount++;
+          }
+        }
+      });
+      resolveSysTx(sysPending);
+      if (sysResolvedCount > 0) {
+        logger.info(`[CRON] Resolved ${sysResolvedCount} pending system predictions.`);
+      }
+      if (resolvedCount > 0) {
+        logger.info(`[CRON] Resolved ${resolvedCount} pending user predictions.`);
+      }
+    } catch (e) {
+      logger.error({ err: e }, "Prediction Resolver Cron Job Error");
+    }
+  });
+  logger.info("Prediction Resolver Cron Job Started (runs every 5m).");
+}
+
+// src/cron/systemPredictionsJob.ts
+var import_node_cron3 = __toESM(require_node_cron(), 1);
+import Database14 from "better-sqlite3";
+import path17 from "node:path";
+import { fileURLToPath as fileURLToPath16 } from "node:url";
+init_scraperDb();
+var __dirnameLocal9 = path17.dirname(fileURLToPath16(import.meta.url));
+var DB_PATH6 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path17.resolve(__dirnameLocal9, "../../../../scripts/scraper/gecmis_maclar.db");
+function startSystemPredictionsJob() {
+  import_node_cron3.default.schedule("0 8 * * *", async () => {
+    logger.info("[CRON] Starting Daily System Predictions Analysis...");
+    try {
+      const db7 = new Database14(DB_PATH6);
+      const d = /* @__PURE__ */ new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      const todayStr = `${year}-${month}-${day}`;
+      const todayData = getTodayMatchesFromDb(todayStr);
+      const insertStmt = db7.prepare(`
+        INSERT INTO system_predictions (
+          match_id, date, league, 
+          ms_prediction, ms_prob,
+          ou_prediction, ou_prob,
+          btts_prediction, btts_prob
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(match_id) DO NOTHING
+      `);
+      let count = 0;
+      for (const m of todayData.matches) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        if (!m.oran_1 || !m.oran_x || !m.oran_2) continue;
+        const refsRaw = queryScraperMatches(m.oran_1, m.oran_x, m.oran_2, "CLOSING", m.lig, 15e3);
+        const similar = findSimilarMatches({
+          oddsHome: m.oran_1,
+          oddsDraw: m.oran_x,
+          oddsAway: m.oran_2,
+          league: m.lig,
+          maxResults: 25
+        }, refsRaw);
+        const validRefs = similar.map((s) => s.match);
+        const analysis = analyze({
+          date: m.tarih,
+          time: m.saat,
+          league: m.lig,
+          homeTeam: m.ev_sahibi,
+          awayTeam: m.deplasman,
+          oddsHome: m.oran_1,
+          oddsDraw: m.oran_x,
+          oddsAway: m.oran_2
+        }, validRefs);
+        if (!analysis) continue;
+        const msProb = Math.max(analysis.analiz_ozet.ev_sahibi.yuzde, analysis.analiz_ozet.beraberlik.yuzde, analysis.analiz_ozet.deplasman.yuzde);
+        const msPred = msProb === analysis.analiz_ozet.ev_sahibi.yuzde ? "1" : msProb === analysis.analiz_ozet.beraberlik.yuzde ? "X" : "2";
+        const ouProb = Math.max(analysis.analiz_ozet.ust_25.yuzde, 100 - analysis.analiz_ozet.ust_25.yuzde);
+        const ouPred = ouProb === analysis.analiz_ozet.ust_25.yuzde ? "UST" : "ALT";
+        const bttsProb = Math.max(analysis.analiz_ozet.kg_var.yuzde, 100 - analysis.analiz_ozet.kg_var.yuzde);
+        const bttsPred = bttsProb === analysis.analiz_ozet.kg_var.yuzde ? "VAR" : "YOK";
+        try {
+          insertStmt.run(m.id, todayStr, m.lig, msPred, msProb, ouPred, ouProb, bttsPred, bttsProb);
+          count++;
+        } catch (e) {
+        }
+      }
+      logger.info(`[CRON] Daily System Predictions completed: added ${count} matches for ${todayStr}.`);
+    } catch (e) {
+      logger.error({ err: e }, "System Predictions Cron Job Error");
+    }
+  });
+  logger.info("System Predictions Cron Job Started (runs every day at 08:00).");
+}
+
+// src/cron/blogDraftJob.ts
+var import_node_cron4 = __toESM(require_node_cron(), 1);
+import Database15 from "better-sqlite3";
+import path18 from "node:path";
+import { fileURLToPath as fileURLToPath17 } from "node:url";
+init_scraperDb();
+var __dirnameLocal10 = path18.dirname(fileURLToPath17(import.meta.url));
+var DB_PATH7 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path18.resolve(__dirnameLocal10, "../../../../scripts/scraper/gecmis_maclar.db");
+function startBlogDraftJob() {
+  import_node_cron4.default.schedule("15 9 * * *", async () => {
+    logger.info("[CRON] Starting Daily Blog Draft Generation...");
+    try {
+      const db7 = new Database15(DB_PATH7);
+      const d = /* @__PURE__ */ new Date();
+      const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const todayData = getTodayMatchesFromDb(todayStr);
+      let matches = todayData.matches || [];
+      matches = matches.filter((m) => m.oran_1 && m.oran_2 && m.oran_x);
+      if (matches.length === 0) {
+        logger.info("[CRON] No valid matches found for blog today.");
+        return;
+      }
+      const topMatches = matches.slice(0, 4);
+      const analyzedMatches = [];
+      for (const m of topMatches) {
+        const refsRaw = queryScraperMatches(m.oran_1, m.oran_x, m.oran_2, "CLOSING", m.lig, 15e3);
+        const similar = findSimilarMatches({
+          oddsHome: m.oran_1,
+          oddsDraw: m.oran_x,
+          oddsAway: m.oran_2,
+          league: m.lig,
+          maxResults: 25
+        }, refsRaw);
+        const validRefs = similar.map((s) => s.match);
+        const analysis = analyze({
+          date: m.tarih,
+          time: m.saat,
+          league: m.lig,
+          homeTeam: m.ev_sahibi,
+          awayTeam: m.deplasman,
+          oddsHome: m.oran_1,
+          oddsDraw: m.oran_x,
+          oddsAway: m.oran_2
+        }, validRefs);
+        if (analysis) {
+          analyzedMatches.push({ ...m, stats: analysis.analiz_ozet });
+        }
+        await new Promise((r) => setTimeout(r, 50));
+      }
+      if (analyzedMatches.length > 0) {
+        const blogContent = await generateDailyMultiMatchBlog(analyzedMatches);
+        db7.prepare(`
+          INSERT INTO blog_posts (title, slug, meta_description, content, status, raw_data)
+          VALUES (?, ?, ?, ?, 'draft', ?)
+        `).run(blogContent.title, blogContent.slug, blogContent.excerpt, blogContent.content, JSON.stringify(analyzedMatches));
+        logger.info(`[CRON] Blog draft created: ${blogContent.title}`);
+      }
+    } catch (e) {
+      logger.error({ err: e }, "Blog Draft Cron Error");
+    }
+  });
+  logger.info("Blog Draft Cron Job Started (runs every day at 09:00).");
+}
+
+// src/cron/newsletterJob.ts
+var import_node_cron5 = __toESM(require_node_cron(), 1);
+import Database16 from "better-sqlite3";
+import path19 from "node:path";
+import { fileURLToPath as fileURLToPath18 } from "node:url";
+import crypto6 from "node:crypto";
+var __dirnameLocal11 = path19.dirname(fileURLToPath18(import.meta.url));
+var DB_PATH8 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db") ? "/var/www/futbol_app/gecmis_maclar.db" : path19.resolve(__dirnameLocal11, "../../../../scripts/scraper/gecmis_maclar.db");
+function startNewsletterJob() {
+  import_node_cron5.default.schedule("0 18 * * 0", async () => {
+    logger.info("[CRON] Starting Weekly Newsletter Job...");
+    try {
+      const db7 = new Database16(DB_PATH8);
+      const RESEND_API_KEY = process.env.RESEND_API_KEY;
+      if (!RESEND_API_KEY) {
+        logger.warn("[CRON] RESEND_API_KEY is not set. Newsletter will not be sent.");
+        return;
+      }
+      const systemStats = db7.prepare(`
+        SELECT 
+          COUNT(*) as total,
+          SUM(CASE WHEN ms_status = 'correct' THEN 1 ELSE 0 END) as correct
+        FROM system_predictions 
+        WHERE date >= date('now', '-7 days')
+      `).get();
+      const systemRate = systemStats.total > 0 ? (systemStats.correct / systemStats.total * 100).toFixed(1) : "Bilinmiyor";
+      const users = db7.prepare(`
+        SELECT id, username, email FROM users 
+        WHERE email_notifications = 1 
+        AND created_at <= datetime('now', '-7 days')
+      `).all();
+      logger.info(`[CRON] Found ${users.length} users subscribed to the newsletter.`);
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < users.length; i += BATCH_SIZE) {
+        const batch = users.slice(i, i + BATCH_SIZE);
+        for (const user of batch) {
+          const userStats = db7.prepare(`
+            SELECT 
+              COUNT(*) as total,
+              SUM(CASE WHEN status = 'correct' THEN 1 ELSE 0 END) as correct
+            FROM user_predictions 
+            WHERE user_id = ? AND created_at >= datetime('now', '-7 days')
+          `).get(user.id);
+          let personalMessage = "Bu hafta hen\xFCz sisteme tahmin girmedin. Yeni oranlar\u0131 ke\u015Ffetmek i\xE7in hemen siteye g\xF6z at!";
+          if (userStats.total > 0) {
+            const userRate = (userStats.correct / userStats.total * 100).toFixed(1);
+            personalMessage = `Bu hafta harika i\u015F \xE7\u0131kard\u0131n! Yapt\u0131\u011F\u0131n ${userStats.total} tahminde <strong>%${userRate} isabet</strong> oran\u0131na ula\u015Ft\u0131n.`;
+          }
+          const unsubscribeHash = crypto6.createHash("md5").update(user.email + "karga_newsletter_secret").digest("hex");
+          const unsubscribeUrl = `https://kargatahmin.com/unsubscribe/${unsubscribeHash}`;
+          const emailHtml = `
+            <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; color: #333;">
+              <h1 style="color: #0f172a;">Merhaba ${user.username || "Futbol Sever"},</h1>
+              <p>Haftal\u0131k KargaTahmin analiz b\xFCltenine ho\u015F geldin!</p>
+              
+              <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e2e8f0;">
+                <h3 style="margin-top: 0;">Ge\xE7ti\u011Fimiz Haftan\u0131n \xD6zeti</h3>
+                <p>Sistem algoritmam\u0131z ge\xE7en haftaki ma\xE7larda <strong>%${systemRate} ba\u015Far\u0131</strong> yakalad\u0131.</p>
+                <p>${personalMessage}</p>
+              </div>
+
+              <a href="https://kargatahmin.com/bugun" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">G\xFCn\xFCn \u0130statistiklerini G\xF6r \u2192</a>
+
+              <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 40px 0 20px;" />
+              
+              <p style="font-size: 12px; color: #64748b; line-height: 1.5;">
+                <strong>Yasal Uyar\u0131:</strong> KargaTahmin taraf\u0131ndan sunulan i\xE7erikler, tamamen yapay zeka algoritmas\u0131 ve ge\xE7mi\u015F istatistiksel veriler kullan\u0131larak \xFCretilmi\u015F bilgilendirme ama\xE7l\u0131 analizlerdir. KargaTahmin, herhangi bir \u015Fekilde bahis oynamaya te\u015Fvik etmez, "kesin kazan\xE7" garantisi vermez. Al\u0131nacak t\xFCm kararlar\u0131n sorumlulu\u011Fu tamamen kullan\u0131c\u0131n\u0131n kendisine aittir.<br><br>
+                Bu e-postay\u0131, bildirim ayarlar\u0131n\u0131z a\xE7\u0131k oldu\u011Fu i\xE7in ald\u0131n\u0131z. <a href="${unsubscribeUrl}" style="color: #ef4444;">Abonelikten \xC7\u0131kmak \u0130\xE7in T\u0131klay\u0131n</a>.
+              </p>
+            </div>
+          `;
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${RESEND_API_KEY}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              from: "KargaTahmin <newsletter@kargatahmin.com>",
+              to: [user.email],
+              subject: "Haftal\u0131k Analiz \xD6zeti ve Ba\u015Far\u0131 Oranlar\u0131",
+              html: emailHtml
+            })
+          });
+          await new Promise((r) => setTimeout(r, 50));
+        }
+        logger.info(`[CRON] Processed newsletter batch (${i + BATCH_SIZE}/${users.length}). Waiting 2s before next batch...`);
+        await new Promise((r) => setTimeout(r, 2e3));
+      }
+      logger.info("[CRON] Weekly Newsletter Job completed successfully.");
+    } catch (e) {
+      logger.error({ err: e }, "Newsletter Cron Error");
+    }
+  });
+  logger.info("Newsletter Cron Job Started (runs every Sunday at 18:00).");
+}
+
 // src/index.ts
-import Database11 from "better-sqlite3";
-import path14 from "node:path";
-import { fileURLToPath as fileURLToPath13 } from "node:url";
+import Database17 from "better-sqlite3";
+import path20 from "node:path";
+import { fileURLToPath as fileURLToPath19 } from "node:url";
 var rawPort = process.env["PORT"];
 if (!rawPort) {
   throw new Error(
@@ -66405,12 +66732,12 @@ var port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
-var __dirnameLocal7 = path14.dirname(fileURLToPath13(import.meta.url));
+var __dirnameLocal12 = path20.dirname(fileURLToPath19(import.meta.url));
 var isProd2 = __require("fs").existsSync("/var/www/futbol_app/gecmis_maclar.db");
-var dbPath8 = isProd2 ? "/var/www/futbol_app/gecmis_maclar.db" : path14.resolve(__dirnameLocal7, "../../scripts/scraper/gecmis_maclar.db");
+var dbPath10 = isProd2 ? "/var/www/futbol_app/gecmis_maclar.db" : path20.resolve(__dirnameLocal12, "../../scripts/scraper/gecmis_maclar.db");
 try {
-  const db6 = new Database11(dbPath8, { readonly: false });
-  db6.exec(`
+  const db7 = new Database17(dbPath10, { readonly: false });
+  db7.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       email TEXT UNIQUE NOT NULL,
@@ -66419,31 +66746,31 @@ try {
     )
   `);
   try {
-    db6.exec("ALTER TABLE users ADD COLUMN membership_status TEXT DEFAULT 'active'");
+    db7.exec("ALTER TABLE users ADD COLUMN membership_status TEXT DEFAULT 'active'");
   } catch (e) {
   }
   try {
-    db6.exec("ALTER TABLE users ADD COLUMN membership_plan TEXT");
+    db7.exec("ALTER TABLE users ADD COLUMN membership_plan TEXT");
   } catch (e) {
   }
   try {
-    db6.exec("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'");
+    db7.exec("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'");
   } catch (e) {
   }
   try {
-    db6.exec("ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0");
+    db7.exec("ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0");
   } catch (e) {
   }
   try {
-    db6.exec("ALTER TABLE users ADD COLUMN is_banned INTEGER DEFAULT 0");
+    db7.exec("ALTER TABLE users ADD COLUMN is_banned INTEGER DEFAULT 0");
   } catch (e) {
   }
   try {
-    db6.exec("ALTER TABLE users ADD COLUMN last_login_at DATETIME DEFAULT NULL");
+    db7.exec("ALTER TABLE users ADD COLUMN last_login_at DATETIME DEFAULT NULL");
   } catch (e) {
   }
   try {
-    db6.exec(`
+    db7.exec(`
       CREATE TABLE IF NOT EXISTS announcements (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -66456,7 +66783,7 @@ try {
   } catch (e) {
   }
   try {
-    db6.exec(`
+    db7.exec(`
       CREATE TABLE IF NOT EXISTS audit_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         admin_email TEXT NOT NULL,
@@ -66469,7 +66796,7 @@ try {
   }
   logger.info("Users table checked/updated.");
   try {
-    db6.exec(`
+    db7.exec(`
       CREATE TABLE IF NOT EXISTS user_predictions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
@@ -66484,6 +66811,30 @@ try {
       )
     `);
     logger.info("user_predictions table checked/updated.");
+    try {
+      db7.exec(`
+      CREATE TABLE IF NOT EXISTS system_predictions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        match_id INTEGER NOT NULL UNIQUE,
+        date TEXT,
+        league TEXT,
+        ms_prediction TEXT,
+        ms_prob REAL,
+        ms_status TEXT DEFAULT 'pending',
+        ou_prediction TEXT,
+        ou_prob REAL,
+        ou_status TEXT DEFAULT 'pending',
+        btts_prediction TEXT,
+        btts_prob REAL,
+        btts_status TEXT DEFAULT 'pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        resolved_at DATETIME DEFAULT NULL,
+        FOREIGN KEY (match_id) REFERENCES gecmis_maclar(id)
+      )
+    `);
+      logger.info("system_predictions table checked/updated.");
+    } catch (e) {
+    }
   } catch (e) {
   }
 } catch (e) {
@@ -66497,6 +66848,9 @@ app_default.listen(port, (err) => {
   logger.info({ port }, "Server listening");
   startDailyMatchScheduler();
   startPredictionResolver();
+  startSystemPredictionsJob();
+  startBlogDraftJob();
+  startNewsletterJob();
 });
 /*! Bundled license information:
 

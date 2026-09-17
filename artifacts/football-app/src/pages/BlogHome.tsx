@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { SeoHead } from '../components/seo/SeoHead';
+﻿import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link } from "wouter";
+import { Calendar, Clock, ChevronRight } from "lucide-react";
+
+const BASE = import.meta.env.VITE_API_URL || "";
 
 export default function BlogHome() {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [generating, setGenerating] = useState(false);
-  const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
   useEffect(() => {
     fetchPosts();
@@ -18,138 +19,60 @@ export default function BlogHome() {
       const data = await res.json();
       setPosts(data);
     } catch (e) {
-      console.error("Blog yüklenemedi", e);
+      console.error(e);
     } finally {
       setLoading(false);
     }
   };
 
-  const generateDailyBlog = async () => {
-    if (!window.confirm("Bugünün maçları için otomatik blog üretilsin mi? (Bu işlem biraz vakit alabilir)")) return;
-    
-    setGenerating(true);
-    try {
-      const res = await fetch(`${BASE}/api/blog/generate-daily`, { method: "POST" });
-      const data = await res.json();
-      if (data.success) {
-        alert("Blog yazıları başarıyla oluşturuldu!");
-        fetchPosts();
-      } else {
-        alert("Hata: " + data.error);
-      }
-    } catch (e: any) {
-      alert("Bir hata oluştu: " + e.message);
-    } finally {
-      setGenerating(false);
-    }
-  };
-
-  const deletePost = async (id: number) => {
-    if (!window.confirm("Bu blog yazısını silmek istiyor musunuz?")) return;
-    try {
-      const res = await fetch(`${BASE}/api/blog/${id}`, { method: "DELETE" });
-      if (res.ok) fetchPosts();
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   return (
-    <div className="app-container" style={{ minHeight: "100vh", backgroundColor: "#0f172a" }}>
-      <SeoHead title="KargaTahmin Admin" description="Gizli alan" url="/" noindex />
-      
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pt-8 pb-20">
+      <Helmet><title>İddaa Analizleri ve Günün Maçları - KargaTahmin Blog</title></Helmet>
 
-      <main className="app-main" style={{ maxWidth: 1000, margin: '0 auto', padding: '40px 20px' }}>
+      <div className="max-w-4xl mx-auto px-4">
         
-        {/* HERO SECTION */}
-        <div style={{ textAlign: "center", marginBottom: 60 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(56, 189, 248, 0.1)", border: "1px solid rgba(56, 189, 248, 0.2)", padding: "6px 16px", borderRadius: "20px", fontSize: "12px", color: "#38bdf8", fontWeight: "bold", marginBottom: "20px" }}>
-            <span>🤖 YAPAY ZEKA DESTEKLİ İDDAA TAHMİNLERİ</span>
-          </div>
-          <h1 style={{ fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 900, lineHeight: 1.2, marginBottom: 20, color: "#f8fafc", letterSpacing: "-0.02em" }}>
-            Günün En Değerli Fırsatları
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-4">
+            Yapay Zeka Destekli <span className="text-primary">Maç Analizleri</span>
           </h1>
-          <p style={{ color: "#94a3b8", fontSize: "1.1rem", maxWidth: 600, margin: "0 auto", lineHeight: 1.6 }}>
-            KargaTahmin algoritması ve Gemini yapay zekası tarafından özenle seçilmiş, istatistiğe dayalı günlük maç yorumları.
+          <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto">
+            Günün öne çıkan maçları için KargaTahmin algoritması tarafından üretilmiş istatistiksel olasılık değerlendirmeleri.
           </p>
         </div>
 
-        {/* BLOG POSTS */}
         {loading ? (
-          <div style={{ textAlign: "center", color: "#94a3b8", padding: "40px" }}>Yazılar yükleniyor...</div>
+          <div className="flex justify-center py-20 text-slate-400">Yükleniyor...</div>
         ) : posts.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px", background: "#1e293b", borderRadius: "16px", border: "1px solid #334155" }}>
-            <span style={{ fontSize: "40px", display: "block", marginBottom: 16 }}>📝</span>
-            <h3 style={{ color: "#f8fafc", margin: "0 0 8px 0" }}>Henüz yazı yok</h3>
-            <p style={{ color: "#94a3b8", margin: 0 }}>Yukarıdaki "Günün Blogunu Üret" butonuna basarak yapay zekanın bugünün maçlarını analiz edip yazmasını sağlayabilirsiniz.</p>
+          <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">Henüz Yazı Yok</h3>
+            <p className="text-slate-500">Çok yakında yeni analizler burada olacak.</p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-            {posts.map(post => {
-              const dateObj = new Date(post.created_at);
-              const formattedDate = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute:'2-digit' });
-
-              return (
-                <article key={post.id} style={{ 
-                  background: "#1e293b", 
-                  borderRadius: "16px", 
-                  border: "1px solid #334155", 
-                  padding: "28px",
-                  position: "relative",
-                  overflow: "hidden"
-                }}>
-                  <div style={{ 
-                    position: "absolute", top: 0, left: 0, width: "4px", height: "100%", 
-                    background: "linear-gradient(to bottom, #38bdf8, #6366f1)" 
-                  }}></div>
-                  
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-                    <div>
-                      <h2 style={{ fontSize: "1.5rem", color: "#f1f5f9", margin: "0 0 8px 0", fontWeight: 700 }}>
-                        {post.title}
-                      </h2>
-                      <div style={{ color: "#64748b", fontSize: "0.85rem", display: "flex", gap: "16px" }}>
-                        <span>📅 {formattedDate}</span>
-                        <span>✍️ AI Tipster</span>
-                      </div>
+          <div className="space-y-6">
+            {posts.map(post => (
+              <article key={post.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden hover:border-primary/50 transition-colors group">
+                <Link href={`/blog/${post.slug}`} className="block p-6 sm:p-8">
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors">
+                    {post.title}
+                  </h2>
+                  <p className="text-slate-600 dark:text-slate-400 mb-6 line-clamp-2">
+                    {post.meta_description}
+                  </p>
+                  <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-100 dark:border-slate-700">
+                    <div className="flex items-center gap-4 text-sm text-slate-500 font-medium">
+                      <span className="flex items-center gap-1.5"><Calendar size={16}/> {new Date(post.created_at).toLocaleDateString('tr-TR')}</span>
+                      <span className="flex items-center gap-1.5"><Clock size={16}/> 3 dk okuma</span>
                     </div>
-                    <button onClick={() => deletePost(post.id)} style={{ background: "transparent", border: "none", color: "#64748b", cursor: "pointer", fontSize: "14px" }}>
-                      Sil
-                    </button>
-                  </div>
-
-                  <div style={{ 
-                    color: "#cbd5e1", 
-                    fontSize: "1.05rem", 
-                    lineHeight: 1.7, 
-                    background: "rgba(15, 23, 42, 0.5)", 
-                    padding: "20px", 
-                    borderRadius: "12px",
-                    border: "1px dashed #334155",
-                    marginBottom: "20px"
-                  }}>
-                    {post.content}
-                  </div>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <span style={{ color: "#94a3b8", fontSize: "0.9rem", fontWeight: 600 }}>TAVSİYE EDİLEN TERCİH:</span>
-                    <span style={{ 
-                      background: "rgba(16, 185, 129, 0.15)", 
-                      color: "#10b981", 
-                      padding: "6px 16px", 
-                      borderRadius: "20px", 
-                      fontWeight: 800,
-                      border: "1px solid rgba(16, 185, 129, 0.3)"
-                    }}>
-                      {post.prediction || "Analizden Bakınız"}
+                    <span className="flex items-center gap-1 text-primary font-bold text-sm">
+                      Devamını Oku <ChevronRight size={16} />
                     </span>
                   </div>
-                </article>
-              );
-            })}
+                </Link>
+              </article>
+            ))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
