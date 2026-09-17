@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import AdminPage from './pages/AdminPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminBlogPage from './pages/AdminBlogPage';
+import ApiManagementPage from './pages/ApiManagementPage';
 import PredictionsPage from './pages/PredictionsPage';
 import SuccessRatePage from './pages/SuccessRatePage';
 import TodayMatchesPage from './pages/TodayMatchesPage';
@@ -37,6 +38,7 @@ function Router() {
         <Route path="/admin" component={AdminPage} />
         <Route path="/admin/kullanicilar" component={AdminUsersPage} />
         <Route path="/admin/blog" component={AdminBlogPage} />
+        <Route path="/admin/api" component={ApiManagementPage} />
         <Route path="/tahminlerim" component={PredictionsPage} />
         <Route path="/basari-orani" component={SuccessRatePage} />
         <Route path="*">
