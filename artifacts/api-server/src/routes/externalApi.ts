@@ -29,18 +29,18 @@ router.get("/matches/today", (req, res) => {
     const db = new Database(DB_PATH);
     const today = new Date().toISOString().split("T")[0];
     
-    // Fetch today's predictions
+    // Fetch today's predictions joined with match info
     const predictions = db.prepare(`
       SELECT 
-        id, match_id, date, time, 
-        home_team, away_team, league, 
-        ms_prob, ms_prediction,
-        ou_prob, ou_prediction,
-        kg_prob, kg_prediction,
-        ms_status, ou_status, kg_status
-      FROM system_predictions 
-      WHERE date = ?
-    `).all(today);
+        s.id, s.match_id, s.date, s.league, 
+        m.home as home_team, m.away as away_team,
+        s.ms_prob, s.ms_prediction, s.ms_status,
+        s.ou_prob, s.ou_prediction, s.ou_status,
+        s.btts_prob as kg_prob, s.btts_prediction as kg_prediction, s.btts_status as kg_status
+      FROM system_predictions s
+      JOIN gecmis_maclar m ON s.match_id = m.id
+      WHERE s.date = ? OR m.date LIKE '%' || ? || '%'
+    `).all(today, today);
 
     res.json({
       success: true,

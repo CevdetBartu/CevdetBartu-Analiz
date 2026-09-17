@@ -45,6 +45,8 @@ app.use("/api", router);
 app.use("/api", authRouter);
 app.use("/api/auth", userAuthRouter);
 app.use("/api", blogRouter);
+app.use("/api/admin/api-keys", adminApiKeysRouter);
+app.use("/api/v1", externalApiRouter);
 
 app.get("/sitemap.xml", (req, res) => {
   try {
