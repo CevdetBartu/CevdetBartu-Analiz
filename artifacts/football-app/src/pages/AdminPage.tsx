@@ -128,6 +128,7 @@ export default function AdminPage() {
   const isRunning = stats?.worker?.is_running ?? false;
 
   return (
+    <AdminLayout>
     <div className="admin-page" style={{ backgroundColor: "#0b0f17", color: "#f1f5f9", minHeight: "100vh" }}>
       {/* Header Bar */}
       
@@ -378,5 +379,6 @@ export default function AdminPage() {
         </ol>
       </div>
     </div>
+    </AdminLayout>
   );
 }

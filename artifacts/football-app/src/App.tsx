@@ -4,6 +4,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import BlogHome from './pages/BlogHome';
 import Home from './pages/Home';
 import AdminPage from './pages/AdminPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminSettingsPage from './pages/AdminSettingsPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import AdminBlogPage from './pages/AdminBlogPage';
 import ApiManagementPage from './pages/ApiManagementPage';
@@ -35,15 +37,20 @@ function Router() {
         <Route path="/kategori/:slug" component={CategoryPage} />
         <Route path="/bugun" component={TodayMatchesPage} />
         <Route path="/canli" component={LiveMatchesPage} />
-        <Route path="/admin" component={AdminPage} />
-        <Route path="/admin/kullanicilar" component={AdminUsersPage} />
-        <Route path="/admin/blog" component={AdminBlogPage} />
-        <Route path="/admin/api" component={ApiManagementPage} />
         <Route path="/tahminlerim" component={PredictionsPage} />
         <Route path="/basari-orani" component={SuccessRatePage} />
+        
+        {/* Admin CMS Routes */}
+        <Route path="/admin" component={AdminDashboardPage} />
+        <Route path="/admin/database" component={AdminPage} />
+        <Route path="/admin/users" component={AdminUsersPage} />
+        <Route path="/admin/blog" component={AdminBlogPage} />
+        <Route path="/admin/settings" component={AdminSettingsPage} />
+        <Route path="/admin/api" component={ApiManagementPage} />
+        
         <Route path="*">
           <div className="flex items-center justify-center min-h-screen">
-            <p className="text-white">Sayfa bulunamadı</p>
+            <p className="text-slate-500">Sayfa bulunamadı</p>
           </div>
         </Route>
       </Switch>

@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { Link, useLocation } from "wouter";
-import { Users, FileText, Settings, Key, LayoutDashboard, LogOut, Home } from "lucide-react";
+import { Users, FileText, Settings, Key, LayoutDashboard, LogOut, Home, Database } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -8,6 +8,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navItems = [
     { href: "/admin", icon: <LayoutDashboard size={20} />, label: "Dashboard" },
+    { href: "/admin/database", icon: <Database size={20} />, label: "Veritabanı (Scraper)" },
     { href: "/admin/blog", icon: <FileText size={20} />, label: "Blog Yönetimi" },
     { href: "/admin/users", icon: <Users size={20} />, label: "Üye Yönetimi" },
     { href: "/admin/api", icon: <Key size={20} />, label: "API Key Yönetimi" },
