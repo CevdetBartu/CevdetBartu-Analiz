@@ -67,4 +67,49 @@ router.delete("/posts/:id", (req, res) => {
   }
 });
 
+
+// POST /api/admin/blog/manual (Create post manually)
+router.post("/manual", (req, res) => {
+  try {
+    const { title, content, prediction, category, slug, excerpt, image_url } = req.body;
+    const db = new Database(DB_PATH);
+    const info = db.prepare(`
+      INSERT INTO blog_posts (title, content, prediction, category, slug, excerpt, image_url, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `).run(title, content, prediction, category, slug, excerpt, image_url);
+    res.json({ success: true, id: info.lastInsertRowid });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+// PUT /api/admin/blog/:id (Edit post)
+router.put("/:id", (req, res) => {
+  try {
+    const { title, content, prediction, category, slug, excerpt, image_url } = req.body;
+    const db = new Database(DB_PATH);
+    db.prepare(`
+      UPDATE blog_posts 
+      SET title=?, content=?, prediction=?, category=?, slug=?, excerpt=?, image_url=?
+      WHERE id = ?
+    `).run(title, content, prediction, category, slug, excerpt, image_url, req.params.id);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
+// DELETE /api/admin/blog/:id (Delete post)
+router.delete("/:id", (req, res) => {
+  try {
+    const db = new Database(DB_PATH);
+    db.prepare("DELETE FROM blog_posts WHERE id = ?").run(req.params.id);
+    res.json({ success: true });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 export default router;

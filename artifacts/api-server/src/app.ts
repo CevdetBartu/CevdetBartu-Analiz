@@ -6,6 +6,8 @@ import { logger } from "./lib/logger";
 import blogRouter from "./routes/blog";
 import authRouter from "./routes/auth";
 import adminApiKeysRouter from "./routes/adminApiKeys";
+import adminUsersRouter from "./routes/adminUsers";
+import adminSettingsRouter from "./routes/adminSettings";
 import externalApiRouter from "./routes/externalApi";
 import userAuthRouter from "./routes/userAuth";
 
@@ -46,6 +48,9 @@ app.use("/api", authRouter);
 app.use("/api/auth", userAuthRouter);
 app.use("/api", blogRouter);
 app.use("/api/admin/api-keys", adminApiKeysRouter);
+app.use("/api/admin/users", adminUsersRouter);
+app.use("/api/admin/settings", adminSettingsRouter);
+app.use("/api/settings/public", adminSettingsRouter);
 app.use("/api/v1", externalApiRouter);
 
 app.get("/sitemap.xml", (req, res) => {

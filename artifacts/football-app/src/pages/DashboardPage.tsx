@@ -1,224 +1,158 @@
-import React, { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useLocation, Link } from 'wouter';
-import { fetchWithAuth, getUserEmail, removeToken, removeUserEmail } from '../lib/auth';
-import { User, LogOut, Key, Trash2, Calendar, Crown, Shield, Target } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react';
+import { fetchWithAuth, removeToken, removeUserEmail } from '../lib/auth';
+import { LogOut, Star, User, Bell, Clock, Crown } from 'lucide-react';
+import { Header } from '../components/layout/Header';
 
 const BASE = import.meta.env.VITE_API_URL || "";
 
 export default function DashboardPage() {
-  const [, setLocation] = useLocation();
-  const [userData, setUserData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [user, setUser] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'profile'|'predictions'|'notifications'>('profile');
 
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [pwdMsg, setPwdMsg] = useState('');
-  const [emailNotifications, setEmailNotifications] = useState(true);
-
-  
   useEffect(() => {
-    async function loadUser() {
-      try {
-        const res = await fetchWithAuth(`${BASE}/api/auth/me`);
-        if (!res.ok) {
-          throw new Error('Kullanıcı bilgileri alınamadı. Lütfen tekrar giriş yapın.');
-        }
-        const data = await res.json();
-        setUserData(data.user);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+    async function load() {
+      const res = await fetchWithAuth(`${BASE}/api/user/me`);
+      if (res.ok) {
+        setUser(await res.json());
       }
     }
-    loadUser();
+    load();
   }, []);
 
-  const handleLogout = () => {
+  function logout() {
     removeToken();
     removeUserEmail();
-    setLocation('/login');
-  };
+    window.location.href = '/login';
+  }
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPwdMsg('');
-    try {
-      const res = await fetchWithAuth(`${BASE}/api/auth/me/password`, {
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Şifre değiştirilemedi');
-      setPwdMsg('Sifreniz basariyla guncellendi.');
-      setCurrentPassword('');
-      setNewPassword('');
-    } catch (err: any) {
-      setPwdMsg(err.message);
-    }
-  };
+  if (!user) return <div className="p-8 text-center">Yükleniyor...</div>;
 
-  if (loading) return <div className="p-8 text-center text-slate-500">Yukleniyor...</div>;
+  const isVip = user.membership_plan === 'vip';
+  const vipDaysLeft = isVip && user.vip_expires_at 
+    ? Math.max(0, Math.ceil((new Date(user.vip_expires_at).getTime() - new Date().getTime()) / (1000 * 3600 * 24)))
+    : 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 md:p-8">
-      <Helmet>
-        <title>Hesabim - KargaTahmin</title>
-      </Helmet>
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      <Header />
       
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Hesabim</h1>
-            <p className="text-slate-500 dark:text-slate-400">Üyelik bilgilerinizi buradan yönetebilirsiniz.</p>
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
+        
+        {/* Sidebar */}
+        <div className="w-full md:w-64 shrink-0 space-y-4">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm text-center">
+            <div className="w-20 h-20 bg-slate-100 rounded-full mx-auto mb-4 flex items-center justify-center text-slate-400">
+              <User size={32} />
+            </div>
+            <h2 className="font-bold text-slate-900 truncate">{user.email}</h2>
+            {isVip ? (
+              <div className="inline-flex items-center gap-1.5 mt-2 bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                <Crown size={14} /> VIP Üye
+              </div>
+            ) : (
+              <div className="inline-block mt-2 bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                Standart Üye
+              </div>
+            )}
           </div>
-          <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors">
-            <LogOut size={18} />
-            <span>Çıkış Yap</span>
-          </button>
+
+          <nav className="bg-white rounded-2xl p-2 border border-slate-200 shadow-sm flex flex-col gap-1">
+            <button 
+              onClick={() => setActiveTab('profile')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium transition-colors ${activeTab === 'profile' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`}
+            >
+              <User size={18} /> Hesabım
+            </button>
+            <button 
+              onClick={() => setActiveTab('predictions')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium transition-colors ${activeTab === 'predictions' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`}
+            >
+              <Star size={18} /> Tahmin Geçmişim
+            </button>
+            <button 
+              onClick={() => setActiveTab('notifications')}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium transition-colors ${activeTab === 'notifications' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`}
+            >
+              <Bell size={18} /> Bildirimler
+            </button>
+            
+            <div className="h-px bg-slate-100 my-2 mx-4"></div>
+            
+            <button 
+              onClick={logout}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <LogOut size={18} /> Çıkış Yap
+            </button>
+          </nav>
         </div>
 
-        {error && <div className="p-4 bg-red-100 text-red-700 rounded-lg">{error}</div>}
+        {/* Content */}
+        <div className="flex-1 space-y-6">
+          
+          {/* VIP Banner */}
+          {isVip && (
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-6 text-white shadow-lg flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold flex items-center gap-2 mb-1"><Crown size={24} /> Premium Aktif</h3>
+                <p className="text-amber-100 font-medium">VIP özelliklere sınırsız erişiminiz var.</p>
+              </div>
+              <div className="bg-white/20 rounded-xl px-5 py-3 text-center backdrop-blur-sm border border-white/20">
+                <div className="text-3xl font-black">{vipDaysLeft}</div>
+                <div className="text-xs uppercase tracking-wider font-bold opacity-80">Gün Kaldı</div>
+              </div>
+            </div>
+          )}
 
-        {userData && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-            {/* Yönetim Paneli - Yalnızca Admin */}
-            {userData?.role === 'admin' && (
-              <div className="md:col-span-3 mb-6 bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 shadow-sm border border-purple-200 dark:border-purple-800/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-bold text-purple-900 dark:text-purple-300 flex items-center gap-2">
-                    <Shield size={20} className="text-purple-600 dark:text-purple-400" />
-                    Yönetici Yetkilerine Sahipsiniz
-                  </h2>
-                  <p className="text-purple-700 dark:text-purple-400 mt-1 text-sm">
-                    Kullanıcıları yönetmek, veritabanına erişmek ve sistem ayarlarını yapılandırmak için admin panellerini kullanabilirsiniz.
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <Link href="/admin/kullanicilar" className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow-sm transition-colors text-sm">
-                    Kullanıcı Yönetimi
-                  </Link>
-                  <Link href="/admin" className="px-4 py-2 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-medium rounded-lg shadow-sm transition-colors text-sm">
-                    Veritabanıı
-                  </Link>
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            {activeTab === 'profile' && (
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 mb-6">Hesap Detayları</h3>
+                <div className="space-y-4 max-w-md">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-500 mb-1">E-posta Adresi</label>
+                    <input type="text" disabled value={user.email} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium cursor-not-allowed" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-500 mb-1">Kayıt Tarihi</label>
+                    <input type="text" disabled value={new Date(user.created_at).toLocaleDateString('tr-TR')} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium cursor-not-allowed" />
+                  </div>
+                  <div className="pt-4 border-t border-slate-100">
+                    <button className="text-blue-600 font-medium text-sm hover:underline">Şifremi Değiştir</button>
+                  </div>
                 </div>
               </div>
             )}
 
-            
-
-            {/* Tahminlerim Kısayolu */}
-            <div className="md:col-span-1 space-y-6">
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                  <Target size={20} className="text-emerald-500" /> Tahmin Merkezi
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                  Maçlara yaptığınız tahminleri, başarı oranınızı ve geçmiş kuponlarınızı takip edin.
-                </p>
-                <Link href="/tahminlerim" className="block w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 font-bold text-center rounded-lg transition-colors border border-emerald-200">
-                  Tahmin Geçmişim
-                </Link>
+            {activeTab === 'predictions' && (
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 mb-6">Tahmin Geçmişim</h3>
+                <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-xl border border-slate-100 border-dashed">
+                  <Clock size={48} className="mx-auto text-slate-300 mb-4" />
+                  <p className="font-medium text-lg text-slate-700">Henüz geçmiş bir tahmininiz yok.</p>
+                  <p className="text-sm mt-1">Gelecekteki kayıtlı kuponlarınız burada listelenecektir.</p>
+                </div>
               </div>
-            </div>
-            {/* Profil Bilgileri */}
-            <div className="md:col-span-2 space-y-6">
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><User size={20} /> Profil Bilgileri</h2>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-500 dark:text-slate-400">E-Posta Adresi</label>
-                    <div className="mt-1 text-lg font-medium text-slate-900 dark:text-white">{userData.email}</div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-slate-500 dark:text-slate-400">Kayıt Tarihi</label>
-                    <div className="mt-1 flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                      <Calendar size={16} />
-                      {new Date(userData.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })}
-                    </div>
-                  </div>
+            )}
 
+            {activeTab === 'notifications' && (
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 mb-6">Bildirim Tercihleri</h3>
+                <div className="flex items-start gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+                  <div className="mt-1">
+                    <input type="checkbox" checked={!!user.email_notifications} readOnly className="w-5 h-5 rounded text-blue-600" />
+                  </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-500 dark:text-slate-400">Durum</label>
-                    <div className="mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">
-                      <Shield size={14} />
-                      {userData.membership_status === 'active' ? 'Aktif Üye' : userData.membership_status}
-                    </div>
+                    <h4 className="font-bold text-slate-900">Günlük Maç Bülteni</h4>
+                    <p className="text-sm text-slate-600 mt-1">Yapay zekanın hazırladığı günün banko maçları ve premium tahminleri her sabah e-posta adresime gönderilsin.</p>
                   </div>
                 </div>
               </div>
-
-
-            {/* Bildirim Tercihleri */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 mt-6">
-              <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                <Mail size={20} className="text-blue-500" /> Bildirim Tercihleri
-              </h2>
-              <div className="flex items-center justify-between p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
-                <div>
-                  <h3 className="font-semibold text-slate-800 dark:text-slate-200">Haftalık E-Posta Bülteni</h3>
-                  <p className="text-sm text-slate-500">Tahmin başarı oranlarını ve güncel analizleri e-posta ile alın.</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" checked={emailNotifications} onChange={e => handleNotificationToggle(e.target.checked)} />
-                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
-            </div>
-
-              {/* Şifre Değiştir */}
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><Key size={20} /> Şifre Değiştir</h2>
-                <form onSubmit={handlePasswordChange} className="space-y-4 max-w-sm">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Mevcut Şifre</label>
-                    <input type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white" required />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Yeni Şifre</label>
-                    <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white" minLength={8} required />
-                  </div>
-                  <button type="submit" className="px-4 py-2 bg-slate-900 text-white dark:bg-indigo-600 rounded-lg hover:opacity-90 transition-opacity">Şifreyi Güncelle</button>
-                  {pwdMsg && <p className="text-sm font-medium mt-2 text-indigo-600 dark:text-indigo-400">{pwdMsg}</p>}
-                </form>
-              </div>
-            </div>
-
-            {/* Uyelik Plani (Placeholder) */}
-            <div className="space-y-6">
-              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-xl p-6 border border-indigo-100 dark:border-indigo-800/30">
-                <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-4">
-                  <Crown size={24} />
-                </div>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Mevcut Plan: Ücretsiz</h2>
-                <p className="text-slate-600 dark:text-slate-400 text-sm mb-6">
-                  Şu anda tüm KargaTahmin analiz özelliklerine ücretsiz erişiyorsunuz. İlerleyen dönemde gelişmiş özellikler için planınızı yükseltebileceksiniz.
-                </p>
-                <button disabled className="w-full py-2.5 px-4 bg-indigo-600/50 text-white rounded-lg font-medium cursor-not-allowed">
-                  Plan Yükselt (Yakında)
-                </button>
-              </div>
-
-              <div className="bg-red-50 dark:bg-red-900/10 rounded-xl p-6 border border-red-100 dark:border-red-900/20">
-                <h3 className="text-red-800 dark:text-red-400 font-bold mb-2 flex items-center gap-2"><Trash2 size={18} /> Tehlikeli Bölge</h3>
-                <p className="text-red-600/80 dark:text-red-400/80 text-sm mb-4">Hesabınızı silerseniz bu işlem geri alınamaz.</p>
-                <button onClick={() => {
-                  if(window.confirm('Hesabinizi kalici olarak silmek istediginize emin misiniz?')) {
-                    fetchWithAuth(BASE + '/api/auth/me', { method: 'DELETE' }).then(() => handleLogout());
-                  }
-                }} className="text-sm text-red-600 dark:text-red-400 font-medium hover:underline">
-                  Hesabımı Kalıcı Olarak Sil
-                </button>
-              </div>
-            </div>
-
+            )}
           </div>
-        )}
-      </div>
+
+        </div>
+      </main>
     </div>
   );
 }
