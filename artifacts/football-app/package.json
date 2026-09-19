@@ -75,6 +75,13 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@tiptap/extension-character-count": "^3.31.3",
+    "@tiptap/extension-image": "^3.31.3",
+    "@tiptap/extension-link": "^3.31.3",
+    "@tiptap/extension-placeholder": "^3.31.3",
+    "@tiptap/pm": "^3.31.3",
+    "@tiptap/react": "^3.31.3",
+    "@tiptap/starter-kit": "^3.31.3",
     "hls.js": "^1.6.16",
     "react-helmet-async": "^3.0.0"
   }

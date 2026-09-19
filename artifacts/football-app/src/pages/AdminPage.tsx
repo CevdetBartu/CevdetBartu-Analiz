@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { SeoHead } from '../components/seo/SeoHead';
 import { Link, useLocation } from 'wouter';
 import { fetchWithAuth, isAuthenticated, getUserRole } from '../lib/auth';
+import AdminLayout from '../components/layout/AdminLayout';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 const API = `${BASE}/api/admin/scraper`;
@@ -129,7 +130,7 @@ export default function AdminPage() {
 
   return (
     <AdminLayout>
-    <div className="admin-page" style={{ backgroundColor: "#0b0f17", color: "#f1f5f9", minHeight: "100vh" }}>
+    <div className="admin-page" style={{ minHeight: "100vh" }}>
       {/* Header Bar */}
       
       

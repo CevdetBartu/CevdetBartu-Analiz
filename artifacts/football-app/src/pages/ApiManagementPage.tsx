@@ -63,6 +63,7 @@ export default function ApiManagementPage() {
   if (loading) return <div className="p-8 text-center text-slate-500">Yükleniyor...</div>;
 
   return (
+    <AdminLayout>
     <div className="p-4 max-w-6xl mx-auto font-sans">
       <Helmet><title>Admin - API Yönetimi</title></Helmet>
       
@@ -145,5 +146,6 @@ export default function ApiManagementPage() {
 
       </div>
     </div>
+  </AdminLayout>
   );
 }

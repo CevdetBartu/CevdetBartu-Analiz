@@ -71,12 +71,12 @@ router.delete("/posts/:id", (req, res) => {
 // POST /api/admin/blog/manual (Create post manually)
 router.post("/manual", (req, res) => {
   try {
-    const { title, content, prediction, category, slug, excerpt, image_url } = req.body;
+    const { title, content, prediction, category, slug, excerpt, image_url, seo_title, seo_description, seo_keywords, og_image, canonical_url, noindex } = req.body;
     const db = new Database(DB_PATH);
     const info = db.prepare(`
-      INSERT INTO blog_posts (title, content, prediction, category, slug, excerpt, image_url, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    `).run(title, content, prediction, category, slug, excerpt, image_url);
+      INSERT INTO blog_posts (title, content, prediction, category, slug, excerpt, image_url, seo_title, seo_description, seo_keywords, og_image, canonical_url, noindex, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `).run(title, content, prediction, category, slug, excerpt, image_url, seo_title||"", seo_description||"", seo_keywords||"", og_image||"", canonical_url||"", noindex?1:0);
     res.json({ success: true, id: info.lastInsertRowid });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
@@ -87,13 +87,13 @@ router.post("/manual", (req, res) => {
 // PUT /api/admin/blog/:id (Edit post)
 router.put("/:id", (req, res) => {
   try {
-    const { title, content, prediction, category, slug, excerpt, image_url } = req.body;
+    const { title, content, prediction, category, slug, excerpt, image_url, seo_title, seo_description, seo_keywords, og_image, canonical_url, noindex } = req.body;
     const db = new Database(DB_PATH);
     db.prepare(`
       UPDATE blog_posts 
-      SET title=?, content=?, prediction=?, category=?, slug=?, excerpt=?, image_url=?
+      SET title=?, content=?, prediction=?, category=?, slug=?, excerpt=?, image_url=?, seo_title=?, seo_description=?, seo_keywords=?, og_image=?, canonical_url=?, noindex=?
       WHERE id = ?
-    `).run(title, content, prediction, category, slug, excerpt, image_url, req.params.id);
+    `).run(title, content, prediction, category, slug, excerpt, image_url, seo_title||"", seo_description||"", seo_keywords||"", og_image||"", canonical_url||"", noindex?1:0, req.params.id);
     res.json({ success: true });
   } catch (e: any) {
     res.status(500).json({ error: e.message });

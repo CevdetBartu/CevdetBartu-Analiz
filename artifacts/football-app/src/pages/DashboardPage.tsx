@@ -11,7 +11,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function load() {
-      const res = await fetchWithAuth(`${BASE}/api/user/me`);
+      const res = await fetchWithAuth(`${BASE}/api/auth/me`);
       if (res.ok) {
         setUser(await res.json());
       }
